@@ -1,5 +1,4 @@
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -66,15 +65,74 @@ public class Solution
 
 		String[] string = { "10111", "01010", "11011", "11011", "01111" };
 
-		char[][] m = new char[string.length][];
-		int k = 0;
-		for ( String str : string )
-			m[k++] = str.toCharArray();
+		int[][] m = { { 1, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 0, 0, 0, 1, 1, 0 },
+				{ 1, 1, 1, 1, 1, 1, 0, 0, 1, 0 }, { 1, 0, 0, 1, 1, 1, 0, 1, 0, 1 }, { 0, 0, 1, 0, 0, 1, 1, 0, 0, 1 },
+				{ 0, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, { 1, 0, 0, 1, 1, 0, 0, 0, 0, 0 }, { 0, 0, 1, 1, 1, 1, 0, 1, 1, 1 },
+				{ 1, 1, 0, 0, 1, 0, 1, 0, 1, 1 } };
 
-		System.out.println( s.maximalSquare( m ) );
+		System.out.println( s.updateMatrix( m ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int[][] updateMatrix( int[][] matrix )
+	{
+		for ( int[] u : matrix )
+			System.out.println( Arrays.toString( u ) );
+		System.out.println();
+		int row = matrix.length, col = matrix[0].length;
+		int[][] update = new int[row][col];
+		int[][] visit = new int[row][col];
+		for ( int[] u : update )
+			Arrays.fill( u, Integer.MAX_VALUE );
+		for ( int i = 0; i < row; i++ )
+		{
+			for ( int j = 0; j < col; j++ )
+			{
+				if ( matrix[i][j] == 0 )
+				{
+					update[i][j] = 0;
+					continue;
+				}
+				bfsMatrix( matrix, i, j, update, visit );
+			}
+		}
+		for ( int[] u : update )
+			System.out.println( Arrays.toString( u ) );
+		return update;
+
+	}
+
+	void bfsMatrix( int[][] m, int i, int j, int[][] p, int[][] v )
+	{
+		Queue<int[]> queue = new LinkedList<>(), qt = new LinkedList<>();
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, 1 }, { 0, -1 } };
+		queue.add( new int[] { i, j } );
+		int dist = 1;
+		while ( true )
+		{
+			while ( !queue.isEmpty() )
+			{
+				qt = new LinkedList<>();
+				int[] next = queue.poll();
+				int pi = next[0], pj = next[1];
+				for ( int[] d : dirs )
+				{
+					int ni = pi + d[0], nj = pj + d[1];
+					if ( ni < 0 || nj < 0 || ni >= m.length || nj >= m[0].length )
+						continue;
+					if ( m[ni][nj] == 0 || p[ni][nj] < Integer.MAX_VALUE )
+					{
+						p[i][j] = Math.min( dist, 1 + p[ni][nj] );
+						return;
+					}
+					qt.add( new int[] { ni, nj } );
+				}
+			}
+			queue.addAll( qt );
+			dist++;
+		}
 	}
 
 	public int maximalSquare( char[][] matrix )
