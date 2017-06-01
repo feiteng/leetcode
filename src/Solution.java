@@ -65,74 +65,142 @@ public class Solution
 
 		String[] string = { "10111", "01010", "11011", "11011", "01111" };
 
-		int[][] m = { { 1, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 0, 0, 0, 1, 1, 0 },
-				{ 1, 1, 1, 1, 1, 1, 0, 0, 1, 0 }, { 1, 0, 0, 1, 1, 1, 0, 1, 0, 1 }, { 0, 0, 1, 0, 0, 1, 1, 0, 0, 1 },
-				{ 0, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, { 1, 0, 0, 1, 1, 0, 0, 0, 0, 0 }, { 0, 0, 1, 1, 1, 1, 0, 1, 1, 1 },
-				{ 1, 1, 0, 0, 1, 0, 1, 0, 1, 1 } };
+		int[][] m = {
+				{ 0, 0, 0 }, { 0, 1, 0 }, { 0, 0, 0 } };
 
-		System.out.println( s.updateMatrix( m ) );
+		System.out.println( s.findDiagonalOrder( m ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
 
+	public String complexNumberMultiply( String a, String b )
+	{
+		int[] va = complexNumToVal( a ), vb = complexNumToVal( b );
+		int ar=va[0], ai=va[1], br=vb[0],bi=vb[1];
+		int vr= ar*br-ai*bi, vi=ar*bi+ai*br;
+		return String.valueOf( vr )+"+"+String.valueOf( vi)+"i";
+	}
+
+	int[] complexNumToVal( String a )
+	{
+		int[] v = new int[2];
+		int plus = a.indexOf( '+' );
+		v[0] = Integer.valueOf( a.substring( 0, plus ) );
+		v[1] = Integer.valueOf( a.substring( plus + 1, a.indexOf( 'i' ) ) );
+		return v;
+	}
+
+	public List<String> generatePossibleNextMoves( String s )
+	{
+		List<String> list = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for ( int i = 1; i < s.length(); i++ )
+		{
+			sb = new StringBuilder();
+			if ( s.charAt( i ) == '+' && s.charAt( i - 1 ) == '+' )
+			{
+				sb.append( s.substring( 0, i - 1 ) );
+				sb.append( "--" );
+				sb.append( s.substring( i + 1, s.length() ) );
+				list.add( sb.toString() );
+			}
+		}
+		return list;
+
+	}
+
+	public int[] findDiagonalOrder( int[][] matrix )
+	{
+		boolean up = true;
+		int i = 0, j = 0, count = 0;
+		if ( matrix.length == 0 || matrix[0].length == 0 )
+			return new int[] {};
+		int[] ret = new int[matrix.length * matrix[0].length];
+		while ( count < matrix.length * matrix[0].length )
+		{
+			ret[count] = matrix[i][j];
+			if ( up )
+			{
+				i--;
+				j++;
+				if ( j == matrix[0].length )
+				{
+					// go down
+					i += 2;
+					j--;
+					up = !up;
+				}
+				else if ( i < 0 )
+				{
+					// go right
+					i++;
+					up = !up;
+				}
+
+			}
+			else
+			{
+				i++;
+				j--;
+				if ( i == matrix.length )
+				{
+					// go right
+					i--;
+					j += 2;
+
+					up = !up;
+				}
+				else if ( j < 0 )
+				{// go down
+					j++;
+					up = !up;
+				}
+			}
+			count++;
+		}
+		System.out.println( Arrays.toString( ret ) );
+		return ret;
+
+	}
+
 	public int[][] updateMatrix( int[][] matrix )
 	{
-		for ( int[] u : matrix )
-			System.out.println( Arrays.toString( u ) );
-		System.out.println();
 		int row = matrix.length, col = matrix[0].length;
 		int[][] update = new int[row][col];
-		int[][] visit = new int[row][col];
-		for ( int[] u : update )
-			Arrays.fill( u, Integer.MAX_VALUE );
+		Queue<int[]> queue = new LinkedList<>();
+
 		for ( int i = 0; i < row; i++ )
 		{
 			for ( int j = 0; j < col; j++ )
 			{
 				if ( matrix[i][j] == 0 )
-				{
-					update[i][j] = 0;
-					continue;
-				}
-				bfsMatrix( matrix, i, j, update, visit );
+					queue.add( new int[] { i, j } );
+				else
+					update[i][j] = Integer.MAX_VALUE;
 			}
 		}
-		for ( int[] u : update )
-			System.out.println( Arrays.toString( u ) );
-		return update;
 
-	}
-
-	void bfsMatrix( int[][] m, int i, int j, int[][] p, int[][] v )
-	{
-		Queue<int[]> queue = new LinkedList<>(), qt = new LinkedList<>();
-		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, 1 }, { 0, -1 } };
-		queue.add( new int[] { i, j } );
-		int dist = 1;
-		while ( true )
+		while ( !queue.isEmpty() )
 		{
-			while ( !queue.isEmpty() )
+			int[] pos = queue.poll();
+			int i = pos[0], j = pos[1];
+			int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+			for ( int[] d : dirs )
 			{
-				qt = new LinkedList<>();
-				int[] next = queue.poll();
-				int pi = next[0], pj = next[1];
-				for ( int[] d : dirs )
-				{
-					int ni = pi + d[0], nj = pj + d[1];
-					if ( ni < 0 || nj < 0 || ni >= m.length || nj >= m[0].length )
-						continue;
-					if ( m[ni][nj] == 0 || p[ni][nj] < Integer.MAX_VALUE )
-					{
-						p[i][j] = Math.min( dist, 1 + p[ni][nj] );
-						return;
-					}
-					qt.add( new int[] { ni, nj } );
-				}
+				int ni = i + d[0], nj = j + d[1];
+				// pos is the closest distance to a zero
+				// if it's greater than a known value, stop
+				if ( ni < 0 || nj < 0 || ni >= row || nj >= col || update[ni][nj] <= 1 + update[i][j] )
+					continue;
+				queue.add( new int[] { ni, nj } );
+				update[ni][nj] = update[i][j] + 1;
 			}
-			queue.addAll( qt );
-			dist++;
+
 		}
+		// for ( int[] u : update )
+		// System.out.println( Arrays.toString( u ) );
+		return update;
 	}
 
 	public int maximalSquare( char[][] matrix )
