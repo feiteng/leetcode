@@ -65,21 +65,71 @@ public class Solution
 
 		String[] string = { "10111", "01010", "11011", "11011", "01111" };
 
-		int[][] m = {
-				{ 0, 0, 0 }, { 0, 1, 0 }, { 0, 0, 0 } };
+		int[][] A = { { 1, -5 } }, B = { { 12 }, { -1 } };
 
-		System.out.println( s.findDiagonalOrder( m ) );
+		int[][] p = s.multiply( A, B );
+		for ( int[] k : p )
+			System.out.println( Arrays.toString( k ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
 
+	public int[][] multiply( int[][] A, int[][] B )
+	{
+		if ( A.length == 0 || A[0].length == 0 || B.length == 0 || B[0].length == 0 )
+			return new int[][] {};
+		int[][] res = new int[A.length][B[0].length];
+
+		for ( int i = 0; i < A.length; i++ )
+		{
+			for ( int j = 0; j < B.length; j++ )
+			{
+				if ( A[i][j] == 0 )
+					continue;
+				for ( int k = 0; k < B[0].length; k++ )
+				{
+					if ( B[j][k] == 0 )
+						continue;
+					res[i][k] += A[i][j] * B[j][k];
+				}
+			}
+		}
+
+		return res;
+	}
+
+	public int longestLine( int[][] m )
+	{
+		if ( m.length == 0 || m[0].length == 0 )
+			return 0;
+		int row = m.length, col = m[0].length, maxCount = 0;
+		int[][] v = new int[4][col];
+		for ( int i = 0; i < row; i++ )
+		{
+			v[0] = new int[col];
+			for ( int j = 0; j < col; j++ )
+			{
+				v[0][j] = m[i][j] == 0 ? 0 : j > 0 ? v[0][j - 1] + 1 : 1;
+				v[1][j] = m[i][j] == 0 ? 0 : v[1][j] + 1;
+				v[2][j] = m[i][j] == 0 ? 0 : j < col - 1 ? v[2][j + 1] + 1 : 1;
+			}
+			for ( int j = col - 1; j >= 0; j-- )
+				v[3][j] = m[i][j] == 0 ? 0 : j > 0 ? v[3][j - 1] + 1 : j;
+			for ( int j = 0; j < col; j++ )
+				for ( int k = 0; k < 4; k++ )
+					maxCount = Math.max( maxCount, v[k][j] );
+		}
+
+		return maxCount;
+	}
+
 	public String complexNumberMultiply( String a, String b )
 	{
 		int[] va = complexNumToVal( a ), vb = complexNumToVal( b );
-		int ar=va[0], ai=va[1], br=vb[0],bi=vb[1];
-		int vr= ar*br-ai*bi, vi=ar*bi+ai*br;
-		return String.valueOf( vr )+"+"+String.valueOf( vi)+"i";
+		int ar = va[0], ai = va[1], br = vb[0], bi = vb[1];
+		int vr = ar * br - ai * bi, vi = ar * bi + ai * br;
+		return String.valueOf( vr ) + "+" + String.valueOf( vi ) + "i";
 	}
 
 	int[] complexNumToVal( String a )
