@@ -65,14 +65,33 @@ public class Solution
 
 		String[] string = { "10111", "01010", "11011", "11011", "01111" };
 
-		int[][] A = { { 1, -5 } }, B = { { 12 }, { -1 } };
+		int n = 3;
 
-		int[][] p = s.multiply( A, B );
-		for ( int[] k : p )
-			System.out.println( Arrays.toString( k ) );
+		System.out.println( s.integerReplacement( n ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int integerReplacement( int n )
+	{
+		int k = 0;
+		while ( n > 1 )
+		{
+			while ( ( n & 1 ) == 0 )
+			{
+				n /= 2;
+				k++;
+			}
+			if ( n == 1 )
+				return k;
+			if ( ( ( n + 1 ) & n ) == 0 && ( ( n - 1 ) & n ) != 0 )
+				n++;
+			else
+				n--;
+			k++;
+		}
+		return k;
 	}
 
 	public int[][] multiply( int[][] A, int[][] B )
