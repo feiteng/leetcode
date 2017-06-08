@@ -40,20 +40,6 @@ import java.util.TreeMap;
 
 public class Solution
 {
-	int sizex;
-	int sizey;
-	int index;
-	int len;
-	public char[] wordc;
-	String _endWord;
-	int[] px, py, b, m;
-	List<TreeNode> preOrderList, inOrderList, postOrderList;
-	int _buildTree_pos;
-	int[] _buildTree_preorder, _buildTree_postorder;
-	int[][] _spiralOrder_matrix;
-	int _spiralOrder_i, _spiralOrder_j;
-	// List<Integer> preOrderList, inOrderList;.
-	Set<Integer> set;
 
 	public static void main( String[] args ) throws IOException
 	{
@@ -63,12 +49,8 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String[] string = { "10111", "01010", "11011", "11011", "01111" };
-
-		int n = 3;
-
-		System.out.println( s.integerReplacement( n ) );
-
+		String[] pStrings = { "root/a 1.txt(abcd) 2.txt(efsfgh)", "root/c 3.txt(abdfcd)", "root/c/d 4.txt(efggdfh)" };
+		System.out.println( s.findDuplicate( pStrings ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -76,22 +58,101 @@ public class Solution
 	public int integerReplacement( int n )
 	{
 		int k = 0;
-		while ( n > 1 )
+
+		return k;
+	}
+
+	public List<List<String>> findDuplicate( String[] paths )
+	{
+		List<List<String>> list = new ArrayList<>();
+		if ( paths.length < 1 )
+			return list;
+		Map<String, List<String>> map = new HashMap<>();
+		for ( String p : paths )
+			updateMap( map, p );
+		for ( String k : map.keySet() )
 		{
-			while ( ( n & 1 ) == 0 )
+			if ( map.get( k ).size() > 1 )
+				list.add( map.get( k ) );
+		}
+		return list;
+	}
+
+	void updateMap( Map<String, List<String>> map, String file )
+	{
+		String[][] parse = parseFile( file );
+		for ( int i = 1; i < parse.length; i++ )
+		{
+			String[] p = parse[i];
+
+			if ( !map.containsKey( p[1] ) )
+				map.put( p[1], new ArrayList<>() );
+			map.get( p[1] ).add( p[0] );
+		}
+	}
+
+	String[][] parseFile( String file )
+	{
+		String[] split = file.split( " " );
+		String[][] sp2 = new String[split.length][2];
+		for ( int i = 1; i < split.length; i++ )
+		{
+			int pos = split[i].indexOf( "(" );
+			sp2[i][0] = split[0] + "/" + split[i].substring( 0, pos );
+			sp2[i][1] = split[i].substring( pos + 1, split[i].length() - 1 );
+		}
+		return sp2;
+	}
+
+	public boolean canPlaceFlowers( int[] flowerbed, int n )
+	{
+		if ( flowerbed.length < 1 )
+			return false;
+		if ( flowerbed.length < 2 )
+			return flowerbed[0] == 0 ? true : n == 0 ? true : false;
+		int k = 0;
+		if ( flowerbed[0] == 0 && flowerbed[1] == 0 )
+		{
+			k++;
+			flowerbed[0] = 1;
+		}
+		for ( int i = 1; i < flowerbed.length - 1; i++ )
+		{
+			if ( flowerbed[i - 1] == 0 && flowerbed[i] == 0 && flowerbed[i + 1] == 0 )
 			{
-				n /= 2;
+				flowerbed[i] = 1;
 				k++;
 			}
-			if ( n == 1 )
-				return k;
-			if ( ( ( n + 1 ) & n ) == 0 && ( ( n - 1 ) & n ) != 0 )
-				n++;
-			else
-				n--;
+		}
+		int m = flowerbed.length - 1;
+		if ( flowerbed[m - 1] == 0 && flowerbed[m] == 0 )
+		{
 			k++;
 		}
-		return k;
+		return k >= n ? true : false;
+
+	}
+
+	public String tree2str( TreeNode t )
+	{
+		if ( t == null )
+			return "";
+		if ( t.left == null && t.right == null )
+		{
+			return String.valueOf( t.val );
+		}
+		String string = "";
+		string += String.valueOf( t.val );
+		string += "(";
+		string += tree2str( t.left );
+		string += ")";
+		if ( t.right != null )
+		{
+			string += "(";
+			string += tree2str( t.right );
+			string += ")";
+		}
+		return string;
 	}
 
 	public int[][] multiply( int[][] A, int[][] B )
@@ -4732,6 +4793,8 @@ public class Solution
 		System.out.println( n.toString() );
 	}
 
+	List<TreeNode> preOrderList, inOrderList, postOrderList;
+
 	public void recoverTree( TreeNode root )
 	{
 		inOrderList = new ArrayList<>();
@@ -4771,6 +4834,8 @@ public class Solution
 
 	}
 
+	int _buildTree_pos;
+
 	public TreeNode buildTreepost( int[] inorder, int[] postorder )
 	{
 		List<Integer> inOrderList = new ArrayList<>();
@@ -4807,6 +4872,8 @@ public class Solution
 
 		return root;
 	}
+
+	int[] _buildTree_preorder, _buildTree_postorder;
 
 	public TreeNode constructTreePre( List<Integer> sublist )
 	{
@@ -5465,6 +5532,8 @@ public class Solution
 
 		return 0;
 	}
+
+	String _endWord;
 
 	public int bfsLadder( String node, List<String> nodes, List<String> visited )
 	{
