@@ -59,7 +59,33 @@ public class Solution
 
 	public int[] findOrder( int numCourses, int[][] prerequisites )
 	{
+		// topological sort
+		int[] sort = new int[numCourses];
 
+		Map<Integer, Set<Integer>> map = new HashMap<>();
+		for ( int[] p : prerequisites )
+		{
+			if ( !map.containsKey( p[1] ) )
+				map.put( p[1], new HashSet<>() );
+			map.get( p[1] ).add( p[0] );
+		}
+
+		Stack<Integer> stack = new Stack<>();
+		boolean[] visited = new boolean[numCourses];
+		for ( int i = 0; i < numCourses; i++ )
+		{
+			if ( !map.containsKey( i ) )
+				stack.push( i );
+			for ( int next : map.get( i ) )
+			{
+				if ( visited[next] )
+					continue;
+
+			}
+			stack.push( i );
+		}
+
+		return sort;
 	}
 
 	public boolean canFinish( int numCourses, int[][] prerequisites )
