@@ -1,5 +1,4 @@
 
-
 // Definition for binary tree
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -20,6 +19,11 @@ public class TreeNode
 
 	static String _seprator = ",";
 	String chara = "null";
+
+	public TreeNode()
+	{
+		// TODO Auto-generated constructor stub
+	}
 
 	TreeNode( int x )
 	{

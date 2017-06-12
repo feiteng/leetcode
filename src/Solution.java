@@ -49,14 +49,211 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] m = { 66, 90, 7, 6, 32, 16, 2, 78, 69, 88, 85, 26, 3, 9, 58, 65, 30, 96, 11, 31, 99, 49, 63, 83, 79, 97, 20, 64, 81, 80, 25, 69, 9, 75,
-				23, 70, 26, 71, 25, 54, 1, 40, 41, 82, 32, 10, 26, 33, 50, 71, 5, 91, 59, 96, 9, 15, 46, 70, 26, 32, 49, 35, 80, 21, 34, 95, 51, 66,
-				17, 71, 28, 88, 46, 21, 31, 71, 42, 2, 98, 96, 40, 65, 92, 43, 68, 14, 98, 38, 13, 77, 14, 13, 60, 79, 52, 46, 9, 13, 25, 8 };
+		int[] nums = { 2, 2, 3, 4 };
 
-		System.out.println( s.canPartition( m ) );
+		String[] pStrings = { "root/a 1.txt(abcd) 2.txt(efsfgh)", "root/c 3.txt(abdfcd)", "root/c/d 4.txt(efggdfh)" };
+		System.out.println( s.findDuplicate( pStrings ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int triangleNumber( int[] nums )
+	{
+		Arrays.sort( nums );
+		int count = 0;
+		for ( int i = 0; i < nums.length - 2; i++ )
+		{
+			for ( int j = i + 1; j < nums.length - 1; j++ )
+			{
+				int a = nums[i], b = nums[j], sum = a + b, k = Arrays.binarySearch( nums, sum );
+				if ( k < 0 )
+					k = -k + 1;
+				count += k - 1 - j;
+			}
+		}
+		return count;
+	}
+
+	int findK( int[] nums, int target ) // binary search to find first element bigger than target
+	{
+		int l = 0, r = nums.length - 1, m = ( l + r ) / 2;
+		while ( l < r )
+		{
+			if ( nums[m] > target )
+				r = m - 1;
+			else
+				l = m + 1;
+			m = ( l + r ) / 2;
+		}
+		return l;
+	}
+
+	public String tree2str( TreeNode t )
+	{
+		if ( t == null )
+			return "";
+		String string = "" + t.val;
+		if ( t.left == null && t.right == null )
+			return string;
+		string += "(" + tree2str( t.left ) + ")";
+		if ( t.right != null )
+		{
+			string += "(" + tree2str( t.right ) + ")";
+		}
+		string += ")";
+		return string;
+
+	}
+
+	int duplicate( List<Integer> list, Map<Integer, Integer> map, int i )
+	{
+		int count = 0, a = list.get( i ), n = map.get( a ), k = n * ( n - 1 ) / 2;
+		if ( n >= 3 )
+		{
+			count += n * ( n - 1 ) * ( n - 2 ) / 6;
+		}
+
+		for ( int j = i + 1; j < list.size(); j++ )
+		{
+			if ( a * 2 > list.get( j ) )
+				count += k * map.get( list.get( j ) );
+		}
+		return count;
+	}
+
+	int nonDuplicate( List<Integer> list, Map<Integer, Integer> map, int i )
+	{
+		int count = 0;
+		for ( int j = i + 1; j < list.size() - 1; j++ )
+		{
+			int a = list.get( i ), b = list.get( j ), k = j + 1;
+			while ( k < list.size() && a + b > list.get( k ) )
+			{
+				count += map.get( b ) * map.get( k );
+				k++;
+			}
+
+		}
+		return count;
+	}
+
+	public String addBoldTag( String s, String[] dict )
+	{
+		boolean[] bold = new boolean[s.length()];
+		for ( String d : dict )
+		{
+			int k = 0;
+			while ( k >= 0 )
+			{
+				k = s.indexOf( d, k );
+				if ( k < 0 )
+					break;
+				if ( k >= 0 )
+				{
+
+					for ( int i = k; i < k + d.length(); i++ )
+						bold[i] = true;
+				}
+				k++;
+			}
+		}
+		int i = 0, j = 0;
+		System.out.println( Arrays.toString( bold ) );
+		StringBuilder sb = new StringBuilder();
+		boolean flag = false;
+		while ( i < bold.length )
+		{
+			while ( i < bold.length && !bold[i] )
+				i++;
+			sb.append( s.substring( j, i ) );
+			j = i;
+
+			if ( j != bold.length )
+			{
+				sb.append( "<b>" );
+				flag = true;
+			}
+			while ( j < bold.length && bold[j] )
+				j++;
+			sb.append( s.substring( i, j ) );
+			i = j;
+			if ( flag )
+			{
+				sb.append( "</b>" );
+				flag = false;
+			}
+		}
+		if ( flag )
+			sb.append( "</b>" );
+		return sb.toString();
+	}
+
+	public TreeNode mergeTrees( TreeNode t1, TreeNode t2 )
+	{
+		TreeNode t;
+		if ( t1 != null && t2 != null )
+		{
+			t = new TreeNode( t1.val + t2.val );
+			t.left = mergeTrees( t1.left, t2.left );
+			t.right = mergeTrees( t1.right, t2.right );
+		}
+		if ( t1 == null && t2 != null )
+		{
+			t = t2;
+			return t;
+		}
+		if ( t1 != null && t2 == null )
+		{
+			t = t1;
+			return t;
+		}
+		return null;
+	}
+
+	static String intToRoman( int num )
+	{
+		String string = "";
+		Map<Integer, String> map = new HashMap<>();
+		map.put( 1, "I" );
+		map.put( 5, "V" );
+		map.put( 10, "X" );
+		map.put( 50, "L" );
+		map.put( 100, "C" );
+		map.put( 500, "D" );
+		map.put( 1000, "M" );
+		int t = 0;
+		while ( num > 0 )
+		{
+			string = toRom( num % 10, t, map ) + string;
+			num /= 10;
+			t++;
+		}
+		return string;
+	}
+
+	static String toRom( int n, int pow, Map<Integer, String> map )
+	{
+		String string = "", rest = "";
+		int p = (int) ( Math.pow( 10, pow ) );
+
+		if ( n == 4 )
+			string = map.get( p ) + map.get( 5 * p );
+		else if ( n == 5 )
+			string = map.get( 5 * p );
+		else if ( n == 9 )
+			string = map.get( p ) + map.get( 10 * p );
+
+		else if ( n > 5 )
+		{
+			string = map.get( 5 * p );
+			for ( int k = 0; k < n - 5; k++ )
+				rest += map.get( p );
+		}
+		else
+			for ( int k = 0; k < n; k++ )
+				rest += map.get( p );
+		return string + rest;
 	}
 
 	boolean canPartition( int[] m )
@@ -251,28 +448,6 @@ public class Solution
 		}
 		return k >= n ? true : false;
 
-	}
-
-	public String tree2str( TreeNode t )
-	{
-		if ( t == null )
-			return "";
-		if ( t.left == null && t.right == null )
-		{
-			return String.valueOf( t.val );
-		}
-		String string = "";
-		string += String.valueOf( t.val );
-		string += "(";
-		string += tree2str( t.left );
-		string += ")";
-		if ( t.right != null )
-		{
-			string += "(";
-			string += tree2str( t.right );
-			string += ")";
-		}
-		return string;
 	}
 
 	public int[][] multiply( int[][] A, int[][] B )
