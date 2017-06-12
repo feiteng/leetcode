@@ -49,13 +49,117 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] nums = { 2, 2, 3, 4 };
+		int[] tickets = {};
 
-		String[] pStrings = { "root/a 1.txt(abcd) 2.txt(efsfgh)", "root/c 3.txt(abdfcd)", "root/c/d 4.txt(efggdfh)" };
-		System.out.println( s.findDuplicate( pStrings ) );
+		System.out.println( Arrays.toString( s.findOrder( 2000, tickets ) ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int[] findOrder( int numCourses, int[][] prerequisites )
+	{
+
+	}
+
+	public boolean canFinish( int numCourses, int[][] prerequisites )
+	{
+		Map<Integer, Set<Integer>> pre = new HashMap<>();
+		for ( int[] p : prerequisites )
+		{
+			if ( !pre.containsKey( p[0] ) )
+				pre.put( p[0], new HashSet<>() );
+			pre.get( p[0] ).add( p[1] );
+		}
+
+		for ( int i = 0; i < numCourses; i++ )
+		{
+			if ( !detectCycle( pre, new HashSet<>(), i ) )
+				return false;
+			tested.add( i );
+		}
+		return true;
+	}
+
+	Set<Integer> tested = new HashSet<>();
+
+	boolean detectCycle( Map<Integer, Set<Integer>> map, Set<Integer> visit, int k )
+	{
+		if ( !map.containsKey( k ) || tested.contains( k ) )
+			return true;
+		visit.add( k );
+		for ( int next : map.get( k ) )
+		{
+			if ( visit.contains( next ) )
+				return false;
+			if ( !detectCycle( map, visit, next ) )
+				return false;
+		}
+		visit.remove( k );
+		return true;
+	}
+
+	public List<String> findItinerary( String[][] tickets )
+	{
+		Map<String, Set<String>> map = new HashMap<>(); // from, to
+		int totalDest = tickets.length;
+		for ( String[] t : tickets )
+		{
+			if ( !map.containsKey( t[0] ) )
+				map.put( t[0], new HashSet<>() );
+			map.get( t[0] ).add( t[1] );
+		}
+
+		System.out.println( map );
+		generateList( map, new HashMap<>(), new ArrayList<>(), "JFK", totalDest );
+
+		itineraryList.add( 0, "JFK" );
+
+		return itineraryList;
+	}
+
+	List<String> itineraryList = new ArrayList<>();
+
+	void generateList( Map<String, Set<String>> map, Map<String, Set<String>> visit, List<String> list, String curStop, int count )
+	{
+		if ( count == 1 )
+		{
+			for ( String dest : map.get( curStop ) )
+			{
+				if ( !visit.containsKey( curStop ) )
+					visit.put( curStop, new HashSet<>() );
+				if ( visit.get( curStop ).contains( dest ) )
+					continue;
+				list.add( dest );
+				// System.out.println( list );
+				if ( itineraryList.size() == 0 )
+					itineraryList = new ArrayList<>( list );
+				itineraryList = new ArrayList<>( compareList( itineraryList, list ) );
+				list.remove( dest );
+				return;
+			}
+		}
+		if ( !map.containsKey( curStop ) || map.get( curStop ).size() == 0 )
+			return;
+		// list.add( curStop );
+		for ( String dest : map.get( curStop ) )
+		{
+			if ( !visit.containsKey( curStop ) )
+				visit.put( curStop, new HashSet<>() );
+			if ( visit.get( curStop ).contains( dest ) )
+				continue;
+			visit.get( curStop ).add( dest );
+			list.add( dest );
+			generateList( map, visit, list, dest, count - 1 );
+			list.remove( list.size() - 1 );
+			visit.get( curStop ).remove( dest );
+		}
+	}
+
+	List<String> compareList( List<String> l1, List<String> l2 )
+	{
+		String s1 = String.join( "", l1 ), s2 = String.join( "", l2 );
+		return s1.compareTo( s2 ) < 0 ? l1 : l2;
 	}
 
 	public int triangleNumber( int[] nums )
@@ -7121,13 +7225,6 @@ public class Solution
 			}
 		}
 		return true;
-	}
-
-	public boolean canFinish( int numCourses, int[][] prerequisites )
-	{
-		int[] rank = new int[numCourses];
-		return true;
-
 	}
 
 	public boolean containsNearbyAlmostDuplicate( int[] nums, int k, int t )
