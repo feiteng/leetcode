@@ -49,17 +49,83 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] tickets = {};
+		int[] p1 = { 6987, -473 },
+				p2 = { 6985, -473 },
+				p3 = { 6986, -472 },
+				p4 = { 6986, -474 };
 
-		System.out.println( Arrays.toString( s.findOrder( 2000, tickets ) ) );
+		System.out.println( s.validSquare( p1, p2, p3, p4 ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
 
+	class validSqPoint implements Comparable<validSqPoint>
+	{
+		int x, y;
+
+		public validSqPoint( int a, int b )
+		{
+			x = a;
+			y = b;
+		}
+
+		@Override
+		public int compareTo( validSqPoint o )
+		{
+			return this.x == o.x ? this.y - o.y : this.x - o.x;
+		}
+
+	}
+
+	public boolean validSquare( int[] p1, int[] p2, int[] p3, int[] p4 )
+	{
+		// to make a square:
+		// 1) 4 equal length
+		// 2) 1 angle = 90 degree
+
+		// sort by x then y
+
+		List<validSqPoint> list = new ArrayList<>();
+		list.add( new validSqPoint( p1[0], p1[1] ) );
+		list.add( new validSqPoint( p2[0], p2[1] ) );
+		list.add( new validSqPoint( p3[0], p3[1] ) );
+		list.add( new validSqPoint( p4[0], p4[1] ) );
+
+		Collections.sort( list );
+
+		// now calculate distance
+		double d1 = distance( list.get( 0 ), list.get( 1 ) ),
+				d2 = distance( list.get( 0 ), list.get( 2 ) ),
+				d3 = distance( list.get( 2 ), list.get( 3 ) ),
+				d4 = distance( list.get( 1 ), list.get( 3 ) );
+		if ( d1 != d2 )
+			return false;
+		if ( d1 != d3 )
+			return false;
+		if ( d1 != d4 )
+			return false;
+
+		double angle = Math.acos( dot( list.get( 0 ), list.get( 1 ) ) / ( d1 * d2 ) );
+
+		return angle == Math.PI / 2.0;
+	}
+
+	double dot( validSqPoint p1, validSqPoint p2 )
+	{
+		return (double) ( p1.x * p2.x + p1.y * p2.y );
+
+	}
+
+	double distance( validSqPoint p1, validSqPoint p2 )
+	{
+		double x = p1.x - p2.x, y = p1.y - p2.y;
+		return Math.sqrt( x * x + y * y );
+	}
+
 	public int[] findOrder( int numCourses, int[][] prerequisites )
 	{
-		// topological sort
+		// topological sort http://www.geeksforgeeks.org/topological-sorting/
 		int[] sort = new int[numCourses];
 
 		Map<Integer, Set<Integer>> map = new HashMap<>();
@@ -71,21 +137,51 @@ public class Solution
 		}
 
 		Stack<Integer> stack = new Stack<>();
+
 		boolean[] visited = new boolean[numCourses];
+
 		for ( int i = 0; i < numCourses; i++ )
 		{
-			if ( !map.containsKey( i ) )
-				stack.push( i );
-			for ( int next : map.get( i ) )
-			{
-				if ( visited[next] )
-					continue;
-
-			}
-			stack.push( i );
+			if ( visited[i] )
+				continue;
+			if ( !insertStack( map, i, visited, stack, new HashSet<>() ) )
+				return new int[] {};
+			tested.add( i );
 		}
-
+		int k = 0;
+		while ( !stack.isEmpty() )
+			sort[k++] = stack.pop();
 		return sort;
+	}
+
+	Set<Integer> tested = new HashSet<>();
+
+	boolean insertStack( Map<Integer, Set<Integer>> map, int pos, boolean[] visited,
+			Stack<Integer> stack, Set<Integer> pathVisit )
+	{
+		// how to detect cycle during insertion?
+
+		if ( visited[pos] )
+			return false;
+		visited[pos] = true;
+		if ( !map.containsKey( pos ) )
+		{
+			// at end of grpah , will not add it into cycle?
+			stack.push( pos );
+			return true;
+		}
+		pathVisit.add( pos );
+		for ( int k : map.get( pos ) )
+		{
+			if ( pathVisit.contains( k ) )
+				return false;
+			if ( visited[k] )
+				continue;
+			if ( !insertStack( map, k, visited, stack, pathVisit ) )
+				return false;
+		}
+		stack.push( pos );
+		return true;
 	}
 
 	public boolean canFinish( int numCourses, int[][] prerequisites )
@@ -106,8 +202,6 @@ public class Solution
 		}
 		return true;
 	}
-
-	Set<Integer> tested = new HashSet<>();
 
 	boolean detectCycle( Map<Integer, Set<Integer>> map, Set<Integer> visit, int k )
 	{
