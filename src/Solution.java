@@ -41,12 +41,35 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] vals = { 1, 2, 31, 33 };
-		int n = 2147483647;
-		System.out.println( s.minPatches( vals, n ) );
+		int[] vals = {};
+
+		System.out.println( s.findMaxLength( vals ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int findMaxLength( int[] nums )
+	{
+		if ( nums.length < 1 )
+			return 0;
+
+		Map<Integer, Integer> map = new HashMap<>();
+		int sumUpTo = 0, maxLen = 0;
+		for ( int i = 0; i < nums.length; i++ )
+		{
+			if ( nums[i] == 0 )
+				nums[i] = -1;
+			sumUpTo += nums[i];
+			if ( map.containsKey( sumUpTo ) )
+			{
+				maxLen = Math.max( maxLen, i - map.get( sumUpTo ) );
+			}
+			else
+				map.put( sumUpTo, i );
+		}
+
+		return maxLen;
 	}
 
 	public int minPatches( int[] nums, int n )
