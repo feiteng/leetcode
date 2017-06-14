@@ -49,6 +49,33 @@ public class Solution
 
 	}
 
+	public int getMoneyAmount( int n )
+	{
+		// https://discuss.leetcode.com/topic/51353/simple-dp-solution-with-explanation
+		if ( n == 1 )
+			return 0;
+		int[][] t = new int[n + 1][n + 1];
+		return dp( t, 1, n );
+	}
+
+	int dp( int[][] t, int s, int e )
+	{
+		if ( s >= e )
+			return 0;
+
+		if ( t[s][e] != 0 )
+			return t[s][e];
+
+		int val = Integer.MAX_VALUE;
+		for ( int x = s; s <= e; x++ )
+		{
+			int tmp = x + Math.max( dp( t, s, x - 1 ), dp( t, x + 1, e ) );
+			val = Math.min( val, tmp );
+		}
+		t[s][e] = val;
+		return val;
+	}
+
 	public int findMaxLength( int[] nums )
 	{
 		if ( nums.length < 1 )
@@ -117,33 +144,6 @@ public class Solution
 		for ( int k : factors )
 			sum += k;
 		return sum == num;
-	}
-
-	public int getMoneyAmount( int n )
-	{
-		// https://discuss.leetcode.com/topic/51353/simple-dp-solution-with-explanation
-		if ( n == 1 )
-			return 0;
-		int[][] t = new int[n + 1][n + 1];
-		return dp( t, 1, n );
-	}
-
-	int dp( int[][] t, int s, int e )
-	{
-		if ( s >= e )
-			return 0;
-
-		if ( t[s][e] != 0 )
-			return t[s][e];
-
-		int val = Integer.MAX_VALUE;
-		for ( int x = s; s <= e; x++ )
-		{
-			int tmp = x + Math.max( dp( t, s, x - 1 ), dp( t, x + 1, e ) );
-			val = Math.min( val, tmp );
-		}
-		t[s][e] = val;
-		return val;
 	}
 
 	public String fractionAddition( String expression )
