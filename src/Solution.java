@@ -43,15 +43,113 @@ public class Solution
 		time = System.currentTimeMillis();
 		int[] vals = {};
 
-		System.out.println( s.findMaxLength( vals ) );
+		System.out.println( s.generatePalindromes( "baaaa" ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
 
+	public int findIntegers( int num )
+	{
+		int z = 1, o = 1, t;
+
+		int m = 1;
+		while ( m < num )
+		{
+			t = z;
+			z += o;
+			o = t;
+			m *= 2;
+		}
+		// m-1 down to num
+		return z + o;
+	}
+
+	public List<String> generatePalindromes( String s )
+	{
+		List<String> list = new ArrayList<>();
+		Map<Character, Integer> map = new HashMap<>();
+		for ( char k : s.toCharArray() )
+		{
+			if ( !map.containsKey( k ) )
+				map.put( k, 0 );
+			map.put( k, map.get( k ) + 1 );
+		}
+		for ( int i = 0; i < array.length; i++ )
+		{
+			if ( array[i] == 0 )
+				continue;
+			if ( array[i] % 2 == 0 )
+			{
+				updatePalindrome( "", array, i, list, s.length() );
+			}
+			else
+			{
+				array[i]--;
+				updatePalindrome( String.valueOf( (char) ( i + 'a' ) ), array, i, list, s.length() - 1 );
+				array[i]++;
+			}
+		}
+
+		return list;
+	}
+
+	void updatePalindrome( String current, int[] array, int pos, List<String> list, int size )
+	{
+		if ( size == 0 )
+		{
+			list.add( current );
+			return;
+		}
+		// if ( size < 0 )
+		// return;
+		for ( int i = 0; i < array.length; i++ )
+		{
+			if ( array[i] > 0 && ( array[i] & 1 ) == 0 )
+			{
+				array[i] -= 2;
+				String c = String.valueOf( (char) ( i + 'a' ) ), half = current.substring( 0, current.length() / 2 );
+				updatePalindrome( c + current + c, array, i, list, size - 2 );
+				if ( half.length() > 0 )
+					updatePalindrome( half + c + c + new StringBuilder( half ).reverse().toString(), array, i + 1, list, size - 2 );
+				array[i] += 2;
+			}
+
+		}
+
+	}
+
+	public boolean canPermutePalindrome( String s )
+	{
+		Map<Character, Integer> map = new HashMap<>();
+		for ( char k : s.toCharArray() )
+		{
+			if ( !map.containsKey( k ) )
+			{
+				map.put( k, 0 );
+			}
+			map.put( k, map.get( k ) + 1 );
+		}
+		boolean odd = false;
+		for ( char k : map.keySet() )
+		{
+			if ( ( map.get( k ) & 1 ) != 0 ) // odd
+			{
+				if ( odd )
+					return false;
+				if ( odd == false )
+				{
+					odd = true;
+				}
+			}
+		}
+		return true;
+	}
+
 	public int getMoneyAmount( int n )
 	{
 		// https://discuss.leetcode.com/topic/51353/simple-dp-solution-with-explanation
+
 		if ( n == 1 )
 			return 0;
 		int[][] t = new int[n + 1][n + 1];
@@ -67,7 +165,7 @@ public class Solution
 			return t[s][e];
 
 		int val = Integer.MAX_VALUE;
-		for ( int x = s; s <= e; x++ )
+		for ( int x = s; x <= e; x++ )
 		{
 			int tmp = x + Math.max( dp( t, s, x - 1 ), dp( t, x + 1, e ) );
 			val = Math.min( val, tmp );
