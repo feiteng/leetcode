@@ -31,13 +31,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 
-/**
- * Class used to run leetcode
- * 
- * @author Rutter
- *
- */
-
 public class Solution
 {
 
@@ -48,12 +41,86 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-
-		String string = "2/3-1/2";
-		System.out.println( s.fractionAddition( string ) );
+		int[] vals = { 1, 2, 31, 33 };
+		int n = 2147483647;
+		System.out.println( s.minPatches( vals, n ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int minPatches( int[] nums, int n )
+	{
+		// classic 0 - 1 bag problem
+		// pick each item only once
+
+		int count = 0, nextVal = 1, upto = 0;
+		Arrays.sort( nums );
+		for ( int i = 0; i < nums.length; i++ )
+		{
+			if ( nums[i] == nextVal )
+			{
+				nextVal++;
+				upto += nums[i];
+			}
+			else if ( nums[i] > nextVal )
+			{
+				upto += nextVal;
+				nextVal++;
+			}
+
+		}
+
+		return count;
+
+	}
+
+	public boolean checkPerfectNumber( int num )
+	{
+		// generate factors first
+		Set<Integer> factors = new HashSet<>();
+		for ( int i = 2; i <= Math.sqrt( num ); i++ )
+		{
+			if ( num % i == 0 )
+			{
+				factors.add( i );
+				factors.add( num / i );
+			}
+		}
+		factors.add( 1 );
+
+		// then check if sum equals num
+		int sum = 0;
+		for ( int k : factors )
+			sum += k;
+		return sum == num;
+	}
+
+	public int getMoneyAmount( int n )
+	{
+		// https://discuss.leetcode.com/topic/51353/simple-dp-solution-with-explanation
+		if ( n == 1 )
+			return 0;
+		int[][] t = new int[n + 1][n + 1];
+		return dp( t, 1, n );
+	}
+
+	int dp( int[][] t, int s, int e )
+	{
+		if ( s >= e )
+			return 0;
+
+		if ( t[s][e] != 0 )
+			return t[s][e];
+
+		int val = Integer.MAX_VALUE;
+		for ( int x = s; s <= e; x++ )
+		{
+			int tmp = x + Math.max( dp( t, s, x - 1 ), dp( t, x + 1, e ) );
+			val = Math.min( val, tmp );
+		}
+		t[s][e] = val;
+		return val;
 	}
 
 	public String fractionAddition( String expression )
@@ -4577,7 +4644,7 @@ public class Solution
 		return Math.max( r2, maxtmp );
 	}
 
-	public int getMoneyAmount( int n )
+	public int getMoneyAmount1( int n )
 	{
 		if ( n == 1 )
 			return 0;
