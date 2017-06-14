@@ -49,29 +49,155 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] p1 = { 6987, -473 },
-				p2 = { 6985, -473 },
-				p3 = { 6986, -472 },
-				p4 = { 6986, -474 };
-
-		System.out.println( s.validSquare( p1, p2, p3, p4 ) );
+		String string = "2/3-1/2";
+		System.out.println( s.fractionAddition( string ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
 
-	class validSqPoint implements Comparable<validSqPoint>
+	public String fractionAddition( String expression )
+	{
+		int k = 0, i = 0;
+		List<Integer> numerators = new ArrayList<>(), denoms = new ArrayList<>();
+		// parse numerator and denominator
+		while ( i < expression.length() )
+		{
+			k = expression.indexOf( "/", i );
+			// String sub = expression.substring( i, k );
+			int numerator = Integer.valueOf( expression.substring( i, k ) ), denom = 1;
+			i = k + 1;
+			k = i;
+			while ( i < expression.length() && expression.charAt( i ) >= '0' && expression.charAt( i ) <= '9' )
+				i++;
+			if ( i == expression.length() )
+				denom = Integer.valueOf( expression.substring( k ) );
+			else
+				denom = Integer.valueOf( expression.substring( k, i ) );
+			k = i + 1;
+
+			numerators.add( numerator );
+			denoms.add( denom );
+		}
+		int scf = 1, sum = 0;
+		for ( int d : denoms )
+			scf = lcm( d, scf );
+
+		for ( int j = 0; j < numerators.size(); j++ )
+		{
+			sum += numerators.get( j ) * scf / denoms.get( j );
+		}
+		if ( scf == 1 )
+			return "" + sum + "/1";
+		if ( sum == 0 )
+			return "0/1";
+
+		int m1 = sum < 0 ? -1 : 1, m2 = scf < 0 ? -1 : 1;
+		sum = sum * m1;
+		scf = scf * m2;
+
+		int nscf = gcd( scf, sum );
+
+		return "" + m1 * m2 * sum / nscf + "/" + scf / nscf;
+	}
+
+	int gcd( int a, int b )
+	{
+		if ( b == 0 )
+			return a;
+		return ( a % b == 0 ) ? b : gcd( b, a % b );
+	}
+
+	int lcm( int a, int b )
+	{
+		return Math.abs( a * b ) / gcd( a, b );
+	}
+
+	public void wiggleSort( int[] nums )
+	{
+		int[] copy = new int[nums.length];
+		System.arraycopy( nums, 0, copy, 0, nums.length );
+		Arrays.sort( copy );
+		int i = 0, j = copy.length - 1, flip = 1, k = 0;
+		while ( k < nums.length )
+		{
+			if ( flip > 0 )
+			{
+				nums[k] = copy[i];
+				i++;
+				flip = 1 - flip;
+			}
+			else
+			{
+				nums[k] = copy[j];
+				j--;
+				flip = 1 - flip;
+			}
+			k++;
+		}
+	}
+
+	public int findTilt( TreeNode root )
+	{
+		if ( root == null || root.left == null && root.right == null )
+			return 0;
+		if ( root.left == null || root.right == null )
+		{
+			if ( root.left == null )
+				return Math.abs( sumTree( root.right ) ) + findTilt( root.right );
+			else
+				return Math.abs( sumTree( root.left ) ) + findTilt( root.left );
+		}
+		return Math.abs( sumTree( root.left ) - sumTree( root.right ) ) + findTilt( root.left ) + findTilt( root.right );
+	}
+
+	int sumTree( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+		return root.val + sumTree( root.left ) + sumTree( root.right );
+	}
+
+	public int triangleNumber( int[] nums )
+	{
+		Arrays.sort( nums );
+		int count = 0, k = 2;
+		for ( int i = 0; i < nums.length - 2; i++ )
+		{
+			for ( int j = i + 1; j < nums.length - 1; j++ )
+			{
+				int a = nums[i], b = nums[j];
+				while ( k < nums.length && a + b > nums[k] )
+					k++;
+				System.out.printf( "%d %d %d %d\n", nums[i], nums[j], nums[k - 1], Math.max( k - 1 - j, 0 ) );
+				count += Math.max( k - 1 - j, 0 );
+			}
+		}
+		return count;
+	}
+
+	class vector implements Comparable<vector>
 	{
 		int x, y;
 
-		public validSqPoint( int a, int b )
+		public vector( int a, int b ) // assuming zero as origin
 		{
 			x = a;
 			y = b;
 		}
 
+		vector add( vector v )
+		{
+			return new vector( this.x + v.x, this.y + v.y );
+		}
+
+		vector minus( vector v )
+		{
+			return new vector( this.x - v.x, this.y - v.y );
+		}
+
 		@Override
-		public int compareTo( validSqPoint o )
+		public int compareTo( vector o )
 		{
 			return this.x == o.x ? this.y - o.y : this.x - o.x;
 		}
@@ -86,19 +212,20 @@ public class Solution
 
 		// sort by x then y
 
-		List<validSqPoint> list = new ArrayList<>();
-		list.add( new validSqPoint( p1[0], p1[1] ) );
-		list.add( new validSqPoint( p2[0], p2[1] ) );
-		list.add( new validSqPoint( p3[0], p3[1] ) );
-		list.add( new validSqPoint( p4[0], p4[1] ) );
+		vector m1 = new vector( p1[0], p1[1] ),
+				m2 = new vector( p2[0], p2[1] ),
+				m3 = new vector( p3[0], p3[1] ),
+				m4 = new vector( p4[0], p4[1] );
 
+		List<vector> list = new ArrayList<>();
+		list.add( m1 );
+		list.add( m2 );
+		list.add( m3 );
+		list.add( m4 );
 		Collections.sort( list );
+		vector v1 = list.get( 0 ), v2 = list.get( 1 ), v3 = list.get( 2 ), v4 = list.get( 3 );
 
-		// now calculate distance
-		double d1 = distance( list.get( 0 ), list.get( 1 ) ),
-				d2 = distance( list.get( 0 ), list.get( 2 ) ),
-				d3 = distance( list.get( 2 ), list.get( 3 ) ),
-				d4 = distance( list.get( 1 ), list.get( 3 ) );
+		double d1 = distance( v1, v2 ), d2 = distance( v1, v3 ), d3 = distance( v2, v4 ), d4 = distance( v3, v4 );
 		if ( d1 != d2 )
 			return false;
 		if ( d1 != d3 )
@@ -106,18 +233,18 @@ public class Solution
 		if ( d1 != d4 )
 			return false;
 
-		double angle = Math.acos( dot( list.get( 0 ), list.get( 1 ) ) / ( d1 * d2 ) );
-
-		return angle == Math.PI / 2.0;
+		vector v13 = v3.minus( v1 ), v12 = v2.minus( v1 );
+		double dot = dot( v13, v12 ), angle = Math.acos( dot / ( d1 * d2 ) );
+		return angle == Math.PI / 2;
 	}
 
-	double dot( validSqPoint p1, validSqPoint p2 )
+	double dot( vector p1, vector p2 )
 	{
 		return (double) ( p1.x * p2.x + p1.y * p2.y );
 
 	}
 
-	double distance( validSqPoint p1, validSqPoint p2 )
+	double distance( vector p1, vector p2 )
 	{
 		double x = p1.x - p2.x, y = p1.y - p2.y;
 		return Math.sqrt( x * x + y * y );
@@ -280,37 +407,6 @@ public class Solution
 	{
 		String s1 = String.join( "", l1 ), s2 = String.join( "", l2 );
 		return s1.compareTo( s2 ) < 0 ? l1 : l2;
-	}
-
-	public int triangleNumber( int[] nums )
-	{
-		Arrays.sort( nums );
-		int count = 0;
-		for ( int i = 0; i < nums.length - 2; i++ )
-		{
-			for ( int j = i + 1; j < nums.length - 1; j++ )
-			{
-				int a = nums[i], b = nums[j], sum = a + b, k = Arrays.binarySearch( nums, sum );
-				if ( k < 0 )
-					k = -k + 1;
-				count += k - 1 - j;
-			}
-		}
-		return count;
-	}
-
-	int findK( int[] nums, int target ) // binary search to find first element bigger than target
-	{
-		int l = 0, r = nums.length - 1, m = ( l + r ) / 2;
-		while ( l < r )
-		{
-			if ( nums[m] > target )
-				r = m - 1;
-			else
-				l = m + 1;
-			m = ( l + r ) / 2;
-		}
-		return l;
 	}
 
 	public String tree2str( TreeNode t )
@@ -4712,20 +4808,6 @@ public class Solution
 		if ( z == x + y )
 			return true;
 		return z % gcd( x, y ) == 0;
-	}
-
-	int gcd( int a, int b )
-	{
-		if ( a > b )
-		{
-			// swap a, b
-			int t = a;
-			a = b;
-			b = t;
-		}
-		if ( a == 0 )
-			return b;
-		return gcd( a, b % a );
 	}
 
 	public boolean canJump( int[] nums )
