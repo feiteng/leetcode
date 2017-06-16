@@ -41,43 +41,303 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] vals = {};
 
-		System.out.println( s.generatePalindromes( "baaaa" ) );
+		System.out.println( s.decodeString( "2[abc]3[cd]ef" ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
 
-	public int findIntegers( int num )
+	public String decodeString( String s )
+	{
+		String str = "";
+		Stack<Character> stack = new Stack<>();
+		for ( char k : s.toCharArray() )
+		{
+			if ( k != ']' )
+				stack.push( k );
+			else
+			{
+				String tmp = "";
+				while ( stack.peek() != '[' )
+				{
+					tmp = String.valueOf( stack.pop() ) + tmp;
+				}
+				stack.pop();
+				String numStr = "";
+				while ( !stack.isEmpty() && stack.peek() >= '0' && stack.peek() <= '9' )
+				{
+					numStr = String.valueOf( stack.pop() ) + numStr;
+				}
+				String newTmp = "";
+				for ( int i = 0; i < Integer.valueOf( numStr ); i++ )
+				{
+					newTmp += tmp;
+				}
+				for ( char c : newTmp.toCharArray() )
+					stack.push( c );
+			}
+		}
+		while ( !stack.isEmpty() )
+		{
+			str = String.valueOf( stack.pop() ) + str;
+		}
+		return str;
+	}
+
+	public int maxKilledEnemies( char[][] grid )
 	{
 
-		String binRep = Integer.toBinaryString( num );
+		if ( grid.length == 0 || grid[0].length == 0 )
+			return 0;
+		int m = grid.length, n = grid[0].length;
+		int[][] total = new int[m][n];
+		for ( int i = 0; i < m; i++ )
+		{
+			Queue<int[]> pos = new LinkedList<>();
+			int enemies = 0;
+			for ( int j = 0; j < n; j++ )
+			{
+				if ( grid[i][j] == 'W' )
+				{// fill everything from left wall to current wall
+					for ( int[] k : pos )
+					{
+						int ni = k[0], nj = k[1];
+						total[ni][nj] += enemies;
+					}
+					enemies = 0;
+					pos.clear();
+				}
+				if ( grid[i][j] == 'E' )
+					enemies++;
+				if ( grid[i][j] == '0' )
+					pos.add( new int[] { i, j } );
+			}
+			for ( int[] k : pos )
+			{
+				int ni = k[0], nj = k[1];
+				total[ni][nj] += enemies;
+			}
+		}
+		for ( int j = 0; j < n; j++ )
+		{
+			Queue<int[]> pos = new LinkedList<>();
+			int enemies = 0;
+			for ( int i = 0; i < m; i++ )
+			{
+				if ( grid[i][j] == 'W' )
+				{// fill everything from left wall to current wall
+					for ( int[] k : pos )
+					{
+						int ni = k[0], nj = k[1];
+						total[ni][nj] += enemies;
+					}
+					enemies = 0;
+					pos.clear();
+				}
+				if ( grid[i][j] == 'E' )
+					enemies++;
+				if ( grid[i][j] == '0' )
+					pos.add( new int[] { i, j } );
+			}
+			for ( int[] k : pos )
+			{
+				int ni = k[0], nj = k[1];
+				total[ni][nj] += enemies;
+			}
+		}
+		int max = 0;
+		for ( int[] t : total )
+			for ( int v : t )
+				max = Math.max( v, max );
+		for ( int[] t : total )
+			System.out.println( Arrays.toString( t ) );
+		return max;
+	}
+
+	public int wordsTyping( String[] sentence, int rows, int cols )
+	{
+		String join = String.join( "-", sentence ) + "-"; // complete sentence
+
+		int startPos = 0;
+
+		for ( int i = 0; i < rows; i++ )
+		{
+			startPos += cols;
+			if ( join.charAt( startPos % join.length() ) == '-' )
+				startPos++;
+			else
+			{
+				while ( startPos > 0 && join.charAt( ( startPos - 1 ) % join.length() ) != '-' )
+					startPos--;
+			}
+		}
+		return startPos / join.length();
+
+	}
+
+	public int longestConsecutive( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+		longestConsecutiveHelper( root, 0, root.val );
+		return longestConsecutiveInt;
+	}
+
+	int longestConsecutiveInt = 0;
+
+	void longestConsecutiveHelper( TreeNode root, int cur, int target )
+	{
+		// base case
+		if ( root == null )
+			return;
+		if ( root.val == target )
+			cur++;
+		else
+			cur = 1;
+		longestConsecutiveInt = Math.max( longestConsecutiveInt, cur );
+		longestConsecutiveHelper( root.left, cur, root.val + 1 );
+		longestConsecutiveHelper( root.right, cur, root.val + 1 );
+	}
+
+	public String licenseKeyFormatting( String S, int K )
+	{
+		S = S.toUpperCase();
+		String string = S.replace( "-", "" );
+		int m = string.length() % K, step = string.length() / K;
+		List<String> newStr = new ArrayList<>();
+		if ( m > 0 )
+		{
+			newStr.add( string.substring( 0, m ) );
+			string = string.substring( m );
+		}
+		for ( int i = 0; i < step; i++ )
+		{
+			newStr.add( string.substring( i * K, i * K + K ) );
+		}
+		System.out.println( String.join( "-", newStr ) );
+
+		return String.join( "-", newStr );
+	}
+
+	public int lengthOfLongestSubstringKDistinct( String s, int k )
+	{
+		int m = 0, i = 0, j = 0, run = 0;
+		int[] c = new int[256];
+		for ( i = 0; i < s.length(); i++ )
+		{
+
+			if ( c[s.charAt( i )] == 0 )
+			{
+				run++;
+			}
+			c[s.charAt( i )]++;
+			if ( run > k )
+			{
+				m = Math.max( m, i - j );
+				while ( run > k )
+				{
+					c[s.charAt( j )]--;
+					if ( c[s.charAt( j )] == 0 )
+						run--;
+					j++;
+				}
+			}
+		}
+		m = Math.max( m, i - j );
+		return m;
+	}
+
+	public int lengthLongestPath( String input )
+	{
+
+		Stack<String> folders = new Stack<>();
+
+		String[] seps = input.split( "\n" );
+
+		int maxLen = 0;
+
+		for ( int i = 0; i < seps.length; i++ )
+		{
+			int pos = seps[i].lastIndexOf( "\t" );
+			while ( pos + 1 < folders.size() )
+				folders.pop();
+			folders.push( seps[i].substring( pos + 1 ) );
+			// System.out.println( folders );
+			if ( seps[i].indexOf( "." ) >= 0 ) // has file name
+			{
+				String join = String.join( "/", folders );
+				// System.out.println( join );
+				maxLen = Math.max( maxLen, join.length() );
+			}
+		}
+		return maxLen;
+
+	}
+
+	void updateList( String nextFolder, List<String> currentList, List<String> maxList )
+	{
+		int level = getLevel( nextFolder );
+
+		if ( level > 0 )
+			nextFolder = nextFolder.substring( level );
+		if ( level <= currentList.size() )
+		{
+			level = currentList.size() - level;
+			while ( --level >= 0 )
+				currentList.remove( currentList.size() - 1 );
+		}
+		currentList.add( nextFolder );
+		if ( getLen( maxList ) < getLen( currentList ) && currentList.get( currentList.size() - 1 ).indexOf( '.' ) > 0 )
+		{
+			maxList.clear();
+			maxList.addAll( currentList );
+		}
+	}
+
+	int getLen( List<String> list )
+	{
+		return String.join( "/", list ).length();
+	}
+
+	int getLevel( String input )
+	{
+		int level = 0, startPos = 1;
+		startPos = input.indexOf( "\t" );
+		while ( input.indexOf( "\t", startPos ) >= 0 )// input.indexOf( "\n" ) >
+		{
+			level++;
+			startPos = input.indexOf( "\t", startPos ) + 1;
+		}
+		return level;
+	}
+
+	public int findIntegers( int num )
+	{
 		int[] counts = new int[32];
 		counts[0] = 1;
 		counts[1] = 2;
-		int zero = 1, one = 1, tmp, sum = 0;
+		int sum = 0;
 
 		for ( int i = 2; i < 32; i++ )
 			counts[i] = counts[i - 1] + counts[i - 2];
 
 		boolean prev = false;
-		int i = 31;
-		while ( i >= 0 )
+		String binRep = new StringBuilder( Integer.toBinaryString( num ) ).reverse().toString();
+		for ( int i = binRep.length() - 1; i >= 0; i-- )
 		{
-			if ( ( num & ( 1 << i ) ) == 1 )
-			{
+			if ( binRep.charAt( i ) == '1' )
 				sum += counts[i];
-				if ( prev )
+			if ( i < binRep.length() - 1 )
+			{
+				if ( binRep.charAt( i ) == '1' && binRep.charAt( i + 1 ) == '1' )
 				{
-					sum--; // remove self for double digit
+					sum--;
 					break;
 				}
-				prev = true;
 			}
-			i--;
 		}
-		return sum + 1; // add self always
+		return sum + 1;
 	}
 
 	public List<String> generatePalindromes( String s )
@@ -1816,66 +2076,6 @@ public class Solution
 
 	}
 
-	public int lengthLongestPath( String input )
-	{
-		int maxLen = 0, level;
-		input = "\t" + input;
-		List<String> currentList = new ArrayList<>(), maxList = new ArrayList<>();
-		int i = 0, j = input.indexOf( "\n" );
-		while ( j > 0 )
-		{
-			String nextFolder = input.substring( i, j );
-			updateList( nextFolder, currentList, maxList );
-			i = j + 1; // i at next character
-			j = input.indexOf( "\n", i );
-		}
-		// now j < 0, also case no \n at all
-		if ( i == 0 && input.indexOf( '.' ) < 0 )
-			return 0;
-		j = input.length();
-		String nextFolder = input.substring( i, j );
-		updateList( nextFolder, currentList, maxList );
-
-		return getLen( maxList );
-	}
-
-	void updateList( String nextFolder, List<String> currentList, List<String> maxList )
-	{
-		int level = getLevel( nextFolder );
-
-		if ( level > 0 )
-			nextFolder = nextFolder.substring( level );
-		if ( level <= currentList.size() )
-		{
-			level = currentList.size() - level;
-			while ( --level >= 0 )
-				currentList.remove( currentList.size() - 1 );
-		}
-		currentList.add( nextFolder );
-		if ( getLen( maxList ) < getLen( currentList ) && currentList.get( currentList.size() - 1 ).indexOf( '.' ) > 0 )
-		{
-			maxList.clear();
-			maxList.addAll( currentList );
-		}
-	}
-
-	int getLen( List<String> list )
-	{
-		return String.join( "/", list ).length();
-	}
-
-	int getLevel( String input )
-	{
-		int level = 0, startPos = 1;
-		startPos = input.indexOf( "\t" );
-		while ( input.indexOf( "\t", startPos ) >= 0 )// input.indexOf( "\n" ) >
-		{
-			level++;
-			startPos = input.indexOf( "\t", startPos ) + 1;
-		}
-		return level;
-	}
-
 	public int reversePairs( int[] nums )
 	{
 		int count = 0;
@@ -2351,29 +2551,6 @@ public class Solution
 		}
 
 		return retList;
-	}
-
-	public int wordsTyping( String[] sentence, int rows, int cols )
-	{
-		int count = 0, pos = 0, k = -1;
-
-		while ( rows > 0 )
-		{
-			pos = 0;
-			while ( cols >= pos + sentence[k + 1].length() )
-			{
-				pos += sentence[++k].length() + 1;
-				if ( k >= sentence.length - 1 )
-				{
-					k = -1;
-					count++;
-				}
-			}
-			rows--;
-
-		}
-
-		return count;
 	}
 
 	public void reverseWords( char[] s )
