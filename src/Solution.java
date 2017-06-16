@@ -43,7 +43,7 @@ public class Solution
 		time = System.currentTimeMillis();
 		int[] vals = {};
 
-		System.out.println( s.generatePalindromes( "baaaa" ) );
+		System.out.println( s.findIntegers( 5 ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
@@ -51,18 +51,32 @@ public class Solution
 
 	public int findIntegers( int num )
 	{
-		int z = 1, o = 1, t;
+		String binRep = Integer.toBinaryString( num );
+		int[] counts = new int[32];
+		counts[0] = 1;
+		counts[1] = 2;
+		int zero = 1, one = 1, tmp, sum = 0;
 
-		int m = 1;
-		while ( m < num )
+		for ( int i = 2; i < 32; i++ )
+			counts[i] = counts[i - 1] + counts[i - 2];
+
+		boolean prev = false;
+		int i = 31;
+		while ( i >= 0 )
 		{
-			t = z;
-			z += o;
-			o = t;
-			m *= 2;
+			if ( ( num & ( 1 << i ) ) == 1 )
+			{
+				sum += counts[i];
+				if ( prev )
+				{
+					sum--; // remove self for double digit
+					break;
+				}
+				prev = true;
+			}
+			i--;
 		}
-		// m-1 down to num
-		return z + o;
+		return sum + 1; // add self always
 	}
 
 	public List<String> generatePalindromes( String s )
@@ -75,75 +89,62 @@ public class Solution
 				map.put( k, 0 );
 			map.put( k, map.get( k ) + 1 );
 		}
-		for ( int i = 0; i < array.length; i++ )
+		boolean single = false;
+		String string = "";
+		for ( char k : map.keySet() )
 		{
-			if ( array[i] == 0 )
-				continue;
-			if ( array[i] % 2 == 0 )
+			if ( ( map.get( k ) & 1 ) != 0 ) // odd number
 			{
-				updatePalindrome( "", array, i, list, s.length() );
-			}
-			else
-			{
-				array[i]--;
-				updatePalindrome( String.valueOf( (char) ( i + 'a' ) ), array, i, list, s.length() - 1 );
-				array[i]++;
+				if ( single ) // two single number = no palindrome available
+					return new ArrayList<>();
+				single = true;
+				string = String.valueOf( k );
 			}
 		}
+		int k = 0;
+		if ( string.length() > 0 )
+		{
+			char c = string.charAt( 0 );
+			map.put( c, map.get( c ) - 1 );
+			k = 1;
+		}
+		// dfs
+		updatePalindrome( string, map, list, s.length() - k );
 
 		return list;
+
 	}
 
-	void updatePalindrome( String current, int[] array, int pos, List<String> list, int size )
+	void updatePalindrome( String current, Map<Character, Integer> map, List<String> list, int size )
 	{
 		if ( size == 0 )
 		{
 			list.add( current );
 			return;
 		}
-		// if ( size < 0 )
-		// return;
-		for ( int i = 0; i < array.length; i++ )
+
+		for ( char k : map.keySet() )
 		{
-			if ( array[i] > 0 && ( array[i] & 1 ) == 0 )
-			{
-				array[i] -= 2;
-				String c = String.valueOf( (char) ( i + 'a' ) ), half = current.substring( 0, current.length() / 2 );
-				updatePalindrome( c + current + c, array, i, list, size - 2 );
-				if ( half.length() > 0 )
-					updatePalindrome( half + c + c + new StringBuilder( half ).reverse().toString(), array, i + 1, list, size - 2 );
-				array[i] += 2;
-			}
-
+			if ( map.get( k ) == 0 )
+				continue;
+			map.put( k, map.get( k ) - 2 );
+			String a = String.valueOf( k ), string = a + current + a;
+			updatePalindrome( string, map, list, size - 2 );
+			map.put( k, map.get( k ) + 2 );
 		}
-
 	}
 
 	public boolean canPermutePalindrome( String s )
 	{
-		Map<Character, Integer> map = new HashMap<>();
+		Set<Character> set = new HashSet<>();
 		for ( char k : s.toCharArray() )
 		{
-			if ( !map.containsKey( k ) )
-			{
-				map.put( k, 0 );
-			}
-			map.put( k, map.get( k ) + 1 );
+			if ( !set.contains( k ) )
+				set.add( k );
+			else
+				set.remove( k );
 		}
-		boolean odd = false;
-		for ( char k : map.keySet() )
-		{
-			if ( ( map.get( k ) & 1 ) != 0 ) // odd
-			{
-				if ( odd )
-					return false;
-				if ( odd == false )
-				{
-					odd = true;
-				}
-			}
-		}
-		return true;
+		return set.size() < 2;
 	}
 
 	public int getMoneyAmount( int n )
