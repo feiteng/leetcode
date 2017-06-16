@@ -43,7 +43,7 @@ public class Solution
 		time = System.currentTimeMillis();
 		int[] vals = {};
 
-		System.out.println( s.findIntegers( 5 ) );
+		System.out.println( s.generatePalindromes( "baaaa" ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
@@ -51,6 +51,7 @@ public class Solution
 
 	public int findIntegers( int num )
 	{
+
 		String binRep = Integer.toBinaryString( num );
 		int[] counts = new int[32];
 		counts[0] = 1;
@@ -145,6 +146,31 @@ public class Solution
 				set.remove( k );
 		}
 		return set.size() < 2;
+	}
+
+	void updatePalindrome( String current, int[] array, int pos, List<String> list, int size )
+	{
+		if ( size == 0 )
+		{
+			list.add( current );
+			return;
+		}
+		// if ( size < 0 )
+		// return;
+		for ( int i = 0; i < array.length; i++ )
+		{
+			if ( array[i] > 0 && ( array[i] & 1 ) == 0 )
+			{
+				array[i] -= 2;
+				String c = String.valueOf( (char) ( i + 'a' ) ), half = current.substring( 0, current.length() / 2 );
+				updatePalindrome( c + current + c, array, i, list, size - 2 );
+				if ( half.length() > 0 )
+					updatePalindrome( half + c + c + new StringBuilder( half ).reverse().toString(), array, i + 1, list, size - 2 );
+				array[i] += 2;
+			}
+
+		}
+
 	}
 
 	public int getMoneyAmount( int n )
