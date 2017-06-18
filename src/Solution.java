@@ -41,12 +41,79 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] vals = {};
 
-		System.out.println( s.generatePalindromes( "baaaa" ) );
+		System.out.println( s.smallestFactorization( 8000000 ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int smallestFactorization( int a )
+	{
+		if ( a < 10 )
+			return a;
+		String m = "";
+		for ( int k = 9; k > 1; k-- )
+		{
+			while ( a % k == 0 )
+			{
+				m = "" + k + m;
+				a /= k;
+			}
+		}
+		if ( m.length() == 0 || a != 1 )
+			return 0;
+		long l = Long.valueOf( m );
+		return l > Integer.MAX_VALUE ? 0 : (int) l;
+	}
+
+	public int maxDistance( int[][] arrays )
+	{
+
+		Arrays.sort( arrays, ( a, b ) -> a[0] - b[0] );
+		int m1 = arrays[0][0], m2 = arrays[1][0];
+		Arrays.sort( arrays, ( a, b ) -> b[b.length - 1] - a[a.length - 1] );
+		if ( arrays[0][0] == m1 )
+			return Math.max( arrays[0][arrays[0].length - 1] - m2, arrays[1][arrays[1].length - 1] - m1 );
+		else
+			return arrays[0][arrays[0].length - 1] - m1;
+	}
+
+	public TreeNode addOneRow( TreeNode root, int v, int d )
+	{
+		// bfs level access desired nodes
+		if ( d == 1 )
+		{
+			TreeNode vNode = new TreeNode( v );
+			vNode.left = root;
+			return vNode;
+		}
+		Queue<TreeNode> queue = new LinkedList<>(), tQueue = new LinkedList<>();
+		queue.add( root );
+		int count = 1;
+		while ( count < d - 1 )
+		{
+			tQueue.clear();
+			while ( !queue.isEmpty() )
+			{
+				TreeNode m = queue.poll();
+				if ( m.left != null )
+					tQueue.add( m.left );
+				if ( m.right != null )
+					tQueue.add( m.right );
+			}
+			count++;
+			queue.addAll( tQueue );
+		}
+		while ( !queue.isEmpty() )
+		{
+			TreeNode t = queue.poll(), l = new TreeNode( v ), r = new TreeNode( v );
+			l.left = t.left;
+			r.right = t.right;
+			t.left = l;
+			t.right = r;
+		}
+		return root;
 	}
 
 	public int findIntegers( int num )
