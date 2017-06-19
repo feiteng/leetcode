@@ -48,6 +48,7 @@ public class Solution
 
 	}
 
+	// saturday night
 	public int smallestFactorization( int a )
 	{
 		if ( a < 10 )
