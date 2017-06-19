@@ -42,10 +42,186 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		System.out.println( s.smallestFactorization( 8000000 ) );
+		int[] nusm = { 3, 10, 5, 25, 2, 8 };
+
+		System.out.println( Arrays.toString( s.findRelativeRanks( nusm ) ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int shortestDistance( int[][] grid )
+	{
+		return 0;
+	}
+
+	public String[] findRelativeRanks( int[] nums )
+	{
+		int[] copy = new int[nums.length];
+		System.arraycopy( nums, 0, copy, 0, nums.length );
+		Arrays.sort( copy );
+		Map<Integer, String> map = new HashMap<>();
+		int k = 1;
+		for ( int i = copy.length - 1; i >= 0; i-- )
+		{
+			if ( k == 1 )
+				map.put( copy[i], "Gold Medal" );
+			if ( k == 2 )
+				map.put( copy[i], "Silver Medal" );
+			if ( k == 3 )
+				map.put( copy[i], "Bronze Medal" );
+			if ( k > 3 )
+				map.put( copy[i], String.valueOf( k ) );
+			k++;
+		}
+		String[] ranks = new String[nums.length];
+		for ( int i = 0; i < nums.length; i++ )
+			ranks[i] = map.get( nums[i] );
+		return ranks;
+
+	}
+
+	public int findMaximumXOR( int[] nums )
+	{
+		int max = 0, mask = 0;
+		for ( int i = 31; i >= 0; i-- )
+		{
+			mask |= 1 << i;
+			System.out.println( Integer.toBinaryString( mask ) );
+			Set<Integer> set = new HashSet<>();
+			for ( int k : nums )
+				set.add( k & mask ); // find nums on ith digit
+
+			int tmp = max | 1 << i;
+			for ( int k : set )
+			{
+				if ( set.contains( k ^ tmp ) )
+				{
+					max = tmp;
+					break;
+				}
+			}
+		}
+		return max;
+	}
+
+	public UndirectedGraphNode cloneGraph( UndirectedGraphNode node )
+	{
+		Map<UndirectedGraphNode, UndirectedGraphNode> oldNewMap = new HashMap<>(),
+				newOldMap = new HashMap<>();
+		UndirectedGraphNode clone = new UndirectedGraphNode( node.label );
+		oldNewMap.put( node, clone );
+		newOldMap.put( clone, node );
+		// bfs travel
+		return clone;
+	}
+
+	public int getMinimumDifference( TreeNode root )
+	{
+		List<Integer> list = new ArrayList<>();
+		preOrderGMD( root, list );
+		int minDiff = Integer.MAX_VALUE;
+		for ( int i = 0; i < list.size() - 1; i++ )
+			minDiff = Math.min( minDiff, Math.abs( list.get( i ) - list.get( i + 1 ) ) );
+		return minDiff;
+	}
+
+	void preOrderGMD( TreeNode node, List<Integer> list )
+	{
+		if ( node == null )
+			return;
+		preOrderGMD( node.left, list );
+		list.add( node.val );
+		preOrderGMD( node.left, list );
+
+	}
+
+	public boolean detectCapitalUse( String word )
+	{
+		String s1 = word.toUpperCase(), s2 = word.toLowerCase(),
+				s3 = String.valueOf( word.charAt( 0 ) ).toUpperCase() + word.substring( 1 ).toLowerCase();
+		return word.equals( s1 ) ? true : word.equals( s2 ) ? true : word.equals( s3 ) ? true : false;
+	}
+
+	public int findMaxConsecutiveOnes( int[] nums )
+	{
+		int p1 = -1, p2 = -1, max = 0;
+		for ( int i = 0; i < nums.length; i++ )
+		{
+			if ( nums[i] == 0 )
+			{
+				max = Math.max( i - p2 - 1, max );
+				p2 = p1;
+				p1 = i;
+
+			}
+		}
+		max = Math.max( nums.length - p2 - 1, max );
+		return max;
+	}
+
+	public int findMaxConsecutiveOnes_I( int[] nums )
+	{
+		int i = 0, j = 0, maxCount = 0;
+		while ( i < nums.length && j < nums.length )
+		{
+			while ( i < nums.length && nums[i] == 1 )
+				i++;
+			// now nums[i] !=1 or i = nums.len
+			maxCount = Math.max( maxCount, i - j );
+			j = i;
+			while ( j < nums.length && nums[j] != 1 )
+				j++;
+			// find next starting position of 1
+			i = j;
+		}
+		return Math.max( maxCount, j - i );
+	}
+
+	public int findNthDigit( int n )
+	{
+		if ( n < 10 )
+			return n;
+		long sum = 0, k = 1, t = 9, count = 0;
+		while ( sum + t * k < n )
+		{
+			sum += t * k;
+			t *= 10;
+			k++;
+			count = count * 10 + 9;
+		}
+
+		// now sum < n
+		long target = count + ( n - sum ) / k + ( ( n - sum ) % k > 0 ? 1 : 0 );
+		String nString = new StringBuilder( String.valueOf( target ) ).toString();
+		System.out.println( target );
+		if ( ( n - sum ) % k == 0 )
+			return (int) ( target % 10 );
+		return nString.charAt( (int) ( ( n - sum ) % k - 1 ) ) - '0';
+	}
+
+	public int leastInterval( char[] tasks, int n )
+	{
+		int time = 0;
+		int[] t = new int[26];
+		for ( char c : tasks )
+			t[c - 'A']++;
+		Arrays.sort( t );
+		while ( t[25] > 0 )
+		{
+			int counter = 0;
+			while ( counter <= n )
+			{
+				if ( t[25] == 0 )
+					break;
+				if ( counter < 26 && t[25 - counter] > 0 )
+					t[25 - counter]--;
+				time++;
+				counter++;
+			}
+			Arrays.sort( t );
+		}
+		return time;
 	}
 
 	// saturday night
@@ -381,33 +557,33 @@ public class Solution
 		return level;
 	}
 
-	// public int findIntegers( int num )
-	// {
-	// int[] counts = new int[32];
-	// counts[0] = 1;
-	// counts[1] = 2;
-	// int sum = 0;
-	//
-	// for ( int i = 2; i < 32; i++ )
-	// counts[i] = counts[i - 1] + counts[i - 2];
-	//
-	// boolean prev = false;
-	// String binRep = new StringBuilder( Integer.toBinaryString( num ) ).reverse().toString();
-	// for ( int i = binRep.length() - 1; i >= 0; i-- )
-	// {
-	// if ( binRep.charAt( i ) == '1' )
-	// sum += counts[i];
-	// if ( i < binRep.length() - 1 )
-	// {
-	// if ( binRep.charAt( i ) == '1' && binRep.charAt( i + 1 ) == '1' )
-	// {
-	// sum--;
-	// break;
-	// }
-	// }
-	// }
-	// return sum + 1;
-	// }
+	public int findIntegers( int num )
+	{
+		int[] counts = new int[32];
+		counts[0] = 1;
+		counts[1] = 2;
+		int sum = 0;
+
+		for ( int i = 2; i < 32; i++ )
+			counts[i] = counts[i - 1] + counts[i - 2];
+
+		boolean prev = false;
+		String binRep = new StringBuilder( Integer.toBinaryString( num ) ).reverse().toString();
+		for ( int i = binRep.length() - 1; i >= 0; i-- )
+		{
+			if ( binRep.charAt( i ) == '1' )
+				sum += counts[i];
+			if ( i < binRep.length() - 1 )
+			{
+				if ( binRep.charAt( i ) == '1' && binRep.charAt( i + 1 ) == '1' )
+				{
+					sum--;
+					break;
+				}
+			}
+		}
+		return sum + 1;
+	}
 
 	public List<String> generatePalindromes( String s )
 	{
@@ -4159,7 +4335,7 @@ public class Solution
 		return null;
 	}
 
-	public int findNthDigit( int n )
+	public int findNthDigit_I( int n )
 	{
 		int k = 1;
 		while ( n - (int) Math.pow( 10, k ) + (int) Math.pow( 10, k - 1 ) >= 0 )
@@ -4168,11 +4344,7 @@ public class Solution
 			k++;
 
 		}
-		// if ( n == 0 )
-		// {
-		// return (int) Math.pow( 10, k - 1 ) - 1;
-		// }
-		// else
+
 		{
 			n -= 1;
 			int num = (int) Math.pow( 10, k - 1 ) + n / k, res = n % k;
@@ -4184,11 +4356,12 @@ public class Solution
 	int findNthDigit_S( int n )
 	{
 		StringBuilder stringBuilder = new StringBuilder();
-		int i = 0;
+		int i = 1;
 		while ( stringBuilder.length() < n )
 			stringBuilder.append( String.valueOf( i++ ) );
 		System.out.println( stringBuilder.toString() );
-		return Integer.valueOf( String.valueOf( stringBuilder.charAt( stringBuilder.length() - 1 ) ) );
+		System.out.println( stringBuilder.toString().length() );
+		return Integer.valueOf( String.valueOf( stringBuilder.charAt( n - 1 ) ) );
 	}
 
 	public List<String> readBinaryWatch( int num )
@@ -4455,17 +4628,6 @@ public class Solution
 		}
 
 		return retList;
-	}
-
-	public UndirectedGraphNode cloneGraph( UndirectedGraphNode node )
-	{
-		Map<UndirectedGraphNode, UndirectedGraphNode> oldNewMap = new HashMap<>(),
-				newOldMap = new HashMap<>();
-		UndirectedGraphNode clone = new UndirectedGraphNode( node.label );
-		oldNewMap.put( node, clone );
-		newOldMap.put( clone, node );
-		// bfs travel
-		return clone;
 	}
 
 	public RandomListNode copyRandomList_( RandomListNode head )
