@@ -42,9 +42,9 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] nusm = { 3, 10, 5, 25, 2, 8 };
+		String num = "66";
 
-		System.out.println( Arrays.toString( s.findRelativeRanks( nusm ) ) );
+		System.out.println( ( s.reverseStr( "abcdefghijkl", 3 ) ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
@@ -53,6 +53,82 @@ public class Solution
 	public int shortestDistance( int[][] grid )
 	{
 		return 0;
+	}
+
+	public String reverseStr( String s, int k )
+	{
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while ( i < s.length() )
+		{
+			sb.append( reverseStrH( s.substring( i, Math.min( i + 2 * k, s.length() ) ), k ) );
+			i += 2 * k;
+		}
+		return sb.toString();
+	}
+
+	String reverseStrH( String string, int k )
+	{
+		if ( string.length() < k )
+			return new StringBuilder( string ).reverse().toString();
+		else
+			return new StringBuilder( string.substring( 0, k ) ).reverse().toString() + string.substring( k );
+	}
+
+	public int numWays( int n, int k ) // number too big, handle by python
+	{
+		long total = pow_NumWays( k, n );
+		for ( int i = n; i > 2; i-- )
+		{
+			total -= ( n == i ? 1 : n - i ) * ( k * pow_NumWays( k - 1, n - i ) );
+		}
+		return (int) total;
+	}
+
+	int choose( int n, int k )
+	{
+		if ( n == 0 )
+			return 1;
+		return n;
+	}
+
+	int factorial_NumWays( int k )
+	{
+		if ( k < 2 )
+			return 1;
+		int m = 1, p = 1;
+		while ( m <= k )
+			p *= m++;
+		return p;
+	}
+
+	long pow_NumWays( int b, int a )
+	{
+		long c = 1;
+		for ( int i = 0; i < a; i++ )
+			c *= b;
+		return c;
+	}
+
+	public boolean isStrobogrammatic( String num )
+	{
+		char[] vals = num.toCharArray();
+		int len = vals.length;
+		for ( char c : vals )
+			if ( c == '2' || c == '3' || c == '4' || c == '5' || c == '7' )
+				return false;
+		for ( int i = 0; i < len / 2; i++ )
+		{
+			if ( vals[i] == vals[len - 1 - i] && ( vals[i] != '6' && vals[i] != '9' ) ) // 0 1 8
+				continue;
+			else if ( ( vals[i] == '6' && vals[len - 1 - i] == '9' ) || ( vals[i] == '9' && vals[len - 1 - i] == '6' ) )
+				continue;
+			else
+				return false;
+		}
+		if ( len % 2 != 0 && ( vals[len / 2] == '6' || vals[len / 2] == '9' ) )
+			return false;
+		return true;
 	}
 
 	public String[] findRelativeRanks( int[] nums )
