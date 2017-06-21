@@ -42,9 +42,13 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String num = "66";
+		String[] st = { "ball", "asee", "let", "lep" };
 
-		System.out.println( ( s.reverseStr( "abcdefghijkl", 3 ) ) );
+		List<String> list = new ArrayList<>();
+		for ( String v : st )
+			list.add( v );
+
+		System.out.println( ( s.validWordSquare( list ) ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
@@ -52,7 +56,66 @@ public class Solution
 
 	public int shortestDistance( int[][] grid )
 	{
+
+		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public int diameterOfBinaryTree( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+
+		return Math.max( Math.max( diameterOfBinaryTree( root.left ), diameterOfBinaryTree( root.right ) ),
+				1 + depthDOBT( root.left ) + depthDOBT( root.right ) );
+
+	}
+
+	int depthDOBT( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+		return 1 + Math.max( depthDOBT( root.left ), depthDOBT( root.right ) );
+	}
+
+	public boolean validWordSquare( List<String> words )
+	{
+		String[] matrix = new String[words.size()];
+		int k = 0;
+		for ( String word : words )
+			matrix[k++] = word;
+		int[][] dirs = { { +1, -1 }, { -1, +1 } };
+		for ( int i = 0; i < matrix.length; i++ )
+		{
+			int d = 0;
+			while ( true )
+			{
+				int li = d, lj = -d, ri = -li, rj = -lj;
+				if ( i + li >= matrix.length || i + ri < 0 || i + lj >= matrix.length || i + rj < 0 || matrix[i].length() <= i )
+					break;
+				if ( matrix[i + li].charAt( i + lj ) != matrix[i + ri].charAt( i + rj ) )
+					return false;
+				d++;
+			}
+		}
+
+		return true;
+	}
+
+	public int numWays( int n, int k ) // number too big, handle by python
+	{
+		if ( n == 0 )
+			return 0;
+		if ( n == 1 )
+			return k;
+		int same = k, diff = k * ( k - 1 );
+		for ( int i = 2; i < n; i++ )
+		{
+			int t = diff;
+			diff = ( same + diff ) * ( k - 1 );
+			same = t;
+		}
+		return diff + same;
 	}
 
 	public String reverseStr( String s, int k )
@@ -73,41 +136,6 @@ public class Solution
 			return new StringBuilder( string ).reverse().toString();
 		else
 			return new StringBuilder( string.substring( 0, k ) ).reverse().toString() + string.substring( k );
-	}
-
-	public int numWays( int n, int k ) // number too big, handle by python
-	{
-		long total = pow_NumWays( k, n );
-		for ( int i = n; i > 2; i-- )
-		{
-			total -= ( n == i ? 1 : n - i ) * ( k * pow_NumWays( k - 1, n - i ) );
-		}
-		return (int) total;
-	}
-
-	int choose( int n, int k )
-	{
-		if ( n == 0 )
-			return 1;
-		return n;
-	}
-
-	int factorial_NumWays( int k )
-	{
-		if ( k < 2 )
-			return 1;
-		int m = 1, p = 1;
-		while ( m <= k )
-			p *= m++;
-		return p;
-	}
-
-	long pow_NumWays( int b, int a )
-	{
-		long c = 1;
-		for ( int i = 0; i < a; i++ )
-			c *= b;
-		return c;
 	}
 
 	public boolean isStrobogrammatic( String num )
