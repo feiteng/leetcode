@@ -42,14 +42,12 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String[] st = { "ball", "asee", "let", "lep" };
+		String[] st = { "4", "-7", "-3", "null", "null", "-9", "-3", "9", "-7", "-4", "null", "6", "null", "-6", "-6", "null", "null", "0", "6", "5",
+				"null", "9", "null", "null", "-1", "-4", "null", "null", "null", "-2" };
 
-		List<String> list = new ArrayList<>();
-		for ( String v : st )
-			list.add( v );
+		TreeNode t = new TreeNode( st );
 
-		System.out.println( ( s.validWordSquare( list ) ) );
-
+		System.out.println( s.repeatedSubstringPattern( "abac" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -61,21 +59,64 @@ public class Solution
 		return 0;
 	}
 
+	public boolean repeatedSubstringPattern( String s )
+	{
+		for ( int i = 1; i <= s.length() / 2; i++ )
+		{
+			if ( s.length() % i != 0 )
+				continue;
+			if ( RSPHelper( s, i ) )
+				return true;
+		}
+		return false;
+	}
+
+	boolean RSPHelper( String s, int k )
+	{
+		int m = s.length() / k;
+		char[] c = s.substring( k ).toCharArray();
+
+		for ( int j = 0; j < k; j++ )
+		{
+			for ( int i = 1; i < m; i++ )
+			{
+				if ( s.charAt( j + i * k ) != c[j] )
+					return false;
+			}
+		}
+		return true;
+	}
+
 	public int diameterOfBinaryTree( TreeNode root )
 	{
-		if ( root == null )
-			return 0;
-
-		return Math.max( Math.max( diameterOfBinaryTree( root.left ), diameterOfBinaryTree( root.right ) ),
-				1 + depthDOBT( root.left ) + depthDOBT( root.right ) );
+		DOBTHelper( root );
+		return DOBTLen - 1;
 
 	}
+
+	int DOBTHelper( TreeNode root )
+	{
+
+		if ( root == null )
+			return 0;
+		int l = depthDOBT( root.left ), r = depthDOBT( root.right );
+		DOBTLen = Math.max( DOBTLen, 1 + l + r );
+		DOBTLen = Math.max( DOBTLen, DOBTHelper( root.left ) );
+		DOBTLen = Math.max( DOBTLen, DOBTHelper( root.right ) );
+		return DOBTLen;
+	}
+
+	int DOBTLen = 0;
+	Map<TreeNode, Integer> map = new HashMap<>();
 
 	int depthDOBT( TreeNode root )
 	{
 		if ( root == null )
 			return 0;
-		return 1 + Math.max( depthDOBT( root.left ), depthDOBT( root.right ) );
+		if ( map.containsKey( root ) )
+			return map.get( root );
+		map.put( root, 1 + Math.max( depthDOBT( root.left ), depthDOBT( root.right ) ) );
+		return map.get( root );
 	}
 
 	public boolean validWordSquare( List<String> words )
