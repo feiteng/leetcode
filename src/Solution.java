@@ -42,12 +42,11 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String[] st = { "4", "-7", "-3", "null", "null", "-9", "-3", "9", "-7", "-4", "null", "6", "null", "-6", "-6", "null", "null", "0", "6", "5",
-				"null", "9", "null", "null", "-1", "-4", "null", "null", "null", "-2" };
+		String[] st = { "2", "1", "2" };
 
 		TreeNode t = new TreeNode( st );
 
-		System.out.println( s.repeatedSubstringPattern( "abac" ) );
+		System.out.println( Arrays.toString( s.findMode( t ) ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -57,6 +56,58 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public int[] findMode( TreeNode root )
+	{
+		// pass 1 in order traversal to find max occurance
+		// pass 2 find value with same occurance
+		if ( root == null )
+			return new int[] {};
+		List<Integer> list = new ArrayList<>(), list2 = new ArrayList<>();
+		findModeInOrder( root, list );
+		int tmp = 1, total = 0;
+		for ( int i = 0; i < list.size() - 1; i++ )
+		{
+			if ( list.get( i ) == list.get( i + 1 ) )
+				tmp++;
+			else
+			{
+				total = Math.max( total, tmp );
+				tmp = 1;
+			}
+		}
+		System.out.println( list );
+		total = Math.max( total, tmp );
+		tmp = 1;
+		for ( int i = 0; i < list.size() - 1; i++ )
+		{
+			if ( list.get( i ) == list.get( i + 1 ) )
+				tmp++;
+			else if ( tmp == total )
+			{
+				list2.add( list.get( i ) );
+				tmp = 1;
+			}
+		}
+		if ( total == 1 )
+			list2.add( list.get( list.size() - 1 ) );
+
+		int[] m = new int[list2.size()];
+		int v = 0;
+		for ( int l : list2 )
+			m[v++] = l;
+		return m;
+
+	}
+
+	void findModeInOrder( TreeNode root, List<Integer> list )
+	{
+		if ( root == null )
+			return;
+		findModeInOrder( root.left, list );
+		list.add( root.val );
+		findModeInOrder( root.right, list );
 	}
 
 	public boolean repeatedSubstringPattern( String s )
@@ -74,17 +125,12 @@ public class Solution
 	boolean RSPHelper( String s, int k )
 	{
 		int m = s.length() / k;
-		char[] c = s.substring( k ).toCharArray();
+		String sub = s.substring( 0, k );
+		StringBuilder sb = new StringBuilder();
+		while ( sb.length() < s.length() )
+			sb.append( sub );
 
-		for ( int j = 0; j < k; j++ )
-		{
-			for ( int i = 1; i < m; i++ )
-			{
-				if ( s.charAt( j + i * k ) != c[j] )
-					return false;
-			}
-		}
-		return true;
+		return sb.toString().equals( s );
 	}
 
 	public int diameterOfBinaryTree( TreeNode root )
