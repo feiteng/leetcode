@@ -42,11 +42,8 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String[] st = { "2", "1", "2" };
-
-		TreeNode t = new TreeNode( st );
-
-		System.out.println( Arrays.toString( s.findMode( t ) ) );
+		int[][] t = { { 0, 0 }, { 1, 0 }, { 2, 0 } };
+		System.out.println( s.numberOfBoomerangs( t ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -58,55 +55,77 @@ public class Solution
 		return 0;
 	}
 
+	public int numberOfBoomerangs( int[][] points )
+	{
+		int total = 0;
+		for ( int i = 0; i < points.length; i++ )
+		{
+			Map<Integer, Integer> maps = new HashMap<>();
+			for ( int j = 0; j < points.length; j++ )
+			{
+				int dist = NOBdistance( points[i], points[j] );
+				if ( !maps.containsKey( dist ) )
+					maps.put( dist, 0 );
+				maps.put( dist, maps.get( dist ) + 1 );
+			}
+			for ( int d : maps.keySet() )
+			{
+				int v = maps.get( d );
+				total += v * ( v - 1 );
+			}
+		}
+
+		return total;
+	}
+
+	int NOBdistance( int[] p1, int[] p2 )
+	{
+		int x = p1[0] - p2[0], y = p1[1] - p2[1];
+		return x * x + y * y;
+	}
+
 	public int[] findMode( TreeNode root )
 	{
 		// pass 1 in order traversal to find max occurance
 		// pass 2 find value with same occurance
 		if ( root == null )
 			return new int[] {};
-		List<Integer> list = new ArrayList<>(), list2 = new ArrayList<>();
+		lstVist = null;
+		List<Integer> list = new ArrayList<>();
 		findModeInOrder( root, list );
-		int tmp = 1, total = 0;
-		for ( int i = 0; i < list.size() - 1; i++ )
-		{
-			if ( list.get( i ) == list.get( i + 1 ) )
-				tmp++;
-			else
-			{
-				total = Math.max( total, tmp );
-				tmp = 1;
-			}
-		}
-		System.out.println( list );
-		total = Math.max( total, tmp );
-		tmp = 1;
-		for ( int i = 0; i < list.size() - 1; i++ )
-		{
-			if ( list.get( i ) == list.get( i + 1 ) )
-				tmp++;
-			else if ( tmp == total )
-			{
-				list2.add( list.get( i ) );
-				tmp = 1;
-			}
-		}
-		if ( total == 1 )
-			list2.add( list.get( list.size() - 1 ) );
 
-		int[] m = new int[list2.size()];
 		int v = 0;
-		for ( int l : list2 )
+		int[] m = new int[list.size()];
+		for ( int l : list )
 			m[v++] = l;
 		return m;
 
 	}
+
+	Integer lstVist = null;
+	int curMax = 1, tMax = 0;
 
 	void findModeInOrder( TreeNode root, List<Integer> list )
 	{
 		if ( root == null )
 			return;
 		findModeInOrder( root.left, list );
-		list.add( root.val );
+		// visit root -> what to do?
+		if ( lstVist != null )
+		{
+			if ( lstVist == root.val )
+				curMax++;
+			if ( tMax == curMax )
+				list.add( lstVist );
+			if ( tMax < curMax )
+			{
+				list.clear();
+				list.add( lstVist );
+				curMax = 1;
+			}
+
+		}
+		lstVist = root.val;
 		findModeInOrder( root.right, list );
 	}
 
