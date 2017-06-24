@@ -42,8 +42,8 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t = { { 0, 0 }, { 1, 0 }, { 2, 0 } };
-		System.out.println( s.numberOfBoomerangs( t ) );
+		int[] t = { 2, 107, 109, 113, 127, 131, 137, 3, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 47, 53 };
+		System.out.println( s.findTargetSumWays( t, 6 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -53,6 +53,28 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public int findTargetSumWays( int[] nums, int S )
+	{
+		fTShelper( nums, S, 0, 0 );
+		return findTargetSumWays_Int;
+	}
+
+	int findTargetSumWays_Int = 0;
+
+	void fTShelper( int[] nums, int target, int sum, int pos )
+	{
+		if ( pos == nums.length && sum == target )
+		{
+			findTargetSumWays_Int++;
+			return;
+		}
+		if ( pos >= nums.length )
+			return;
+		fTShelper( nums, target, sum + nums[pos], pos + 1 );
+		fTShelper( nums, target, sum - nums[pos], pos + 1 );
+
 	}
 
 	public int numberOfBoomerangs( int[][] points )
