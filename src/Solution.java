@@ -42,8 +42,12 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] t = { 2, 107, 109, 113, 127, 131, 137, 3, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 47, 53 };
-		System.out.println( s.findTargetSumWays( t, 6 ) );
+		int[][] t =
+
+		{
+				{ 100, 200 }
+		};
+		System.out.println( s.scheduleCourse( t ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -55,13 +59,62 @@ public class Solution
 		return 0;
 	}
 
+	public int scheduleCourse( int[][] courses )
+	{
+		boolean[] visited = new boolean[courses.length];
+		scheduleCourseHelper( courses, 0, visited, 0 );
+		return scheduleCourse_Int;
+	}
+
+	int scheduleCourse_Int = 0;
+
+	void scheduleCourseHelper( int[][] courses, int currentTime, boolean[] visited, int count )
+	{
+
+	}
+
+	public int maximumProduct( int[] nums )
+	{
+		Arrays.sort( nums );
+		// if all positive pick biggest three
+		// else
+		// pick biggest neg2 and biggest pos 1 or pos 1-3
+		int neg = nums[0] * nums[1], len = nums.length, pos = nums[len - 2] * nums[len - 3];
+		int biggest = nums[len - 1];
+		return neg > pos ? neg * biggest : pos * biggest;
+
+	}
+
 	public int findTargetSumWays( int[] nums, int S )
 	{
-		fTShelper( nums, S, 0, 0 );
+		int target = 0;
+		for ( int n : nums )
+			target += n;
+		target += S;
+		if ( target % 2 != 0 )
+			return 0;
+		fTShelperII( nums, target / 2, 0, 0 );
 		return findTargetSumWays_Int;
 	}
 
 	int findTargetSumWays_Int = 0;
+
+	void fTShelperII( int[] nums, int target, int sum, int pos )
+	{
+		if ( sum > target || pos > nums.length )
+			return;
+		if ( sum == target )
+		{
+			findTargetSumWays_Int++;
+		}
+		// find combinations of nums equal to target
+		for ( int i = pos; i < nums.length; i++ )
+		{
+			sum += nums[i];
+			fTShelperII( nums, target, sum, i + 1 );
+			sum -= nums[i];
+		}
+	}
 
 	void fTShelper( int[] nums, int target, int sum, int pos )
 	{
