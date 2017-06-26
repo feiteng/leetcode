@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Scanner;
@@ -42,11 +43,7 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t =
-
-		{
-				{ 100, 200 }
-		};
+		int[][] t = { { 7, 16 }, { 2, 3 }, { 3, 12 }, { 3, 14 }, { 10, 19 }, { 10, 16 }, { 6, 8 }, { 6, 11 }, { 3, 13 }, { 6, 16 } };
 		System.out.println( s.scheduleCourse( t ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
@@ -61,16 +58,21 @@ public class Solution
 
 	public int scheduleCourse( int[][] courses )
 	{
-		boolean[] visited = new boolean[courses.length];
-		scheduleCourseHelper( courses, 0, visited, 0 );
-		return scheduleCourse_Int;
-	}
+		Arrays.sort( courses, ( a, b ) -> a[1] != b[1] ? a[1] - b[1] : a[0] - b[0] );
+		PriorityQueue<Integer> pQueue = new PriorityQueue<>( ( a, b ) -> b - a );
+		int curTime = 0;
+		for ( int i = 0; i < courses.length; i++ )
+		{
+			curTime += courses[i][0];
 
-	int scheduleCourse_Int = 0;
+			pQueue.add( courses[i][0] );
 
-	void scheduleCourseHelper( int[][] courses, int currentTime, boolean[] visited, int count )
-	{
+			if ( curTime > courses[i][1] )
 
+				curTime -= pQueue.poll();
+
+		}
+		return pQueue.size();
 	}
 
 	public int maximumProduct( int[] nums )
