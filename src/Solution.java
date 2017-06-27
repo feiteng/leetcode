@@ -44,7 +44,7 @@ public class Solution
 		time = System.currentTimeMillis();
 
 		int[][] t = { { 7, 16 }, { 2, 3 }, { 3, 12 }, { 3, 14 }, { 10, 19 }, { 10, 16 }, { 6, 8 }, { 6, 11 }, { 3, 13 }, { 6, 16 } };
-		System.out.println( s.scheduleCourse( t ) );
+		System.out.println( s.magicalString( 7 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -54,6 +54,34 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public int magicalString( int n )
+	{
+		if ( n < 1 )
+			return 0;
+		int[] vals = new int[n];
+		vals[0] = 1;
+		vals[1] = 2;
+		vals[2] = 2;
+		int last = 2, one = 1, count = 2;
+		for ( int i = 2; i < vals.length; i++ )
+		{
+
+		}
+		Queue<Integer> queue = new LinkedList<>();
+		queue.add( 2 );
+
+		while ( count < n )
+		{
+			int val = queue.poll(), next = last == 1 ? 2 : 1;
+			one += val == 1 ? 1 : 0;
+			last = next;
+			count++;
+			while ( val-- > 0 )
+				queue.add( next );
+		}
+		return one;
 	}
 
 	public int scheduleCourse( int[][] courses )
