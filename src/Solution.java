@@ -43,8 +43,8 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t = { { 7, 16 }, { 2, 3 }, { 3, 12 }, { 3, 14 }, { 10, 19 }, { 10, 16 }, { 6, 8 }, { 6, 11 }, { 3, 13 }, { 6, 16 } };
-		System.out.println( s.magicalString( 7 ) );
+		int[][] t = { { 0, 1 }, { 3, 2 }, { 1, 2 } };
+		System.out.println( s.countComponents( 5, t ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -56,31 +56,77 @@ public class Solution
 		return 0;
 	}
 
+	public List<Integer> numIslands2( int m, int n, int[][] positions )
+	{
+
+	}
+
+	public int countComponents( int n, int[][] edges )
+	{
+		Map<Integer, Set<Integer>> map = new HashMap<>();
+		for ( int i = 0; i < edges.length; i++ )
+		{
+			if ( !map.containsKey( edges[i][0] ) )
+				map.put( edges[i][0], new HashSet<>() );
+			if ( !map.containsKey( edges[i][1] ) )
+				map.put( edges[i][1], new HashSet<>() );
+			map.get( edges[i][0] ).add( edges[i][1] );
+			map.get( edges[i][1] ).add( edges[i][0] );
+		}
+		boolean[] visit = new boolean[n];
+		Arrays.fill( visit, true );
+		int count = 0;
+		for ( int i = 0; i < n; i++ )
+		{
+			if ( visit[i] && map.containsKey( i ) )
+			{
+				// dfs visit
+				countComponentsVisit( visit, map, i );
+				count++;
+			}
+		}
+		for ( boolean k : visit )
+			if ( k )
+				count++;
+		return count;
+	}
+
+	void countComponentsVisit( boolean[] visit, Map<Integer, Set<Integer>> map, int pos )
+	{
+		System.out.println( pos );
+		for ( int next : map.get( pos ) )
+		{
+			if ( !visit[next] )
+				continue;
+			visit[next] = false;
+			countComponentsVisit( visit, map, next );
+		}
+	}
+
 	public int magicalString( int n )
 	{
 		if ( n < 1 )
 			return 0;
+		if ( n < 3 )
+			return 1;
 		int[] vals = new int[n];
 		vals[0] = 1;
 		vals[1] = 2;
 		vals[2] = 2;
-		int last = 2, one = 1, count = 2;
+		int last = 2, one = 1, count = 2, j = 3;
 		for ( int i = 2; i < vals.length; i++ )
 		{
+			int k = vals[i];
+			last ^= 3;
+			one += k == 1 ? 1 : 0;
+			while ( k-- > 0 )
+			{
+				if ( j < vals.length )
+					vals[j++] = last;
+			}
 
 		}
-		Queue<Integer> queue = new LinkedList<>();
-		queue.add( 2 );
 
-		while ( count < n )
-		{
-			int val = queue.poll(), next = last == 1 ? 2 : 1;
-			one += val == 1 ? 1 : 0;
-			last = next;
-			count++;
-			while ( val-- > 0 )
-				queue.add( next );
-		}
 		return one;
 	}
 
