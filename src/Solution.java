@@ -58,7 +58,37 @@ public class Solution
 
 	public List<Integer> numIslands2( int m, int n, int[][] positions )
 	{
+		List<Integer> list = new ArrayList<>();
+		Map<int[], Set<int[]>> map = new HashMap<>();
+		for ( int i = 0; i < m; i++ )
+			for ( int j = 0; j < n; j++ )
+				map.put( new int[] { i, j }, new HashSet<>() );
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
 
+		for ( int[] p : positions )
+		{
+			boolean found = false;
+			for ( int[] d : dirs )
+			{
+				int ni = p[0] + d[0], nj = p[1] + d[1];
+				if ( ni < 0 || nj < 0 || ni >= m || nj >= n )
+					continue;
+				found = true;
+				int[] nij = new int[] { ni, nj };
+				if ( map.containsKey( nij ) )
+				{
+					map.get( nij ).add( new int[] { p[0], p[1] } );
+					map.get( new int[] { p[0], p[1] } ).add( nij );
+				}
+			}
+			if ( !found )
+			{
+
+			}
+
+		}
+
+		return list;
 	}
 
 	public int countComponents( int n, int[][] edges )
