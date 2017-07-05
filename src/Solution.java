@@ -91,6 +91,22 @@ public class Solution
 		return list;
 	}
 
+	public boolean judgeSquareSum( int c )
+	{
+		int sqrc = (int) Math.sqrt( c );
+		int l = 0, r = sqrc;
+		while ( l < r )
+		{
+			if ( l * l + r * r == c )
+				return true;
+			if ( l * l + r * r < c )
+				l++;
+			else
+				r--;
+		}
+		return false;
+	}
+
 	public int countComponents( int n, int[][] edges )
 	{
 		Map<Integer, Set<Integer>> map = new HashMap<>();
