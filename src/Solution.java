@@ -44,7 +44,7 @@ public class Solution
 		time = System.currentTimeMillis();
 
 		int[][] t = { { 0, 1 }, { 3, 2 }, { 1, 2 } };
-		System.out.println( s.countComponents( 5, t ) );
+		System.out.println( s.isOneEditDistance( "", "a" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -89,6 +89,78 @@ public class Solution
 		}
 
 		return list;
+	}
+
+	public boolean isOneEditDistance( String s, String t )
+	{
+		int k = 0;
+		if ( s.length() == t.length() )
+		{
+			for ( int i = 0; i < t.length(); i++ )
+				if ( s.charAt( i ) != t.charAt( i ) )
+					k++;
+			return k == 1;
+		}
+		if ( Math.abs( s.length() - t.length() ) > 1 )
+			return false;
+		// different distance
+		if ( s.length() < t.length() )
+			return isOED( s, t );
+		return isOED( t, s );
+	}
+
+	boolean isOED( String s, String t )
+	{
+		// s length < t length
+		for ( int i = 0; i < s.length(); i++ )
+		{
+			if ( s.charAt( i ) != t.charAt( i ) )
+				return s.substring( i ).equals( t.substring( i + 1 ) );
+		}
+		return false;
+	}
+
+	public int minDistance( String word1, String word2 )
+	{
+		int m = word1.length(), n = word2.length();
+		if ( m == 0 || n == 0 )
+			return 0;
+		int[][] c = new int[m + 1][n + 1];
+		for ( int i = 0; i < m + 1; i++ )
+			c[i][0] = i;
+		for ( int i = 0; i < n + 1; i++ )
+			c[0][i] = i;
+		for ( int i = 0; i < m; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+			{
+				if ( word1.charAt( i ) == word2.charAt( j ) )
+					c[i + 1][j + 1] = c[i][j];
+				else
+				{
+
+					c[i + 1][j + 1] = Math.min( 1 + Math.min( c[i][j + 1], c[i + 1][j] ), 2 + c[i][j] );
+				}
+			}
+		}
+		// for ( int[] k : c )
+		// System.out.println( Arrays.toString( k ) );
+		return c[m][n];
+	}
+
+	public int findDerangement( int n )
+	{
+		if ( n < 2 )
+			return 0;
+		long k = 1, j = 1, sum = n % 2 == 0 ? 1 : -1;
+		for ( int i = n - 1; i >= 2; i-- )
+		{
+			k *= ( i + 1 );
+			k %= 1000000007;
+			sum += ( i % 2 == 0 ? 1 : -1 ) * k;
+			sum %= 1000000007;
+		}
+		return (int) sum;
 	}
 
 	public boolean judgeSquareSum( int c )
