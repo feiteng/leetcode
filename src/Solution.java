@@ -44,7 +44,7 @@ public class Solution
 		time = System.currentTimeMillis();
 
 		int[][] t = { { 0, 1 }, { 3, 2 }, { 1, 2 } };
-		System.out.println( s.isOneEditDistance( "", "a" ) );
+		System.out.println( s.findDerangement( 31 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -89,6 +89,50 @@ public class Solution
 		}
 
 		return list;
+	}
+
+	public List<int[]> pacificAtlantic( int[][] matrix )
+	{
+		int m = matrix.length, n = matrix[0].length;
+		int[][] connects = new int[m][n];
+		connects[m - 1][0] = connects[0][n - 1] = 3;
+		connects[0][0] = 1;
+		connects[m - 1][n - 1] = 2;
+		for ( int i = 1; i < m; i++ )
+		{
+			connects[i][n - 1] = matrix[i][n - 1] >= matrix[i - 1][n - 1] ? connects[i - 1][n - 1] : 2;
+		}
+		for ( int i = m - 2; i >= 0; i-- )
+		{
+			connects[i][0] = matrix[i][0] >= matrix[i + 1][0] ? connects[i + 1][0] : 1;
+		}
+		for ( int j = 1; j < n; j++ )
+			connects[m - 1][j] = matrix[m - 1][j - 1] >= matrix[m - 1][j] ? connects[m - 1][j - 1] : 2;
+		for ( int j = n - 2; j >= 0; j-- )
+			connects[0][j] = matrix[0][j + 1] >= matrix[0][j] ? connects[0][j] : 1;
+
+		for ( int j = 0; j < n; j++ )
+		{
+			connects[0][j] = 1;
+			connects[m - 1][j] = 2;
+		}
+
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		// fill 1's, only look at up and left
+		for ( int i = 1; i < m; i++ )
+		{
+			for ( int j = 1; j < n; j++ )
+			{
+				if ( matrix[i][j] >= matrix[i - 1][j] || matrix[i][j] >= matrix[i][j - 1] )
+				{
+					connects[i][j] = Math.max( connects[i - 1][j], connects[i][j - 1] );
+				}
+			}
+		}
+		// now fill 2's
+		List<int[]> list = new ArrayList<>();
+		return list;
+
 	}
 
 	public boolean isOneEditDistance( String s, String t )
@@ -152,15 +196,14 @@ public class Solution
 	{
 		if ( n < 2 )
 			return 0;
-		long k = 1, j = 1, sum = n % 2 == 0 ? 1 : -1;
-		for ( int i = n - 1; i >= 2; i-- )
+		long a = 0, b = 1, c = 0;
+		for ( int i = 3; i <= n; i++ )
 		{
-			k *= ( i + 1 );
-			k %= 1000000007;
-			sum += ( i % 2 == 0 ? 1 : -1 ) * k;
-			sum %= 1000000007;
+			c = ( i - 1 ) * ( b + a ) % 1000000007;
+			a = b;
+			b = c;
 		}
-		return (int) sum;
+		return (int) c;
 	}
 
 	public boolean judgeSquareSum( int c )
