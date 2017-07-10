@@ -93,46 +93,90 @@ public class Solution
 
 	public List<int[]> pacificAtlantic( int[][] matrix )
 	{
+		if ( matrix == null || matrix.length == 0 || matrix[0].length == 0 )
+			return new ArrayList<>();
 		int m = matrix.length, n = matrix[0].length;
-		int[][] connects = new int[m][n];
-		connects[m - 1][0] = connects[0][n - 1] = 3;
-		connects[0][0] = 1;
-		connects[m - 1][n - 1] = 2;
-		for ( int i = 1; i < m; i++ )
-		{
-			connects[i][n - 1] = matrix[i][n - 1] >= matrix[i - 1][n - 1] ? connects[i - 1][n - 1] : 2;
-		}
-		for ( int i = m - 2; i >= 0; i-- )
-		{
-			connects[i][0] = matrix[i][0] >= matrix[i + 1][0] ? connects[i + 1][0] : 1;
-		}
-		for ( int j = 1; j < n; j++ )
-			connects[m - 1][j] = matrix[m - 1][j - 1] >= matrix[m - 1][j] ? connects[m - 1][j - 1] : 2;
-		for ( int j = n - 2; j >= 0; j-- )
-			connects[0][j] = matrix[0][j + 1] >= matrix[0][j] ? connects[0][j] : 1;
-
-		for ( int j = 0; j < n; j++ )
-		{
-			connects[0][j] = 1;
-			connects[m - 1][j] = 2;
-		}
 
 		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
-		// fill 1's, only look at up and left
-		for ( int i = 1; i < m; i++ )
+
+		boolean[][] pacific = new boolean[m][n], atlantic = new boolean[m][n];
+		Queue<int[]> qP = new LinkedList<>(), qA = new LinkedList<>();
+
+		for ( int i = 0; i < m; i++ )
 		{
-			for ( int j = 1; j < n; j++ )
+			qP.add( new int[] { i, 0 } );
+			qA.add( new int[] { i, n - 1 } );
+		}
+		for ( int j = 0; j < n; j++ )
+		{
+			qP.add( new int[] { 0, j } );
+			qA.add( new int[] { j, m - 1 } );
+		}
+
+		List<int[]> list = new ArrayList<>();
+		int[][] flow = new int[m][n];
+		flow[m - 1][0] = flow[0][n - 1] = 3;
+		for ( int i = 0; i < m; i++ )
+
+		{
+
+		}
+
+		boolean[][] visit = new boolean[m][n];
+
+		Queue<int[]> queue = new LinkedList<>(), tQueue = new LinkedList<>();
+		queue.add( new int[] { m - 1, 0 } );
+		queue.add( new int[] { 0, n - 1 } );
+		while ( !queue.isEmpty() )
+		{
+			tQueue.clear();
+			while ( !queue.isEmpty() )
 			{
-				if ( matrix[i][j] >= matrix[i - 1][j] || matrix[i][j] >= matrix[i][j - 1] )
+				int[] p = queue.poll();
+				list.add( p );
+				visit[p[0]][p[1]] = true;
+				for ( int[] d : dirs )
 				{
-					connects[i][j] = Math.max( connects[i - 1][j], connects[i][j - 1] );
+					int ni = p[0] + d[0], nj = p[1] + d[1];
+					if ( ni < 0 || nj < 0 || ni >= m || nj >= n || visit[ni][nj] )
+						continue;
+					if ( matrix[ni][nj] >= matrix[p[0]][p[1]] )
+						tQueue.add( new int[] { ni, nj } );
+				}
+
+			}
+			queue.addAll( tQueue );
+		}
+		return list;
+	}
+
+	public boolean wordBreak( String s, List<String> wordDict )
+	{
+		Set<String> set = new HashSet<>( wordDict );
+		return wordBreakHelper( s, set );
+	}
+
+	boolean wordBreakHelper( String s, Set<String> set )
+	{
+		boolean[] vist = new boolean[s.length() + 1];
+		for ( String string : set )
+		{
+			if ( string.length() <= s.length() && set.contains( s.substring( 0, string.length() ) ) )
+				vist[string.length()] = true;
+		}
+		for ( int i = 0; i < vist.length; i++ )
+		{
+			if ( vist[i] )
+			{
+				for ( String string : set )
+				{
+					if ( i + string.length() <= s.length() &&
+							s.substring( i, i + string.length() ).equals( string ) )
+						vist[i + string.length()] = true;
 				}
 			}
 		}
-		// now fill 2's
-		List<int[]> list = new ArrayList<>();
-		return list;
-
+		return vist[s.length()];
 	}
 
 	public boolean isOneEditDistance( String s, String t )
