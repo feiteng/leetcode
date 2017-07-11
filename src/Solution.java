@@ -43,8 +43,10 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t = { { 0, 1 }, { 3, 2 }, { 1, 2 } };
-		System.out.println( s.findDerangement( 31 ) );
+		int[][] t = { { 1, 2, 2, 3, 5 }, { 3, 2, 3, 4, 4 }, { 2, 4, 5, 3, 1 }, { 6, 7, 1, 4, 5 }, { 5, 1, 1, 2, 4 } };
+		String string = "catsanddog";
+		String[] strings = { "cat", "cats", "and", "sand", "dog" };
+		System.out.println( s.wordBreak( string, new ArrayList<>( Arrays.asList( strings ) ) ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -91,16 +93,43 @@ public class Solution
 		return list;
 	}
 
+	public List<String> wordBreak( String s, List<String> wordDict )
+	{
+		if ( !wordBreak1( s, wordDict ) )
+			return new ArrayList<>();
+		for ( String string : wordDict )
+			if ( string.length() <= s.length() && s.substring( 0, string.length() ).equals( string ) )
+				dfsWordBreak( s, wordDict, string.length(), new ArrayList<>( Arrays.asList( new String[] { string } ) ) );
+
+		return wordBreakList;
+	}
+
+	List<String> wordBreakList = new ArrayList<>();
+
+	void dfsWordBreak( String s, List<String> wordDict, int pos, List<String> padd )
+	{
+		if ( pos == s.length() )
+			wordBreakList.add( String.join( " ", new ArrayList<>( padd ) ) );
+		for ( String string : wordDict )
+		{
+			if ( pos + string.length() <= s.length() && s.substring( pos, pos + string.length() ).equals( string ) )
+			{
+				padd.add( string );
+				dfsWordBreak( s, wordDict, pos + string.length(), padd );
+				padd.remove( padd.size() - 1 );
+			}
+		}
+	}
+
 	public List<int[]> pacificAtlantic( int[][] matrix )
 	{
 		if ( matrix == null || matrix.length == 0 || matrix[0].length == 0 )
 			return new ArrayList<>();
 		int m = matrix.length, n = matrix[0].length;
 
-		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
-
 		boolean[][] pacific = new boolean[m][n], atlantic = new boolean[m][n];
 		Queue<int[]> qP = new LinkedList<>(), qA = new LinkedList<>();
+		List<int[]> list = new ArrayList<>();
 
 		for ( int i = 0; i < m; i++ )
 		{
@@ -110,53 +139,44 @@ public class Solution
 		for ( int j = 0; j < n; j++ )
 		{
 			qP.add( new int[] { 0, j } );
-			qA.add( new int[] { j, m - 1 } );
+			qA.add( new int[] { m - 1, j } );
 		}
-
-		List<int[]> list = new ArrayList<>();
-		int[][] flow = new int[m][n];
-		flow[m - 1][0] = flow[0][n - 1] = 3;
+		for ( int[] p : qP )
+			dfsVisit( matrix, pacific, p );
+		for ( int[] p : qA )
+			dfsVisit( matrix, atlantic, p );
 		for ( int i = 0; i < m; i++ )
-
 		{
-
-		}
-
-		boolean[][] visit = new boolean[m][n];
-
-		Queue<int[]> queue = new LinkedList<>(), tQueue = new LinkedList<>();
-		queue.add( new int[] { m - 1, 0 } );
-		queue.add( new int[] { 0, n - 1 } );
-		while ( !queue.isEmpty() )
-		{
-			tQueue.clear();
-			while ( !queue.isEmpty() )
+			for ( int j = 0; j < n; j++ )
 			{
-				int[] p = queue.poll();
-				list.add( p );
-				visit[p[0]][p[1]] = true;
-				for ( int[] d : dirs )
-				{
-					int ni = p[0] + d[0], nj = p[1] + d[1];
-					if ( ni < 0 || nj < 0 || ni >= m || nj >= n || visit[ni][nj] )
-						continue;
-					if ( matrix[ni][nj] >= matrix[p[0]][p[1]] )
-						tQueue.add( new int[] { ni, nj } );
-				}
-
+				if ( pacific[i][j] && atlantic[i][j] )
+					list.add( new int[] { i, j } );
 			}
-			queue.addAll( tQueue );
 		}
+
+		for ( boolean[] b : pacific )
+			System.out.println( Arrays.toString( b ) );
+		System.out.println();
+		for ( boolean[] b : atlantic )
+			System.out.println( Arrays.toString( b ) );
+
 		return list;
 	}
 
-	public boolean wordBreak( String s, List<String> wordDict )
+	void dfsVisit( int[][] matrix, boolean[][] visit, int[] pos )
 	{
-		Set<String> set = new HashSet<>( wordDict );
-		return wordBreakHelper( s, set );
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		visit[pos[0]][pos[1]] = true;
+		for ( int[] d : dirs )
+		{
+			int ni = pos[0] + d[0], nj = pos[1] + d[1];
+			if ( ni < 0 || nj < 0 || ni >= matrix.length || nj >= matrix[0].length || visit[ni][nj] || matrix[ni][nj] < matrix[pos[0]][pos[1]] )
+				continue;
+			dfsVisit( matrix, visit, new int[] { ni, nj } );
+		}
 	}
 
-	boolean wordBreakHelper( String s, Set<String> set )
+	public boolean wordBreak1( String s, List<String> set )
 	{
 		boolean[] vist = new boolean[s.length() + 1];
 		for ( String string : set )
