@@ -35,7 +35,7 @@ import java.util.TreeMap;
 public class Solution
 {
 
-	public static void main( String[] args ) throws IOException
+	public static void main( String[] args )
 	{
 		Solution s = new Solution();
 
@@ -43,10 +43,11 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t = { { 1, 2, 2, 3, 5 }, { 3, 2, 3, 4, 4 }, { 2, 4, 5, 3, 1 }, { 6, 7, 1, 4, 5 }, { 5, 1, 1, 2, 4 } };
+		int[][] t = { { 0, 1 }, { 1, 2 }, { 2, 1 }, { 1, 0 }, { 0, 2 }, { 0, 0 }, { 1, 1 } };
 		String string = "catsanddog";
 		String[] strings = { "cat", "cats", "and", "sand", "dog" };
-		System.out.println( s.wordBreak( string, new ArrayList<>( Arrays.asList( strings ) ) ) );
+
+		System.out.println( s.numIslands2( 3, 3, t ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -61,36 +62,102 @@ public class Solution
 	public List<Integer> numIslands2( int m, int n, int[][] positions )
 	{
 		List<Integer> list = new ArrayList<>();
-		Map<int[], Set<int[]>> map = new HashMap<>();
-		for ( int i = 0; i < m; i++ )
-			for ( int j = 0; j < n; j++ )
-				map.put( new int[] { i, j }, new HashSet<>() );
+
+		if ( m == 0 || n == 0 )
+			return new ArrayList<>();
+		int[][] pr = new int[m][n], pc = new int[m][n];
+
+		boolean[][] visit = new boolean[m][n];
 		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
 
+		int count = 0;
 		for ( int[] p : positions )
 		{
-			boolean found = false;
+			for ( int[] k : parent.keySet() )
+				System.out.println( Arrays.toString( k ) + "_" + Arrays.toString( parent.get( k ) ) );
+			if ( visit[p[0]][p[1]] )
+				continue;
+			visit[p[0]][p[1]] = true;
+			pr[p[0]][p[1]] = p[0];
+			pc[p[0]][p[1]] = p[1];
+			count++;
 			for ( int[] d : dirs )
 			{
 				int ni = p[0] + d[0], nj = p[1] + d[1];
 				if ( ni < 0 || nj < 0 || ni >= m || nj >= n )
 					continue;
-				found = true;
-				int[] nij = new int[] { ni, nj };
-				if ( map.containsKey( nij ) )
+				if ( visit[ni][nj] )
 				{
-					map.get( nij ).add( new int[] { p[0], p[1] } );
-					map.get( new int[] { p[0], p[1] } ).add( nij );
+					while ( pr[ni][nj] != ni || pc[ni][nj] != nj )
+					{
+						int ti = pr[ni][nj], tj = pc[ni][nj];
+						ni = ti;
+						nj = tj;
+					}
+					if ( ni != p[0] || nj != p[1] )
+					{
+						pr[ni][nj] = p[0];
+						pc[ni][nj] = p[1];
+						count--;
+					}
 				}
 			}
-			if ( !found )
-			{
-
-			}
-
+			list.add( count );
 		}
-
 		return list;
+	}
+
+	public String solveEquation( String equation )
+	{
+		String[] split = equation.split( "=" );
+		int[] left = find( split[0] ), right = find( split[1] );
+		int coef = left[0] - right[0], val = right[1] - left[1];
+		if ( coef == 0 && val == 0 )
+			return "Infinite solutions";
+		if ( coef == 0 && val != 0 )
+			return "No solution";
+		return "x=" + val / coef;
+	}
+
+	int[] find( String string )
+	{
+		// int[0] = coefficient of x, int[1] = val
+		int i = 0, coef = 0, val = 0, j = 0;
+		while ( string.indexOf( 'x', i ) >= 0 )
+		{
+			int xpos = string.indexOf( 'x', i );
+			j = Math.max( string.lastIndexOf( '+', xpos ), string.lastIndexOf( '-', xpos ) );
+			if ( j < 0 )
+				j = i;
+			val += intVal( string.substring( i, j ) );
+			coef += j == xpos ? 1 : intVal( string.substring( j, xpos ) );
+
+			i = string.indexOf( 'x', i ) + 1;
+		}
+		val += intVal( string.substring( i, string.length() ) );
+		return new int[] { coef, val };
+	}
+
+	int intVal( String string )
+	{
+		if ( string.length() < 1 )
+			return 0;
+		if ( string.equals( "+" ) )
+			return 1;
+		if ( string.equals( "-" ) )
+			return -1;
+		int val = 0, j = 0, i = 0;
+		for ( i = 0; i < string.length(); i++ )
+		{
+			if ( string.charAt( i ) >= '0' && string.charAt( i ) <= '9' )
+				continue;
+			if ( j < i )
+				val += Integer.valueOf( string.substring( j, i ) );
+			j = i;
+		}
+		val += Integer.valueOf( string.substring( j, i ) );
+		return val;
+
 	}
 
 	public List<String> wordBreak( String s, List<String> wordDict )
