@@ -43,11 +43,11 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t = { { 0, 1 }, { 1, 2 }, { 2, 1 }, { 1, 0 }, { 0, 2 }, { 0, 0 }, { 1, 1 } };
+		int[] t = { 0, 1, 3, 5, 6 };
 		String string = "catsanddog";
 		String[] strings = { "cat", "cats", "and", "sand", "dog" };
 
-		System.out.println( s.numIslands2( 3, 3, t ) );
+		System.out.println( s.hIndex( t ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -57,6 +57,38 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public int hIndex( int[] citations )
+	{
+		if ( citations.length < 1 )
+			return 0;
+		// now sorted, use bsearch
+		int l = 0, r = citations.length - 1, m = ( l + r ) / 2, len = citations.length, ans = len;
+		while ( l <= r )
+		{
+			if ( citations[m] >= len - m )
+			{
+				r = m - 1;
+				ans = m;
+			}
+			else
+				l = m + 1;
+			m = ( l + r ) / 2;
+		}
+		return len - ans;
+	}
+
+	public int hIndex_( int[] citations )
+	{
+		if ( citations.length < 1 )
+			return 0;
+		Arrays.sort( citations );
+
+		int i = 1, len = citations.length;
+		while ( i <= len && citations[len - i] >= i )
+			i++;
+		return i - 1;
 	}
 
 	public List<Integer> numIslands2( int m, int n, int[][] positions )
@@ -6394,7 +6426,7 @@ public class Solution
 
 	}
 
-	public int hIndex( int[] citations )
+	public int hIndex1( int[] citations )
 	{
 		int len = citations.length;
 		Arrays.sort( citations );
