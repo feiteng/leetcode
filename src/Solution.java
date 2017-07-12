@@ -35,7 +35,7 @@ import java.util.TreeMap;
 public class Solution
 {
 
-	public static void main( String[] args ) throws IOException
+	public static void main( String[] args )
 	{
 		Solution s = new Solution();
 
@@ -43,8 +43,11 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t = { { 0, 1 }, { 3, 2 }, { 1, 2 } };
-		System.out.println( s.findDerangement( 31 ) );
+		int[][] t = { { 0, 1 }, { 1, 2 }, { 2, 1 }, { 1, 0 }, { 0, 2 }, { 0, 0 }, { 1, 1 } };
+		String string = "catsanddog";
+		String[] strings = { "cat", "cats", "and", "sand", "dog" };
+
+		System.out.println( s.numIslands2( 3, 3, t ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -59,36 +62,128 @@ public class Solution
 	public List<Integer> numIslands2( int m, int n, int[][] positions )
 	{
 		List<Integer> list = new ArrayList<>();
-		Map<int[], Set<int[]>> map = new HashMap<>();
-		for ( int i = 0; i < m; i++ )
-			for ( int j = 0; j < n; j++ )
-				map.put( new int[] { i, j }, new HashSet<>() );
+
+		if ( m == 0 || n == 0 )
+			return new ArrayList<>();
+		int[][] pr = new int[m][n], pc = new int[m][n];
+
+		boolean[][] visit = new boolean[m][n];
 		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
 
+		int count = 0;
 		for ( int[] p : positions )
 		{
-			boolean found = false;
+			if ( visit[p[0]][p[1]] )
+				continue;
+			visit[p[0]][p[1]] = true;
+			pr[p[0]][p[1]] = p[0];
+			pc[p[0]][p[1]] = p[1];
+			count++;
 			for ( int[] d : dirs )
 			{
 				int ni = p[0] + d[0], nj = p[1] + d[1];
 				if ( ni < 0 || nj < 0 || ni >= m || nj >= n )
 					continue;
-				found = true;
-				int[] nij = new int[] { ni, nj };
-				if ( map.containsKey( nij ) )
+				if ( visit[ni][nj] )
 				{
-					map.get( nij ).add( new int[] { p[0], p[1] } );
-					map.get( new int[] { p[0], p[1] } ).add( nij );
+					while ( pr[ni][nj] != ni || pc[ni][nj] != nj )
+					{
+						int ti = pr[ni][nj], tj = pc[ni][nj];
+						ni = ti;
+						nj = tj;
+					}
+					if ( ni != p[0] || nj != p[1] )
+					{
+						pr[ni][nj] = p[0];
+						pc[ni][nj] = p[1];
+						count--;
+					}
 				}
 			}
-			if ( !found )
-			{
-
-			}
-
+			list.add( count );
 		}
-
 		return list;
+	}
+
+	public String solveEquation( String equation )
+	{
+		String[] split = equation.split( "=" );
+		int[] left = find( split[0] ), right = find( split[1] );
+		int coef = left[0] - right[0], val = right[1] - left[1];
+		if ( coef == 0 && val == 0 )
+			return "Infinite solutions";
+		if ( coef == 0 && val != 0 )
+			return "No solution";
+		return "x=" + val / coef;
+	}
+
+	int[] find( String string )
+	{
+		// int[0] = coefficient of x, int[1] = val
+		int i = 0, coef = 0, val = 0, j = 0;
+		while ( string.indexOf( 'x', i ) >= 0 )
+		{
+			int xpos = string.indexOf( 'x', i );
+			j = Math.max( string.lastIndexOf( '+', xpos ), string.lastIndexOf( '-', xpos ) );
+			if ( j < 0 )
+				j = i;
+			val += intVal( string.substring( i, j ) );
+			coef += j == xpos ? 1 : intVal( string.substring( j, xpos ) );
+
+			i = string.indexOf( 'x', i ) + 1;
+		}
+		val += intVal( string.substring( i, string.length() ) );
+		return new int[] { coef, val };
+	}
+
+	int intVal( String string )
+	{
+		if ( string.length() < 1 )
+			return 0;
+		if ( string.equals( "+" ) )
+			return 1;
+		if ( string.equals( "-" ) )
+			return -1;
+		int val = 0, j = 0, i = 0;
+		for ( i = 0; i < string.length(); i++ )
+		{
+			if ( string.charAt( i ) >= '0' && string.charAt( i ) <= '9' )
+				continue;
+			if ( j < i )
+				val += Integer.valueOf( string.substring( j, i ) );
+			j = i;
+		}
+		val += Integer.valueOf( string.substring( j, i ) );
+		return val;
+
+	}
+
+	public List<String> wordBreak( String s, List<String> wordDict )
+	{
+		if ( !wordBreak1( s, wordDict ) )
+			return new ArrayList<>();
+		for ( String string : wordDict )
+			if ( string.length() <= s.length() && s.substring( 0, string.length() ).equals( string ) )
+				dfsWordBreak( s, wordDict, string.length(), new ArrayList<>( Arrays.asList( new String[] { string } ) ) );
+
+		return wordBreakList;
+	}
+
+	List<String> wordBreakList = new ArrayList<>();
+
+	void dfsWordBreak( String s, List<String> wordDict, int pos, List<String> padd )
+	{
+		if ( pos == s.length() )
+			wordBreakList.add( String.join( " ", new ArrayList<>( padd ) ) );
+		for ( String string : wordDict )
+		{
+			if ( pos + string.length() <= s.length() && s.substring( pos, pos + string.length() ).equals( string ) )
+			{
+				padd.add( string );
+				dfsWordBreak( s, wordDict, pos + string.length(), padd );
+				padd.remove( padd.size() - 1 );
+			}
+		}
 	}
 
 	public List<int[]> pacificAtlantic( int[][] matrix )
@@ -97,10 +192,9 @@ public class Solution
 			return new ArrayList<>();
 		int m = matrix.length, n = matrix[0].length;
 
-		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
-
 		boolean[][] pacific = new boolean[m][n], atlantic = new boolean[m][n];
 		Queue<int[]> qP = new LinkedList<>(), qA = new LinkedList<>();
+		List<int[]> list = new ArrayList<>();
 
 		for ( int i = 0; i < m; i++ )
 		{
@@ -110,47 +204,44 @@ public class Solution
 		for ( int j = 0; j < n; j++ )
 		{
 			qP.add( new int[] { 0, j } );
-			qA.add( new int[] { j, m - 1 } );
+			qA.add( new int[] { m - 1, j } );
 		}
-
-		List<int[]> list = new ArrayList<>();
-		int[][] flow = new int[m][n];
-		flow[m - 1][0] = flow[0][n - 1] = 3;
+		for ( int[] p : qP )
+			dfsVisit( matrix, pacific, p );
+		for ( int[] p : qA )
+			dfsVisit( matrix, atlantic, p );
 		for ( int i = 0; i < m; i++ )
-
 		{
-
-		}
-
-		boolean[][] visit = new boolean[m][n];
-
-		Queue<int[]> queue = new LinkedList<>(), tQueue = new LinkedList<>();
-		queue.add( new int[] { m - 1, 0 } );
-		queue.add( new int[] { 0, n - 1 } );
-		while ( !queue.isEmpty() )
-		{
-			tQueue.clear();
-			while ( !queue.isEmpty() )
+			for ( int j = 0; j < n; j++ )
 			{
-				int[] p = queue.poll();
-				list.add( p );
-				visit[p[0]][p[1]] = true;
-				for ( int[] d : dirs )
-				{
-					int ni = p[0] + d[0], nj = p[1] + d[1];
-					if ( ni < 0 || nj < 0 || ni >= m || nj >= n || visit[ni][nj] )
-						continue;
-					if ( matrix[ni][nj] >= matrix[p[0]][p[1]] )
-						tQueue.add( new int[] { ni, nj } );
-				}
-
+				if ( pacific[i][j] && atlantic[i][j] )
+					list.add( new int[] { i, j } );
 			}
-			queue.addAll( tQueue );
 		}
+
+		for ( boolean[] b : pacific )
+			System.out.println( Arrays.toString( b ) );
+		System.out.println();
+		for ( boolean[] b : atlantic )
+			System.out.println( Arrays.toString( b ) );
+
 		return list;
 	}
 
-	public boolean wordBreak( String s, List<String> wordDict )
+	void dfsVisit( int[][] matrix, boolean[][] visit, int[] pos )
+	{
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		for ( int[] d : dirs )
+		{
+			int ni = pos[0] + d[0], nj = pos[1] + d[1];
+			if ( ni < 0 || nj < 0 || ni >= matrix.length || nj >= matrix[0].length || visit[ni][nj] || matrix[ni][nj] < matrix[pos[0]][pos[1]] )
+				continue;
+			dfsVisit( matrix, visit, new int[] { ni, nj } );
+		}
+
+	}
+
+	public boolean wordBreak1( String s, List<String> wordDict )
 	{
 		Set<String> set = new HashSet<>( wordDict );
 		return wordBreakHelper( s, set );
@@ -170,6 +261,7 @@ public class Solution
 			{
 				for ( String string : set )
 				{
+
 					if ( i + string.length() <= s.length() &&
 							s.substring( i, i + string.length() ).equals( string ) )
 						vist[i + string.length()] = true;
