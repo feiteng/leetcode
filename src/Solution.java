@@ -47,7 +47,7 @@ public class Solution
 		String string = "catsanddog";
 		String[] strings = { "cat", "cats", "and", "sand", "dog" };
 
-		System.out.println( s.hIndex( t ) );
+		System.out.println( s.numDecodings( "10" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -56,6 +56,39 @@ public class Solution
 	{
 
 		Queue<int[]> queue = new LinkedList<>();
+		return 0;
+	}
+
+	public int minCost( int[][] costs )
+	{
+
+	}
+
+	public int numDecodings( String s )
+	{
+		if ( s.equals( "" ) )
+			return 0;
+		return numDecodingsHelper( s );
+	}
+
+	int numDecodingsHelper( String s )
+	{
+		if ( s.equals( "0" ) )
+			return 0;
+		if ( s.length() < 2 )
+			return 1;
+		return decode( s.substring( 0, 1 ) ) * numDecodingsHelper( s.substring( 1 ) ) +
+				decode( s.substring( 0, 2 ) ) * numDecodingsHelper( s.substring( 2 ) );
+	}
+
+	int decode( String s )
+	{
+		if ( s.charAt( 0 ) == '0' )
+			return 0;
+		if ( s.length() < 2 )
+			return 1;
+		if ( Integer.valueOf( s ) <= 26 )
+			return 1;
 		return 0;
 	}
 
@@ -10519,41 +10552,6 @@ public class Solution
 		return 0;
 
 	}
-
-	public int numDecodings( String s )
-	{
-		// if ( s.length() < 1 )
-		// return 0;
-		if ( s.length() < 2 )
-			return 1;
-		String s1 = s.substring( 0, 1 ), s2 = s.substring( 0, 2 ), s3 = s.substring( 1 ), s4 = s.substring( 2 );
-		System.out.println( s1 );
-		System.out.println( s2 );
-		System.out.println( s3 );
-		System.out.println( s4 );
-		return decode( s.substring( 0, 1 ) ) * numDecodings( s.substring( 1 ) ) +
-				decode( s.substring( 0, 2 ) ) * numDecodings( s.substring( 2 ) );
-	}
-
-	int decode( String s )
-	{
-		if ( s.length() < 2 )
-			return 1;
-		if ( s.charAt( 0 ) == '0' )
-			return 0;
-		if ( s.charAt( 0 ) == '2' && s.charAt( 1 ) > '6' || s.charAt( 0 ) == '0' )
-			return 0;
-		return 1;
-	}
-	// public boolean isAdditiveNumber( String num )
-	// {
-	// for ( int i = 1; i < num.length(); i++ )
-	// {
-	// int a = Integer.valueOf( num.substring( 0, i ) );
-	// int b = Integer.valueOf( num.substring( i, i + 1 ) );
-	// }
-	//
-	// }
 
 	public List<String> findMissingRanges( int[] nums, int lower, int upper )
 	{
