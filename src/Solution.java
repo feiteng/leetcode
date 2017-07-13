@@ -59,9 +59,62 @@ public class Solution
 		return 0;
 	}
 
+	public boolean PredictTheWinner( int[] nums )
+	{
+		return predictWinnerHelper( nums, 0, nums.length - 1, new Integer[nums.length][nums.length] ) > 0;
+	}
+
+	int predictWinnerHelper( int[] nums, int s, int e, Integer[][] memo )
+	{
+		if ( memo[s][e] == null )
+		{
+			if ( s == e )
+				return nums[s];
+			memo[s][e] = Math.max( nums[s] - predictWinnerHelper( nums, s + 1, e, memo ), nums[e] - predictWinnerHelper( nums, s, e - 1, memo ) );
+		}
+		return memo[s][e];
+	}
+
+	public int minCostII( int[][] costs )
+	{
+		if ( costs.length == 0 || costs[0].length == 0 )
+			return 0;
+		int m = costs.length, n = costs[0].length;
+		for ( int i = 0; i < m - 1; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+				costs[i + 1][j] = minCostIIFindMin( costs[i], j ) + costs[i + 1][j];
+		}
+		return minCostIIFindMin( costs[m - 1], -1 );
+	}
+
+	int minCostIIFindMin( int[] A, int k )
+	{
+		int min = Integer.MAX_VALUE;
+		for ( int i = 0; i < A.length; i++ )
+		{
+			if ( i == k )
+				continue;
+			min = Math.min( min, A[i] );
+		}
+		return min;
+	}
+
 	public int minCost( int[][] costs )
 	{
-		return 0;
+		if ( costs.length < 1 )
+			return 0;
+		int[][] A = new int[costs.length][3];
+		for ( int i = 0; i < 3; i++ )
+			A[0][i] = costs[0][i];
+		for ( int i = 0; i < costs.length - 1; i++ )
+		{
+			A[i + 1][0] = Math.min( A[i][1], A[i][2] ) + costs[i + 1][0];
+			A[i + 1][1] = Math.min( A[i][0], A[i][2] ) + costs[i + 1][1];
+			A[i + 1][2] = Math.min( A[i][0], A[i][1] ) + costs[i + 1][2];
+		}
+		int n = costs.length - 1;
+		return Math.min( Math.min( A[n][0], A[n][1] ), A[n][2] );
 	}
 
 	public int numDecodings( String s )
