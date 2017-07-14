@@ -43,11 +43,9 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] t = { 0, 1, 3, 5, 6 };
-		String string = "catsanddog";
-		String[] strings = { "cat", "cats", "and", "sand", "dog" };
+		int[][] t = { { 1, 4, 3, 1, 3, 2 }, { 3, 2, 1, 3, 2, 4 }, { 2, 3, 3, 2, 3, 1 } };
 
-		System.out.println( s.numDecodings( "10" ) );
+		System.out.println( s.trapRainWater( t ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -81,32 +79,34 @@ public class Solution
 			visit[m - 1][i] = true;
 		}
 
-		// now dfs visit
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
 		while ( !pQueue.isEmpty() )
 		{
 			int[] pos = pQueue.poll();
-			amount = Math.max( amount, trapRainWaterDFS( 0, heightMap, new int[] { pos[1], pos[2] }, visit, pos[0] ) );
+
+			int i = pos[1], j = pos[2];
+			for ( int[] d : dirs )
+			{
+				int ni = i + d[0], nj = j + d[1];
+				if ( ni < 0 || nj < 0 || ni >= m || nj >= n || visit[ni][nj] )
+					continue;
+				visit[ni][nj] = true;
+				amount += Math.max( 0, pos[0] - heightMap[ni][nj] );
+				pQueue.add( new int[] { heightMap[ni][nj], i, j } );
+			}
 		}
 
 		return amount;
 	}
 
-	int trapRainWaterDFS( int total, int[][] heightMap, int[] pos, boolean[][] visit, int height )
-	{
-		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
-		int i = pos[0], j = pos[1], m = heightMap.length, n = heightMap[0].length;
-		for ( int[] d : dirs )
-		{
-			int ni = i + d[0], nj = j + d[1];
-			if ( ni <= 0 || nj <= 0 || ni >= m || nj >= n || visit[ni][nj] || height < heightMap[ni][nj] )
-				continue;
-			visit[ni][nj] = true;
-			total += height - heightMap[ni][nj];
-			trapRainWaterDFS( total, heightMap, pos, visit, height );
-			total -= height - heightMap[ni][nj];
-		}
-		return total;
-	}
+	// int trapRainWaterDFS( int total, int[][] heightMap, int[] pos, boolean[][] visit, int height )
+	// {
+	//
+	// total += height - heightMap[ni][nj];
+	// trapRainWaterDFS( total, heightMap, pos, visit, height );
+	// }
+	// return total;
+	// }
 
 	public boolean PredictTheWinner( int[] nums )
 	{
