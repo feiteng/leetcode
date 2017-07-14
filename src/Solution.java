@@ -59,9 +59,111 @@ public class Solution
 		return 0;
 	}
 
+	public int trapRainWater( int[][] heightMap )
+	{
+		if ( heightMap.length == 0 || heightMap[0].length == 0 )
+			return 0;
+		int m = heightMap.length, n = heightMap[0].length, amount = 0;
+		PriorityQueue<int[]> pQueue = new PriorityQueue<>( ( a, b ) -> a[0] - b[0] );
+		boolean[][] visit = new boolean[m][n];
+		for ( int i = 0; i < m; i++ )
+		{
+			pQueue.add( new int[] { heightMap[i][0], i, 0 } );
+			pQueue.add( new int[] { heightMap[i][n - 1], i, n - 1 } );
+			visit[i][0] = true;
+			visit[i][n - 1] = true;
+		}
+		for ( int i = 0; i < n; i++ )
+		{
+			pQueue.add( new int[] { heightMap[0][i], 0, i } );
+			pQueue.add( new int[] { heightMap[m - 1][i], m - 1, i } );
+			visit[0][i] = true;
+			visit[m - 1][i] = true;
+		}
+
+		// now dfs visit
+		while ( !pQueue.isEmpty() )
+		{
+			int[] pos = pQueue.poll();
+			amount = Math.max( amount, trapRainWaterDFS( 0, heightMap, new int[] { pos[1], pos[2] }, visit, pos[0] ) );
+		}
+
+		return amount;
+	}
+
+	int trapRainWaterDFS( int total, int[][] heightMap, int[] pos, boolean[][] visit, int height )
+	{
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		int i = pos[0], j = pos[1], m = heightMap.length, n = heightMap[0].length;
+		for ( int[] d : dirs )
+		{
+			int ni = i + d[0], nj = j + d[1];
+			if ( ni <= 0 || nj <= 0 || ni >= m || nj >= n || visit[ni][nj] || height < heightMap[ni][nj] )
+				continue;
+			visit[ni][nj] = true;
+			total += height - heightMap[ni][nj];
+			trapRainWaterDFS( total, heightMap, pos, visit, height );
+			total -= height - heightMap[ni][nj];
+		}
+		return total;
+	}
+
+	public boolean PredictTheWinner( int[] nums )
+	{
+		return predictWinnerHelper( nums, 0, nums.length - 1, new Integer[nums.length][nums.length] ) > 0;
+	}
+
+	int predictWinnerHelper( int[] nums, int s, int e, Integer[][] memo )
+	{
+		if ( memo[s][e] == null )
+		{
+			if ( s == e )
+				return nums[s];
+			memo[s][e] = Math.max( nums[s] - predictWinnerHelper( nums, s + 1, e, memo ), nums[e] - predictWinnerHelper( nums, s, e - 1, memo ) );
+		}
+		return memo[s][e];
+	}
+
+	public int minCostII( int[][] costs )
+	{
+		if ( costs.length == 0 || costs[0].length == 0 )
+			return 0;
+		int m = costs.length, n = costs[0].length;
+		for ( int i = 0; i < m - 1; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+				costs[i + 1][j] = minCostIIFindMin( costs[i], j ) + costs[i + 1][j];
+		}
+		return minCostIIFindMin( costs[m - 1], -1 );
+	}
+
+	int minCostIIFindMin( int[] A, int k )
+	{
+		int min = Integer.MAX_VALUE;
+		for ( int i = 0; i < A.length; i++ )
+		{
+			if ( i == k )
+				continue;
+			min = Math.min( min, A[i] );
+		}
+		return min;
+	}
+
 	public int minCost( int[][] costs )
 	{
-		return 0;
+		if ( costs.length < 1 )
+			return 0;
+		int[][] A = new int[costs.length][3];
+		for ( int i = 0; i < 3; i++ )
+			A[0][i] = costs[0][i];
+		for ( int i = 0; i < costs.length - 1; i++ )
+		{
+			A[i + 1][0] = Math.min( A[i][1], A[i][2] ) + costs[i + 1][0];
+			A[i + 1][1] = Math.min( A[i][0], A[i][2] ) + costs[i + 1][1];
+			A[i + 1][2] = Math.min( A[i][0], A[i][1] ) + costs[i + 1][2];
+		}
+		int n = costs.length - 1;
+		return Math.min( Math.min( A[n][0], A[n][1] ), A[n][2] );
 	}
 
 	public int numDecodings( String s )
