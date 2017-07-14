@@ -43,9 +43,10 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t = { { 1, 4, 3, 1, 3, 2 }, { 3, 2, 1, 3, 2, 4 }, { 2, 3, 3, 2, 3, 1 } };
+		int[] t = { 1, 3, -1, -3, 5, 3, 6, 7 };
 
-		System.out.println( s.trapRainWater( t ) );
+		System.out.println( Arrays.toString( s.medianSlidingWindow( t, 3 ) ) );
+
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -55,6 +56,112 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public double[] medianSlidingWindow( int[] nums, int k )
+	{
+		PriorityQueue<Integer> pq1 = new PriorityQueue<>(), pq2 = new PriorityQueue<>( ( a, b ) -> b - a );
+		for ( int i = 0; i < k; i++ )
+		{
+			pq1.add( nums[i] );
+		}
+		while ( pq1.size() > pq2.size() + 1 )
+		{
+			pq2.add( pq1.poll() );
+		}
+		double[] d = new double[nums.length - k];
+		d[0] = k % 2 == 0 ? ( pq2.peek() + pq1.peek() ) / 2 : pq1.peek();
+		int m = 0;
+		for ( int i = k; i < nums.length; i++ )
+		{
+			if ( nums[i - k] >= d[m] )
+			{
+				pq1.remove( nums[i - k] );
+				pq1.add( pq2.poll() );
+			}
+			else
+			{
+				pq2.remove( nums[i - k] );
+				pq2.add( pq1.poll() );
+			}
+			pq1.add( nums[k] );
+			if ( pq1.peek() < pq2.peek() )
+			{
+				pq2.add( pq1.poll() );
+				pq1.add( pq2.poll() );
+			}
+			d[++m] = k % 2 == 0 ? ( pq2.peek() + pq1.peek() ) / 2 : pq1.peek();
+
+		}
+		return d;
+	}
+
+	public List<int[]> getSkyline( int[][] buildings )
+	{
+
+		List<int[]> list = new ArrayList<>();
+		Map<Integer, List<Integer>> map = new HashMap<>();
+
+		for ( int[] b : buildings )
+		{
+			if ( !map.containsKey( b[0] ) )
+				map.put( b[0], new ArrayList<>() );
+			if ( !map.containsKey( b[1] ) )
+				map.put( b[1], new ArrayList<>() );
+			map.get( b[0] ).add( b[2] );
+			map.get( b[1] ).add( -b[2] );
+		}
+		PriorityQueue<Integer> pQueue = new PriorityQueue<>( ( a, b ) -> b - a );
+		pQueue.add( 0 );
+		int h = 0;
+		List<Integer> keys = new ArrayList<>( map.keySet() );
+		Collections.sort( keys );
+		for ( int k : keys )
+		{
+			for ( int m : map.get( k ) )
+			{
+				if ( m > 0 )
+					pQueue.add( m );
+				else
+					pQueue.remove( -m );
+			}
+			if ( pQueue.peek() != h )
+			{
+				list.add( new int[] { k, pQueue.peek() } );
+				h = pQueue.peek();
+			}
+		}
+		return list;
+	}
+
+	public boolean validTree( int n, int[][] edges )
+	{
+		int[] parent = new int[n];
+		for ( int i = 0; i < n; i++ )
+			parent[i] = i;
+		for ( int[] e : edges )
+		{
+			// now find parent for both edge
+			// set parent of e[1]'s to e[0]'s
+			int p0 = validTreeFindParent( parent, e[0] ),
+					p1 = validTreeFindParent( parent, e[1] );
+			if ( p0 == p1 )
+				return false;
+			parent[p1] = p0;
+		}
+		int p = validTreeFindParent( parent, 0 );
+		System.out.println( Arrays.toString( parent ) );
+		for ( int i = 0; i < n; i++ )
+			if ( p != validTreeFindParent( parent, i ) )
+				return false;
+		return true;
+	}
+
+	int validTreeFindParent( int[] parent, int pos )
+	{
+		while ( parent[pos] != pos )
+			pos = parent[pos];
+		return pos;
 	}
 
 	public int trapRainWater( int[][] heightMap )
@@ -92,21 +199,12 @@ public class Solution
 					continue;
 				visit[ni][nj] = true;
 				amount += Math.max( 0, pos[0] - heightMap[ni][nj] );
-				pQueue.add( new int[] { heightMap[ni][nj], i, j } );
+				pQueue.add( new int[] { Math.max( pos[0], heightMap[ni][nj] ), ni, nj } );
 			}
 		}
 
 		return amount;
 	}
-
-	// int trapRainWaterDFS( int total, int[][] heightMap, int[] pos, boolean[][] visit, int height )
-	// {
-	//
-	// total += height - heightMap[ni][nj];
-	// trapRainWaterDFS( total, heightMap, pos, visit, height );
-	// }
-	// return total;
-	// }
 
 	public boolean PredictTheWinner( int[] nums )
 	{
