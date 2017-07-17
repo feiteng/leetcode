@@ -1,5 +1,4 @@
 
-
 public class ListNode
 {
 	int val;
@@ -10,6 +9,18 @@ public class ListNode
 	{
 		val = x;
 		next = null;
+	}
+
+	ListNode( int[] v )
+	{
+		ListNode t = this;
+		this.val = v[0];
+		for ( int i = 1; i < v.length; i++ )
+		{
+			t.next = new ListNode( v[i] );
+			t = t.next;
+		}
+
 	}
 
 	public int[] toarray()

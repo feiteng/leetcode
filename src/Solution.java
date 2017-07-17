@@ -43,9 +43,10 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] t = { 1, 3, -1, -3, 5, 3, 6, 7 };
-
-		System.out.println( Arrays.toString( s.medianSlidingWindow( t, 3 ) ) );
+		int[] t = { 3, 2, 1 };
+		ListNode l = new ListNode( t );
+		l.print();
+		s.addTwoNumbers( l, l ).print();
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
@@ -56,6 +57,107 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public int[] exclusiveTime( int n, List<String> logs )
+	{
+		int[] functionTime = new int[n], extraTime = new int[n];
+		Stack<Integer> stack = new Stack<>();
+		String[] detail = logs.get( 0 ).split( ":" );
+		stack.push( Integer.valueOf( detail[0] ) );
+		int prevTime = Integer.valueOf( detail[2] ), i = 1;
+
+		while ( i < logs.size() )
+		{
+			detail = logs.get( i ).split( ":" );
+			int id = Integer.valueOf( detail[0] ), taskTime = Integer.valueOf( detail[2] );
+			if ( detail[1].equals( "start" ) )
+			{
+				if ( !stack.isEmpty() )
+					functionTime[stack.peek()] += taskTime - prevTime;
+				stack.push( id );
+				prevTime = taskTime;
+			}
+			else // end
+			{
+				functionTime[stack.pop()] += taskTime - prevTime + 1;
+				prevTime = taskTime;
+			}
+			i++;
+		}
+		return functionTime;
+	}
+
+	public ListNode addTwoNumbers( ListNode l1, ListNode l2 )
+	{
+		ListNode r1 = reverseLN( l1 ), r2 = reverseLN( l2 ), t = new ListNode( 0 ), tL = t;
+		int carry = 0;
+		while ( r1 != null && r2 != null )
+		{
+			int b = ( r1.val + r2.val + carry ) % 10;
+			carry = ( r1.val + r2.val + carry ) / 10;
+			tL.next = new ListNode( b );
+			tL = tL.next;
+			r1 = r1.next;
+			r2 = r2.next;
+		}
+		while ( r1 != null )
+		{
+			tL.next = new ListNode( ( r1.val + carry ) % 10 );
+			carry = ( r1.val + carry ) / 10;
+			tL = tL.next;
+			r1 = r1.next;
+		}
+		while ( r2 != null )
+		{
+			tL.next = new ListNode( ( r2.val + carry ) % 10 );
+			carry = ( r2.val + carry ) / 10;
+			tL = tL.next;
+			r2 = r2.next;
+		}
+		if ( carry > 0 )
+			tL.next = new ListNode( carry );
+		return reverseLN( t.next );
+	}
+
+	ListNode reverseLN( ListNode l )
+	{
+		ListNode tListNode = new ListNode( 0 ), t = l, t2 = tListNode.next;
+		while ( t != null )
+		{
+			t2 = tListNode.next;
+			tListNode.next = new ListNode( t.val );
+			tListNode.next.next = t2;
+			t = t.next;
+		}
+		return tListNode.next;
+	}
+
+	public double findMaxAverage( int[] nums, int k )
+	{
+		// find maximum sub array ?
+		double max = Integer.MIN_VALUE;
+		for ( int i = k; i < nums.length; i++ )
+		{
+			max = Math.max( max, findMaxAverage1( nums, i ) );
+		}
+		return max;
+
+	}
+
+	public double findMaxAverage1( int[] nums, int k )
+	{
+		double sum = 0, tsum = 0;
+		for ( int i = 0; i < k; i++ )
+			tsum += nums[i];
+		sum = tsum;
+		for ( int i = k; i < nums.length; i++ )
+		{
+			tsum -= nums[i - k];
+			tsum += nums[i];
+			sum = Math.max( sum, tsum );
+		}
+		return sum / k;
 	}
 
 	public double[] medianSlidingWindow( int[] nums, int k )
@@ -4742,7 +4844,7 @@ public class Solution
 		return count == 1 ? true : false;
 	}
 
-	public ListNode addTwoNumbers( ListNode l1, ListNode l2 )
+	public ListNode addTwoNumbers1( ListNode l1, ListNode l2 )
 	{
 		int len1 = countListNode( l1 ), len2 = countListNode( l2 ), c = 0, k = Math.abs( len1 - len2 );
 		ListNode r = new ListNode( 0 ), n = r, t1 = l1, t2 = l2;
