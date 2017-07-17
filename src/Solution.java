@@ -43,11 +43,12 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] t = { 3, 2, 1 };
-		ListNode l = new ListNode( t );
-		l.print();
-		s.addTwoNumbers( l, l ).print();
-
+		int[] t = {
+				-2147483648, -2147483648, 2147483647,
+				-2147483648, -2147483648, -2147483648,
+				2147483647, 2147483647, 2147483647,
+				2147483647, -2147483648, 2147483647, -2147483648 };
+		System.out.println( Arrays.toString( s.medianSlidingWindow( t, 3 ) ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -57,6 +58,123 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public List<List<Integer>> verticalOrder( TreeNode root )
+	{
+		// lvl order to find values
+		// use map to lable position, root at 0
+		Map<Integer, List<Integer>> map = new HashMap<>();
+		Queue<TreeNode> queue = new LinkedList<>(), tQueue = new LinkedList<>();
+		Queue<Integer> pos = new LinkedList<>();
+		queue.add( root );
+		pos.add( 0 );
+		while ( !queue.isEmpty() )
+		{
+			tQueue.clear();
+			while ( !queue.isEmpty() )
+			{
+				TreeNode tmp = queue.poll();
+				int position = pos.poll();
+				if ( tmp != null )
+				{
+					tQueue.add( tmp.left );
+					pos.add( position - 1 );
+					tQueue.add( tmp.right );
+					pos.add( position + 1 );
+					if ( !map.containsKey( position ) )
+						map.put( position, new ArrayList<>() );
+					map.get( position ).add( tmp.val );
+				}
+			}
+			queue.addAll( tQueue );
+		}
+		List<Integer> keys = new ArrayList<>( map.keySet() );
+		Collections.sort( keys );
+		List<List<Integer>> ret = new ArrayList<>();
+		for ( int k : keys )
+		{
+			ret.add( new ArrayList<>( map.get( k ) ) );
+		}
+		return ret;
+	}
+
+	public String[] findWords( String[] words )
+	{
+		int[] b = new int[26];
+		for ( char k : "qwertyuiop".toCharArray() )
+			b[k - 'a'] = 1;
+		for ( char k : "asdfghjkl".toCharArray() )
+			b[k - 'a'] = 2;
+		for ( char k : "zxcvbnm".toCharArray() )
+			b[k - 'a'] = 3;
+		List<String> list = new ArrayList<>();
+		for ( String s : words )
+		{
+			Set<Integer> set = new HashSet<>();
+			for ( char k : s.toLowerCase().toCharArray() )
+			{
+				set.add( b[k - 'a'] );
+
+			}
+			if ( set.size() == 1 )
+				list.add( s );
+
+		}
+		String[] ret = new String[list.size()];
+		for ( int i = 0; i < list.size(); i++ )
+			ret[i] = list.get( i );
+		return ret;
+
+	}
+
+	public double[] medianSlidingWindow( int[] nums, int k )
+	{
+		PriorityQueue<Integer> pq1 = new PriorityQueue<>(), pq2 = new PriorityQueue<>( Collections.reverseOrder() );
+		if ( k == 1 )
+		{
+			double[] d = new double[nums.length];
+			for ( int i = 0; i < nums.length; i++ )
+				d[i] = (double) nums[i];
+		}
+		// now pq1 and pq2 will always have a size difference <= 1
+		for ( int i = 0; i < k; i++ )
+		{
+			pq1.add( nums[i] );
+		}
+		while ( pq1.size() - pq2.size() > 1 )
+		{
+			pq2.add( pq1.poll() );
+		}
+		double[] d = new double[nums.length - k + 1];
+		d[0] = k % 2 == 0 ? pq2.peek() / 2.0 + pq1.peek() / 2.0 : pq1.peek();
+		int m = 0;
+		for ( int i = k; i < nums.length; i++ )
+		{
+			pq1.add( nums[i] ); // at least 2 items
+			if ( nums[i - k] >= d[m] )
+			{
+				pq1.remove( nums[i - k] );
+			}
+			else
+			{
+				pq2.remove( nums[i - k] );
+				pq2.add( pq1.poll() );
+			}
+			System.out.print( pq2 );
+			System.out.print( " " + pq1 );
+			System.out.println();
+			if ( pq1.peek() < pq2.peek() ) // !pq1.isEmpty() && !pq2.isEmpty() &&
+			{
+				pq2.add( pq1.poll() );
+				pq1.add( pq2.poll() );
+			}
+			System.out.print( pq2 );
+			System.out.print( " " + pq1 );
+			System.out.println();
+			d[++m] = k % 2 == 0 ? pq2.peek() / 2.0 + pq1.peek() / 2.0 : pq1.peek();
+		}
+		return d;
 	}
 
 	public int[] exclusiveTime( int n, List<String> logs )
@@ -158,44 +276,6 @@ public class Solution
 			sum = Math.max( sum, tsum );
 		}
 		return sum / k;
-	}
-
-	public double[] medianSlidingWindow( int[] nums, int k )
-	{
-		PriorityQueue<Integer> pq1 = new PriorityQueue<>(), pq2 = new PriorityQueue<>( ( a, b ) -> b - a );
-		for ( int i = 0; i < k; i++ )
-		{
-			pq1.add( nums[i] );
-		}
-		while ( pq1.size() > pq2.size() + 1 )
-		{
-			pq2.add( pq1.poll() );
-		}
-		double[] d = new double[nums.length - k];
-		d[0] = k % 2 == 0 ? ( pq2.peek() + pq1.peek() ) / 2 : pq1.peek();
-		int m = 0;
-		for ( int i = k; i < nums.length; i++ )
-		{
-			if ( nums[i - k] >= d[m] )
-			{
-				pq1.remove( nums[i - k] );
-				pq1.add( pq2.poll() );
-			}
-			else
-			{
-				pq2.remove( nums[i - k] );
-				pq2.add( pq1.poll() );
-			}
-			pq1.add( nums[k] );
-			if ( pq1.peek() < pq2.peek() )
-			{
-				pq2.add( pq1.poll() );
-				pq1.add( pq2.poll() );
-			}
-			d[++m] = k % 2 == 0 ? ( pq2.peek() + pq1.peek() ) / 2 : pq1.peek();
-
-		}
-		return d;
 	}
 
 	public List<int[]> getSkyline( int[][] buildings )
