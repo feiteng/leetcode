@@ -43,12 +43,7 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] t = {
-				-2147483648, -2147483648, 2147483647,
-				-2147483648, -2147483648, -2147483648,
-				2147483647, 2147483647, 2147483647,
-				2147483647, -2147483648, 2147483647, -2147483648 };
-		System.out.println( Arrays.toString( s.medianSlidingWindow( t, 3 ) ) );
+		System.out.println( s.frequencySort( "tree" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -60,6 +55,30 @@ public class Solution
 		return 0;
 	}
 
+	public String frequencySort( String s )
+	{
+		int[] freq = new int[256];
+		for ( char c : s.toCharArray() )
+			freq[c]++;
+		PriorityQueue<int[]> pQueue = new PriorityQueue<>( ( a, b ) -> b[1] - a[1] );
+		for ( int i = 0; i < 256; i++ )
+		{
+			if ( freq[i] > 0 )
+			{
+				pQueue.add( new int[] { i, freq[i] } );
+			}
+		}
+		char[] res = new char[s.length()];
+		int i = 0;
+		while ( !pQueue.isEmpty() )
+		{
+			int[] p = pQueue.poll();
+			while ( p[1]-- > 0 )
+				res[i++] = (char) p[0];
+		}
+		return String.valueOf( res );
+	}
+
 	public List<List<Integer>> verticalOrder( TreeNode root )
 	{
 		// lvl order to find values
@@ -69,30 +88,26 @@ public class Solution
 		Queue<Integer> pos = new LinkedList<>();
 		queue.add( root );
 		pos.add( 0 );
+		int min = 0, max = 0;
 		while ( !queue.isEmpty() )
 		{
-			tQueue.clear();
-			while ( !queue.isEmpty() )
+			TreeNode tmp = queue.poll();
+			int position = pos.poll();
+			if ( tmp != null )
 			{
-				TreeNode tmp = queue.poll();
-				int position = pos.poll();
-				if ( tmp != null )
-				{
-					tQueue.add( tmp.left );
-					pos.add( position - 1 );
-					tQueue.add( tmp.right );
-					pos.add( position + 1 );
-					if ( !map.containsKey( position ) )
-						map.put( position, new ArrayList<>() );
-					map.get( position ).add( tmp.val );
-				}
+				queue.add( tmp.left );
+				pos.add( position - 1 );
+				queue.add( tmp.right );
+				pos.add( position + 1 );
+				if ( !map.containsKey( position ) )
+					map.put( position, new ArrayList<>() );
+				map.get( position ).add( tmp.val );
+				min = Math.min( min, position );
+				max = Math.max( max, position );
 			}
-			queue.addAll( tQueue );
 		}
-		List<Integer> keys = new ArrayList<>( map.keySet() );
-		Collections.sort( keys );
 		List<List<Integer>> ret = new ArrayList<>();
-		for ( int k : keys )
+		for ( int k = min; k <= max; k++ )
 		{
 			ret.add( new ArrayList<>( map.get( k ) ) );
 		}
