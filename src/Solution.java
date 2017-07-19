@@ -55,6 +55,103 @@ public class Solution
 		return 0;
 	}
 
+	public String largestNumber( int[] num )
+	{
+		String[] strs = new String[num.length];
+		for ( int i = 0; i < num.length; i++ )
+			strs[i] = String.valueOf( num[i] );
+		Arrays.sort( strs, ( a, b ) -> b.concat( a ).compareTo( a.concat( b ) ) );
+		StringBuilder sb = new StringBuilder();
+		for ( String s : strs )
+			sb.append( s );
+
+		return sb.charAt( 0 ) == '0' ? "0" : sb.toString();
+
+	}
+
+	public int shortestWordDistance( String[] words, String word1, String word2 )
+	{
+		return shortestDistance( words, word1, word2 );
+	}
+
+	public int shortestDistance( String[] words, String word1, String word2 )
+	{
+		Map<String, List<Integer>> map = new HashMap<>();
+		map.put( word1, new ArrayList<>() );
+		map.put( word2, new ArrayList<>() );
+		for ( int i = 0, n = words.length; i < n; i++ )
+		{
+			if ( words[i].equals( word1 ) )
+				map.get( word1 ).add( i );
+			if ( words[i].equals( word2 ) )
+				map.get( word2 ).add( i );
+		}
+		// now find min absolute difference for two sorted list
+		if ( word1.equals( word2 ) )
+			return shortestDistanceSameList( map.get( word1 ) );
+		return shortedDistanceList( map.get( word1 ), map.get( word2 ) );
+	}
+
+	int shortestDistanceSameList( List<Integer> list )
+	{
+		int diff = list.get( 1 ) - list.get( 0 );
+		for ( int i = 0, n = list.size(); i < n - 1; i++ )
+		{
+			diff = Math.min( diff, list.get( i + 1 ) - list.get( i ) );
+		}
+		return diff;
+
+	}
+
+	int shortedDistanceList( List<Integer> l1, List<Integer> l2 )
+	{
+		int i = 0, j = 0, diff = Math.abs( l1.get( i ) - l2.get( j ) );
+		while ( i < l1.size() && j < l2.size() )
+		{
+			diff = Math.min( diff, Math.abs( l1.get( i ) - l2.get( j ) ) );
+			if ( l1.get( i ) < l2.get( j ) )
+				i++;
+			else
+				j++;
+
+		}
+		return diff;
+	}
+
+	public double findMedianSortedArrays( int[] nums1, int[] nums2 )
+	{
+		int k = 0, n1 = nums1.length, n2 = nums2.length, i = 0, j = 0;
+		int[] vals = new int[n1 + n2];
+		while ( k < ( n1 + n2 ) / 2 )
+		{
+			if ( i < n1 && j < n2 )
+			{
+				if ( nums1[i] < nums2[j] )
+					vals[k] = nums1[i++];
+				else
+					vals[k] = nums2[j++];
+			}
+			else if ( i < n1 ) // j == n2
+				vals[k] = nums1[i++];
+			else // i == n1
+				vals[k] = nums2[j++];
+			k++;
+		}
+
+		int next = 0;
+		if ( i == n1 )
+			next = nums2[j];
+		if ( j == n2 )
+			next = nums1[i];
+		if ( i < n1 && j < n2 )
+			next = Math.min( nums1[i], nums2[j] );
+		if ( ( n1 + n2 ) % 2 != 0 )
+		{
+			return (double) next;
+		}
+		return ( vals[k] + next ) / 2.0;
+	}
+
 	public String frequencySort( String s )
 	{
 		int[] freq = new int[256];
@@ -10734,46 +10831,6 @@ public class Solution
 	public void swap( ListNode head )
 	{
 
-	}
-
-	public String largestNumber( int[] num )
-	{
-		Comparator<String> comp = new Comparator<String>()
-		{
-			@Override
-			public int compare( String str1, String str2 )
-			{
-				String s1 = str1 + str2;
-				String s2 = str2 + str1;
-				return s1.compareTo( s2 );
-			}
-		};
-		// convert all numbers into string array, so sorting can be done
-
-		String[] st = new String[num.length];
-		for ( int i = 0; i < num.length; i++ )
-			st[i] = num[i] + "";
-		// sort using array feature
-		Arrays.sort( st, comp );
-		for ( int i = 0; i < num.length; i++ )
-			System.out.print( " " + st[i] );
-		if ( st[num.length - 1].equals( "0" ) )
-			return "0";
-		String ret = "";
-		for ( int i = num.length - 1; i >= 0; i-- )
-			ret += st[i];
-		return ret;
-
-		/*
-		 * int n = num.length; if( n == 0 ) return ""; if( n == 1 ) return
-		 * toString(num[0]); // String ret = ""; int index = 0;
-		 * ArrayList<Integer> pushed = new ArrayList<Integer>(); boolean flag =
-		 * true; for(int i = 0; i < n; i++) { if( num[i] != 0 ) flag = false; }
-		 * int s = 0; if( flag == true ) s = n - 1; for(int i = 0; i < n - s;
-		 * i++) { // find biggest num to fill index = compare(num, pushed);
-		 * System.out.println(" found num: " + num[index] + " current string: "
-		 * + ret); ret += toString(num[index]); pushed.add(index); } return ret;
-		 */
 	}
 
 	// returns index of current best number to fill
