@@ -1,7 +1,9 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AutocompleteSystem
 {
@@ -11,7 +13,7 @@ public class AutocompleteSystem
 	{
 		for ( int i = 0; i < sentences.length; i++ )
 		{
-			root.insert( sentences[i], times[i] );
+			root.update( sentences[i], times[i] );
 		}
 	}
 
@@ -21,7 +23,7 @@ public class AutocompleteSystem
 	{
 		if ( c == '#' )
 		{
-			root.insert( find.toString(), 1 );
+			root.update( find.toString(), 1 );
 			find.delete( 0, find.length() );
 			return new ArrayList<>();
 		}
@@ -53,20 +55,13 @@ public class AutocompleteSystem
 		TrieAS r = root;
 		for ( char k : string.toCharArray() )
 		{
-			if ( r._child[k] == null )
+			int pos = k == ' ' ? 26 : k - 'a';
+			if ( r._child[pos] == null )
 				return;
-			r = r._child[k];
+			r = r._child[pos];
 		}
-		for ( TrieAS t : r._child )
-		{
-			if ( t != null )
-			{
-				for ( int i = 0, n = t._str.size(); i < n; i++ )
-				{
-					list.add( new String[] { t._str.get( i ), String.valueOf( t._hotness.get( i ) ) } );
-				}
-			}
-		}
+		for ( String s : r.map.keySet() )
+			list.add( new String[] { s, String.valueOf( r.map.get( s ) ) } );
 
 	}
 
@@ -83,22 +78,23 @@ public class AutocompleteSystem
 
 class TrieAS
 {
-	TrieAS[] _child = new TrieAS[256];
+	TrieAS[] _child = new TrieAS[27];
+	Map<String, Integer> map = new HashMap<>();
 	List<String> _str = new ArrayList<>();
 	List<Integer> _hotness = new ArrayList<>();
 
-	void insert( String string, int hotness )
+	void update( String string, int hotness )
 	{
 		TrieAS root = this;
 		for ( char k : string.toCharArray() )
 		{
-			if ( root._child[k] == null )
-				root._child[k] = new TrieAS();
-			root._str.add( string );
-			root._hotness.add( hotness );
-			root = root._child[k];
+			int pos = k == ' ' ? 26 : k - 'a';
+			if ( root._child[pos] == null )
+				root._child[pos] = new TrieAS();
+			root.map.put( string, root.map.getOrDefault( string, 0 ) + hotness );
+			root = root._child[pos];
 		}
-		root._str.add( string );
-		root._hotness.add( hotness );
+		root.map.put( string, root.map.getOrDefault( string, 0 ) + hotness );
 	}
+
 }
