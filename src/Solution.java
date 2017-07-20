@@ -60,6 +60,39 @@ public class Solution
 		return 0;
 	}
 
+	public String splitLoopedString( String[] strs )
+	{
+		List<String> strUpdate = new ArrayList<>();
+		Queue<String[]> pQueue = new PriorityQueue<>( ( a, b ) -> a[0].compareTo( b[0] ) );
+		for ( int i = 0, n = strs.length; i < n; i++ )
+		{
+			pQueue.add( new String[] { strs[i], String.valueOf( i ) } );
+			strUpdate.add( comp( strs[i] ) );
+		}
+		String[] top = pQueue.peek();
+		int index = Integer.valueOf( top[1] );
+
+		String l = String.join( "", strUpdate.subList( 0, index ) ),
+				r = String.join( "", strUpdate.subList( index + 1, strUpdate.size() ) );
+		String pivot = strUpdate.get( index );
+		pivot = new StringBuilder( pivot ).reverse().toString();
+		r = r + l;
+		pQueue.clear();
+		for ( int i = pivot.length() - 1, n = pivot.length(); i >= 0; i-- )
+		{
+			pQueue.add( new String[] { pivot.substring( i ), String.valueOf( i ), pivot.substring( i, n ) } );
+		}
+		top = pQueue.peek();
+		index = Integer.valueOf( top[1] );
+		return pivot.substring( index, pivot.length() ) + r + pivot.substring( index );
+	}
+
+	String comp( String s )
+	{
+		String sreverse = new StringBuilder( s ).reverse().toString();
+		return s.compareTo( sreverse ) > 0 ? s : sreverse;
+	}
+
 	public boolean checkInclusion( String s1, String s2 )
 	{
 		int n1 = s1.length(), n2 = s2.length();
