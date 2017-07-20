@@ -55,6 +55,127 @@ public class Solution
 		return 0;
 	}
 
+	public boolean checkInclusion( String s1, String s2 )
+	{
+		int n1 = s1.length(), n2 = s2.length();
+		if ( n2 < n1 )
+			return false;
+		int[] ary1 = new int[26], ary2 = new int[26];
+		for ( int i = 0; i < n1; i++ )
+		{
+			ary1[s1.charAt( i ) - 'a']++;
+			ary2[s2.charAt( i ) - 'a']++;
+		}
+		if ( checkInclusionHelper( ary1, ary2 ) )
+			return true;
+		for ( int i = n1; i < n2; i++ )
+		{
+			ary2[s2.charAt( i - n1 ) - 'a']--;
+			ary2[s2.charAt( i ) - 'a']++;
+			if ( checkInclusionHelper( ary1, ary2 ) )
+				return true;
+		}
+		return false;
+	}
+
+	boolean checkInclusionHelper( int[] a, int[] b )
+	{
+		for ( int i = 0; i < a.length; i++ )
+		{
+			if ( a[i] != b[i] )
+				return false;
+		}
+		return true;
+	}
+
+	public String minWindow( String s, String t )
+	{
+		if ( s.length() < t.length() || s.length() == 0 || t.length() == 0 )
+			return "";
+		int[] aryS = new int[128], aryT = new int[128];
+		int i = 0, j = 0, n = s.length();
+		for ( char k : t.toCharArray() )
+			aryT[k]++;
+		String minwindow = "";
+		while ( i < n )
+		{
+
+			while ( j < n && !checkSub( aryS, aryT ) )
+			{
+				char c = s.charAt( j );
+				aryS[c]++;
+				j++;
+			}
+			if ( checkSub( aryS, aryT ) )
+			{
+				if ( minwindow.length() == 0 || j - i < minwindow.length() )
+					minwindow = s.substring( i, j );
+			}
+			char c = s.charAt( i );
+			aryS[c]--;
+			i++;
+
+		}
+		return minwindow;
+	}
+
+	boolean checkSub( int[] a, int[] b )
+	{
+		for ( int i = 0, n = a.length; i < n; i++ )
+			if ( a[i] < b[i] )
+				return false;
+		return true;
+	}
+
+	boolean checkSub( Map<Character, Integer> map1, Map<Character, Integer> map2 )
+	{
+		for ( char k : map2.keySet() )
+		{
+			if ( !map1.containsKey( k ) )
+				return false;
+			if ( map1.get( k ) < map2.get( k ) )
+				return false;
+		}
+		return true;
+
+	}
+
+	public int[] smallestRange( List<List<Integer>> nums )
+	{
+		Queue<int[]> minQ = new PriorityQueue<>( ( a, b ) -> a[1] - b[1] );
+		int[] pos = new int[nums.size()], bound = new int[nums.size()];
+		int maxV = nums.get( 0 ).get( 0 );
+		for ( int i = 0, n = nums.size(); i < n; i++ )
+		{
+			int val = nums.get( i ).get( 0 );
+			int[] p = new int[] { i, val };
+			minQ.add( p );
+			bound[i] = nums.get( i ).size();
+			maxV = Math.max( maxV, val );
+		}
+		int[] range = new int[] { minQ.peek()[1], maxV };
+
+		while ( minQ.size() == nums.size() )
+		{
+			int[] p = minQ.poll();
+
+			if ( pos[p[0]] + 1 < bound[p[0]] )
+			{
+				pos[p[0]]++;
+				int[] t = new int[] { p[0], nums.get( p[0] ).get( pos[p[0]] ) };
+				minQ.add( t );
+				maxV = Math.max( maxV, t[1] );
+				int a = minQ.peek()[1], b = maxV;
+				if ( b - a < range[1] - range[0] )
+				{
+					range[0] = a;
+					range[1] = b;
+				}
+			}
+		}
+		return range;
+	}
+
 	public String largestNumber( int[] num )
 	{
 		String[] strs = new String[num.length];
@@ -3010,7 +3131,7 @@ public class Solution
 			return a / b;
 	}
 
-	public boolean checkInclusion( String s1, String s2 )
+	public boolean checkInclusion1( String s1, String s2 )
 	{
 		if ( s1.length() > s2.length() )
 			return false;
