@@ -60,12 +60,6 @@ public class Solution
 		return 0;
 	}
 
-	void t()
-
-	{
-
-	}
-
 	public boolean checkInclusion( String s1, String s2 )
 	{
 		int n1 = s1.length(), n2 = s2.length();
