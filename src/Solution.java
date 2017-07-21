@@ -47,8 +47,8 @@ public class Solution
 		List<List<Integer>> list = new ArrayList<>();
 		for ( Integer[] p : t )
 			list.add( new ArrayList<>( Arrays.asList( p ) ) );
-
-		System.out.println( s.checkInclusion( "ab", "eidbaooo" ) );
+		String[] p = { "abc", "xyz" };
+		System.out.println( s.splitLoopedString( p ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -63,11 +63,12 @@ public class Solution
 	public String splitLoopedString( String[] strs )
 	{
 		List<String> strUpdate = new ArrayList<>();
-		Queue<String[]> pQueue = new PriorityQueue<>( ( a, b ) -> a[0].compareTo( b[0] ) );
+		Queue<String[]> pQueue = new PriorityQueue<>( ( a, b ) -> b[0].compareTo( a[0] ) );
 		for ( int i = 0, n = strs.length; i < n; i++ )
 		{
-			pQueue.add( new String[] { strs[i], String.valueOf( i ) } );
-			strUpdate.add( comp( strs[i] ) );
+			String cmp = comp( strs[i] );
+			pQueue.add( new String[] { cmp, String.valueOf( i ) } );
+			strUpdate.add( cmp );
 		}
 		String[] top = pQueue.peek();
 		int index = Integer.valueOf( top[1] );
@@ -80,11 +81,11 @@ public class Solution
 		pQueue.clear();
 		for ( int i = pivot.length() - 1, n = pivot.length(); i >= 0; i-- )
 		{
-			pQueue.add( new String[] { pivot.substring( i ), String.valueOf( i ), pivot.substring( i, n ) } );
+			pQueue.add( new String[] { comp( pivot.substring( i ) ), String.valueOf( i ) } );
 		}
 		top = pQueue.peek();
 		index = Integer.valueOf( top[1] );
-		return pivot.substring( index, pivot.length() ) + r + pivot.substring( index );
+		return pivot.substring( index, pivot.length() ) + r + pivot.substring( 0, index );
 	}
 
 	String comp( String s )
