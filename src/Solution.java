@@ -47,7 +47,7 @@ public class Solution
 		List<List<Integer>> list = new ArrayList<>();
 		for ( Integer[] p : t )
 			list.add( new ArrayList<>( Arrays.asList( p ) ) );
-		String[] p = { "abc", "xyz" };
+		String[] p = { "awef", "eawf", "zdaeff", "awefzewaf", "awefzewaf" };
 		System.out.println( s.splitLoopedString( p ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
@@ -63,29 +63,23 @@ public class Solution
 	public String splitLoopedString( String[] strs )
 	{
 		List<String> strUpdate = new ArrayList<>();
-		Queue<String[]> pQueue = new PriorityQueue<>( ( a, b ) -> b[0].compareTo( a[0] ) );
+		Queue<String> pQueue = new PriorityQueue<>( ( a, b ) -> b.compareTo( a ) );
 		for ( int i = 0, n = strs.length; i < n; i++ )
 		{
 			String cmp = comp( strs[i] );
-			pQueue.add( new String[] { cmp, String.valueOf( i ) } );
 			strUpdate.add( cmp );
 		}
-		String[] top = pQueue.peek();
-		int index = Integer.valueOf( top[1] );
-
-		String l = String.join( "", strUpdate.subList( 0, index ) ),
-				r = String.join( "", strUpdate.subList( index + 1, strUpdate.size() ) );
-		String pivot = strUpdate.get( index );
-		pivot = new StringBuilder( pivot ).reverse().toString();
-		r = r + l;
+		System.out.println( strUpdate );
+		String loop = String.join( "", strUpdate );
 		pQueue.clear();
-		for ( int i = pivot.length() - 1, n = pivot.length(); i >= 0; i-- )
+		StringBuilder sBuilder = new StringBuilder();
+		for ( int i = 0, n = loop.length(); i < n; i++ )
 		{
-			pQueue.add( new String[] { comp( pivot.substring( i ) ), String.valueOf( i ) } );
+
+			sBuilder.delete( 0, sBuilder.length() );
+			pQueue.add( sBuilder.append( loop.substring( i, n ) ).append( loop.substring( 0, i ) ).toString() );
 		}
-		top = pQueue.peek();
-		index = Integer.valueOf( top[1] );
-		return pivot.substring( index, pivot.length() ) + r + pivot.substring( 0, index );
+		return pQueue.poll();
 	}
 
 	String comp( String s )
