@@ -43,12 +43,9 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		Integer[][] t = { { 4, 10, 15, 24, 26 }, { 0, 9, 12, 20 }, { 5, 18, 22, 30 } };
-		List<List<Integer>> list = new ArrayList<>();
-		for ( Integer[] p : t )
-			list.add( new ArrayList<>( Arrays.asList( p ) ) );
-		String[] p = { "awef", "eawf", "zdaeff", "awefzewaf", "awefzewaf" };
-		System.out.println( s.splitLoopedString( p ) );
+		int[][] t = { { 9, 10 }, { 9, 10 }, { 4, 5 }, { -9, -3 }, { -9, 1 }, { 0, 3 }, { 6, 10 }, { -5, -4 }, { -7, -6 } };
+
+		System.out.println( s.countSubstrings( "aaa" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -60,26 +57,131 @@ public class Solution
 		return 0;
 	}
 
+	public String replaceWords( List<String> dict, String sentence )
+	{
+		String[] words = sentence.split( " " );
+		for ( int i = 0, n = words.length; i < n; i++ )
+		{
+			words[i] = findRoot( words[i], dict );
+		}
+		return String.join( " ", words );
+	}
+
+	String findRoot( String string, List<String> dict )
+	{
+		for ( String s : dict )
+		{
+			int l = s.length();
+			if ( l < string.length() && string.substring( 0, l ).equals( s ) )
+				string = s;
+		}
+		return string;
+	}
+
+	public int countSubstrings( String s )
+	{
+		int k = 0;
+		for ( int i = 1; i <= s.length(); i++ )
+		{
+			for ( int j = 0; j < i; j++ )
+			{
+				String sub = s.substring( j, i );
+				if ( CSPalindrome( sub ) )
+					k++;
+			}
+		}
+		return k;
+	}
+
+	boolean CSPalindrome( String s )
+	{
+		if ( s.length() < 1 )
+			return false;
+		return new StringBuilder( s ).reverse().toString().equals( s );
+	}
+
+	public int findLongestChain( int[][] pairs )
+	{
+		FLCmem = new int[pairs.length];
+		for ( int i = 0, n = pairs.length; i < n; i++ )
+			findLongestChainDFS( pairs, i, new boolean[pairs.length] );
+
+		int k = 0;
+		for ( int i = 0; i < FLCmem.length; i++ )
+			k = Math.max( k, FLCmem[i] );
+		return k;
+	}
+
+	int findLongestChain = 0;
+	int[] FLCmem;
+
+	int findLongestChainDFS( int[][] pairs, int pos, boolean[] visit )
+	{
+		if ( FLCmem[pos] > 0 )
+			return FLCmem[pos];
+		// findLongestChain = Math.max( findLongestChain, c );
+		for ( int i = 0, n = pairs.length; i < n; i++ )
+		{
+			if ( visit[i] || pairs[i][0] <= pairs[pos][1] )
+				continue;
+			visit[i] = true;
+			FLCmem[pos] = Math.max( FLCmem[pos], 1 + findLongestChainDFS( pairs, i, visit ) );
+			visit[i] = false;
+		}
+		FLCmem[pos] = Math.max( 1, FLCmem[pos] );
+		return FLCmem[pos];
+	}
+
+	public int[] findErrorNums( int[] nums )
+	{
+		int[] checks = new int[nums.length + 1];
+		Arrays.fill( checks, 1 );
+		for ( int k : nums )
+			checks[k]--;
+		int a = -1, b = -1;
+		for ( int i = 0; i < checks.length; i++ )
+		{
+			if ( checks[i] == -1 )
+				a = i;
+			if ( checks[i] == 1 )
+				b = i;
+		}
+		return new int[] { a, b };
+	}
+
 	public String splitLoopedString( String[] strs )
 	{
-		List<String> strUpdate = new ArrayList<>();
-		Queue<String> pQueue = new PriorityQueue<>( ( a, b ) -> b.compareTo( a ) );
+		List<String> strMax = new ArrayList<>();
+		for ( String string : strs )
+			strMax.add( comp( string ) );
+		String retStr = String.join( "", strs ), newStr = "";
+		StringBuilder sb = new StringBuilder();
 		for ( int i = 0, n = strs.length; i < n; i++ )
 		{
-			String cmp = comp( strs[i] );
-			strUpdate.add( cmp );
+			String si = strs[i], rev = rev( strs[i] ),
+					mid = String.join( "", strMax.subList( i + 1, n ) ) + String.join( "", strMax.subList( 0, i ) );
+			for ( int j = 0, m = strs[i].length(); j < m; j++ )
+			{
+				sb.delete( 0, sb.length() );
+				newStr = sb.append( si.substring( j, m ) ).append( mid ).append( si.substring( 0, j ) ).toString();
+				if ( newStr.compareTo( retStr ) > 0 )
+					retStr = newStr;
+			}
+			si = rev;
+			for ( int j = 0, m = strs[i].length(); j < m; j++ )
+			{
+				sb.delete( 0, sb.length() );
+				newStr = sb.append( si.substring( j, m ) ).append( mid ).append( si.substring( 0, j ) ).toString();
+				if ( newStr.compareTo( retStr ) > 0 )
+					retStr = newStr;
+			}
 		}
-		System.out.println( strUpdate );
-		String loop = String.join( "", strUpdate );
-		pQueue.clear();
-		StringBuilder sBuilder = new StringBuilder();
-		for ( int i = 0, n = loop.length(); i < n; i++ )
-		{
+		return retStr;
+	}
 
-			sBuilder.delete( 0, sBuilder.length() );
-			pQueue.add( sBuilder.append( loop.substring( i, n ) ).append( loop.substring( 0, i ) ).toString() );
-		}
-		return pQueue.poll();
+	String rev( String s )
+	{
+		return new StringBuilder( s ).reverse().toString();
 	}
 
 	String comp( String s )
