@@ -45,7 +45,7 @@ public class Solution
 
 		int[][] t = { { 9, 10 }, { 9, 10 }, { 4, 5 }, { -9, -3 }, { -9, 1 }, { 0, 3 }, { 6, 10 }, { -5, -4 }, { -7, -6 } };
 
-		System.out.println( s.findComplement( 2147483647 ) );
+		System.out.println( s.originalDigits( "zeroonetwothreefourfivesixseveneightnine" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -55,6 +55,30 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public String originalDigits( String s )
+	{
+		int[] k = new int[26], word = new int[10];
+		List<String> list = new ArrayList<>();
+		for ( char c : s.toCharArray() )
+			k[c - 'a']++;
+		word[0] = k['z' - 'a'];
+		word[2] = k['w' - 'a'];
+		word[4] = k['u' - 'a'];
+		word[6] = k['x' - 'a'];
+		word[8] = k['g' - 'a'];
+		word[3] = k['h' - 'a'] - word[8];
+		word[5] = k['f' - 'a'] - word[4];
+		word[7] = k['v' - 'a'] - word[5];
+		word[1] = k['o' - 'a'] - word[0] - word[2] - word[4];
+		word[9] = ( k['n' - 'a'] - word[1] - word[7] ) / 2;
+		for ( int i = 0; i < 10; i++ )
+		{
+			while ( word[i]-- > 0 )
+				list.add( String.valueOf( i ) );
+		}
+		return String.join( "", list );
 	}
 
 	public int findComplement( int num )
@@ -68,7 +92,6 @@ public class Solution
 		System.out.println( Integer.toBinaryString( num ) );
 		System.out.println( Integer.toBinaryString( n - 1 ) );
 		return num ^ ( n - 1 );
-
 	}
 
 	public String replaceWords( List<String> dict, String sentence )
