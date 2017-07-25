@@ -45,7 +45,7 @@ public class Solution
 
 		int[][] t = { { 9, 10 }, { 9, 10 }, { 4, 5 }, { -9, -3 }, { -9, 1 }, { 0, 3 }, { 6, 10 }, { -5, -4 }, { -7, -6 } };
 
-		System.out.println( s.countSubstrings( "aaa" ) );
+		System.out.println( s.findComplement( 2147483647 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
@@ -55,6 +55,20 @@ public class Solution
 
 		Queue<int[]> queue = new LinkedList<>();
 		return 0;
+	}
+
+	public int findComplement( int num )
+	{
+		int i = 0, n = 1;
+		while ( i < 31 && n <= num )
+		{
+			n <<= 1;
+			i++;
+		}
+		System.out.println( Integer.toBinaryString( num ) );
+		System.out.println( Integer.toBinaryString( n - 1 ) );
+		return num ^ ( n - 1 );
+
 	}
 
 	public String replaceWords( List<String> dict, String sentence )
