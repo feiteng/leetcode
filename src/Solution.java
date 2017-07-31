@@ -43,18 +43,113 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] t = { { 9, 10 }, { 9, 10 }, { 4, 5 }, { -9, -3 }, { -9, 1 }, { 0, 3 }, { 6, 10 }, { -5, -4 }, { -7, -6 } };
-
-		System.out.println( s.originalDigits( "zeroonetwothreefourfivesixseveneightnine" ) );
+		String[] strings = { "0", "0", "0", "0", "null", "null", "0", "0", "0", "0", "0" };
+		TreeNode t = new TreeNode( strings );
+		for ( TreeNode v : s.findDuplicateSubtrees( t ) )
+			v.print();
+		// System.out.println( s.minSteps( 6 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
 	}
 
-	public int shortestDistance( int[][] grid )
+	public int minSteps( int n )
 	{
+		// prime numbers take k pastes
+		// e.g. p = 1 x p, need p pastes
+		if ( n == 1 )
+			return 0;
+		if ( minStepIsPrime( n ) )
+			return n;
+		// now find max prime factor, then paste that
+		// factorize
+		Map<Integer, Integer> map = new HashMap<>();
+		int k = n;
+		for ( int i = 2, p = n; i < p; i++ )
+		{
+			if ( n == 1 )
+				break;
+			while ( n % i == 0 )
+			{
+				n /= i;
+				map.put( i, map.getOrDefault( i, 0 ) + 1 );
+			}
+		}
+		int p = Collections.max( map.keySet() );
+		return k / p + p;
+	}
 
-		Queue<int[]> queue = new LinkedList<>();
-		return 0;
+	boolean minStepIsPrime( int k )
+	{
+		if ( k < 2 )
+			return false;
+		if ( k == 2 || k == 3 )
+			return true;
+		for ( int i = 2; i <= Math.sqrt( k ); i++ )
+			if ( k % i == 0 )
+				return false;
+		return true;
+	}
+
+	public List<TreeNode> findDuplicateSubtrees( TreeNode root )
+	{
+		// can only compare left & right, cannot stem from one tree
+		if ( root == null )
+			return new ArrayList<>();
+		List<TreeNode> list = new ArrayList<>();
+		FDSHelper( root.left, root.right, list );
+		// now level order root in list
+		return list;
+	}
+
+	void FDSLvlorder( List<TreeNode> list )
+	{
+		Queue<TreeNode> queue = new LinkedList<>();
+		queue.add( list.get( 0 ) );
+		list.remove( 0 );
+		while ( queue.isEmpty() )
+		{
+			TreeNode t = queue.poll();
+			if ( t != null )
+			{
+				queue.add( t.left );
+				queue.add( t.right );
+				list.add( t );
+			}
+		}
+	}
+
+	void FDSHelper( TreeNode r1, TreeNode r2, List<TreeNode> list )
+	{
+		if ( list.size() > 0 )
+			return;
+		if ( FDScompare( r1, r2 ) )
+			if ( r1 != null )
+				list.add( r1 );
+		if ( r1 != null )
+		{
+			FDSHelper( r1.left, r2, list );
+			FDSHelper( r1.right, r2, list );
+			// FDSHelper( r1.left, r1.right, list );
+		}
+		if ( r2 != null )
+		{
+			FDSHelper( r1, r2.left, list );
+			FDSHelper( r1, r2.right, list );
+			// FDSHelper( r2.left, r2.right, list );
+		}
+
+	}
+
+	boolean FDScompare( TreeNode root1, TreeNode root2 )
+	{
+		if ( root1 == null && root2 == null )
+			return true;
+		if ( root1 == null || root2 == null )
+			return false;
+		if ( root1.val == root2.val )
+			if ( FDScompare( root1.left, root2.left ) && FDScompare( root1.right, root2.right ) )
+				return true;
+		return false;
 	}
 
 	public String originalDigits( String s )
