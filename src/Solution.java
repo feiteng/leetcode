@@ -45,49 +45,12 @@ public class Solution
 
 		String[] strings = { "0", "0", "0", "0", "null", "null", "0", "0", "0", "0", "0" };
 		TreeNode t = new TreeNode( strings );
-		for ( TreeNode v : s.findDuplicateSubtrees( t ) )
-			v.print();
-		// System.out.println( s.minSteps( 6 ) );
+		// for ( TreeNode v : s.findDuplicateSubtrees( t ) )
+		// v.print();
+		System.out.println(
+				s.numDecodingsHelper( "10" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
-	}
-
-	public int minSteps( int n )
-	{
-		// prime numbers take k pastes
-		// e.g. p = 1 x p, need p pastes
-		if ( n == 1 )
-			return 0;
-		if ( minStepIsPrime( n ) )
-			return n;
-		// now find max prime factor, then paste that
-		// factorize
-		Map<Integer, Integer> map = new HashMap<>();
-		int k = n;
-		for ( int i = 2, p = n; i < p; i++ )
-		{
-			if ( n == 1 )
-				break;
-			while ( n % i == 0 )
-			{
-				n /= i;
-				map.put( i, map.getOrDefault( i, 0 ) + 1 );
-			}
-		}
-		int p = Collections.max( map.keySet() );
-		return k / p + p;
-	}
-
-	boolean minStepIsPrime( int k )
-	{
-		if ( k < 2 )
-			return false;
-		if ( k == 2 || k == 3 )
-			return true;
-		for ( int i = 2; i <= Math.sqrt( k ); i++ )
-			if ( k % i == 0 )
-				return false;
-		return true;
 	}
 
 	public List<TreeNode> findDuplicateSubtrees( TreeNode root )
@@ -150,6 +113,91 @@ public class Solution
 			if ( FDScompare( root1.left, root2.left ) && FDScompare( root1.right, root2.right ) )
 				return true;
 		return false;
+	}
+
+	public int numDecodings( String s )
+	{
+		if ( s.length() < 1 )
+			return 0;
+		int[] f = new int[s.length() + 1];
+		f[0] = 1;
+		f[1] = s.charAt( 0 ) == '0' ? 0 : 1;
+		for ( int i = 2, n = s.length(); i <= n; i++ )
+		{
+			int c1 = s.charAt( i - 1 ) == '0' ? 0 : s.charAt( i - 1 ) == '*' ? 9 : 1, c2 = 0;
+			if ( s.charAt( i - 2 ) == '*' ) // 10 - 19, 20 - 26
+				c2 = s.charAt( i - 1 ) < '7' ? 2 : 1;
+			else
+			{
+				if ( s.charAt( i - 1 ) == '*' )
+				{
+					int k = s.charAt( i - 1 ) - '0';
+					c2 = s.charAt( i - 2 );
+				}
+			}
+			c2 = c2 > 9 && c2 <= 26 ? 1 : 0;
+			f[i] = f[i - 1] * c1 + f[i - 2] * c2;
+		}
+		return f[s.length()];
+	}
+
+	int numDecodingsHelper( String s )
+	{
+		if ( s.length() < 1 )
+			return 0;
+		int[] f = new int[s.length() + 1];
+		f[0] = 1;
+		f[1] = s.charAt( 0 ) == '0' ? 0 : 1;
+		for ( int i = 2, n = s.length(); i <= n; i++ )
+		{
+			int c1 = s.charAt( i - 1 ) == '0' ? 0 : 1, c2 = Integer.valueOf( s.substring( i - 2, i ) );
+			c2 = c2 > 9 && c2 <= 26 ? 1 : 0;
+			f[i] = f[i - 1] * c1 + f[i - 2] * c2;
+		}
+		return f[s.length()];
+	}
+
+	public int maxA( int N )
+	{
+		int[] tot = new int[N + 1], add = new int[N + 1],
+				paste = new int[N + 1], ph = new int[N + 1];
+		tot[1] = add[1] = 1;
+		tot[2] = add[2] = 2;
+		tot[3] = add[3] = 3;
+		for ( int i = 3; i <= N; i++ )
+		{
+			ph[i] = tot[i - 3];
+			for ( int j = i, k = 1; j <= N; j++, k++ )
+				tot[j] = Math.max( tot[j], ph[i - 1] * k + paste[i - 1] );
+
+			add[i] = tot[i - 1] + 1;
+			paste[i] = tot[i - 3] * 2;
+			tot[i] = Math.max( tot[i], Math.max( add[i], paste[i] ) );
+		}
+
+		System.out.println( "step\ttotal\tadd\tpaste\tph" );
+		for ( int i = 0; i <= N; i++ )
+		{
+			System.out.printf( "%d\t%d\t%d\t%d\t%d\n", i, tot[i], add[i], paste[i], ph[i] );
+		}
+		return tot[N];
+	}
+
+	public int minSteps( int n )
+	{
+		int[] k = new int[n + 1];
+		Arrays.fill( k, Integer.MAX_VALUE );
+		k[1] = 0;
+		for ( int i = 2; i <= n; i++ )
+		{
+			for ( int j = 1; j < i; j++ )
+			{
+				if ( i % j == 0 )
+					k[i] = Math.min( k[i], i / j + k[j] );
+			}
+
+		}
+		return k[n];
 	}
 
 	public String originalDigits( String s )
@@ -944,34 +992,6 @@ public class Solution
 		}
 		int n = costs.length - 1;
 		return Math.min( Math.min( A[n][0], A[n][1] ), A[n][2] );
-	}
-
-	public int numDecodings( String s )
-	{
-		if ( s.equals( "" ) )
-			return 0;
-		return numDecodingsHelper( s );
-	}
-
-	int numDecodingsHelper( String s )
-	{
-		if ( s.equals( "0" ) )
-			return 0;
-		if ( s.length() < 2 )
-			return 1;
-		return decode( s.substring( 0, 1 ) ) * numDecodingsHelper( s.substring( 1 ) ) +
-				decode( s.substring( 0, 2 ) ) * numDecodingsHelper( s.substring( 2 ) );
-	}
-
-	int decode( String s )
-	{
-		if ( s.charAt( 0 ) == '0' )
-			return 0;
-		if ( s.length() < 2 )
-			return 1;
-		if ( Integer.valueOf( s ) <= 26 )
-			return 1;
-		return 0;
 	}
 
 	public int hIndex( int[] citations )
