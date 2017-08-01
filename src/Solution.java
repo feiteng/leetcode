@@ -48,9 +48,42 @@ public class Solution
 		// for ( TreeNode v : s.findDuplicateSubtrees( t ) )
 		// v.print();
 		System.out.println(
-				s.numDecodingsHelper( "10" ) );
+				s.numDecodings( "**********1111111111" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 
+	}
+
+	public int numDecodings( String s )
+	{
+		if ( s.length() < 1 )
+			return 0;
+		long[] f = new long[3];
+		f[0] = 1;
+		f[1] = s.charAt( 0 ) == '0' ? 0 : s.charAt( 0 ) == '*' ? 9 : 1;
+		for ( int i = 2, n = s.length(); i <= n; i++ )
+		{
+			int c1 = s.charAt( i - 1 ) == '0' ? 0 : s.charAt( i - 1 ) == '*' ? 9 : 1, c2 = 0;
+			String sub2 = s.substring( i - 2, i );
+			if ( sub2.equals( "**" ) )
+				c2 = 15;
+			else if ( sub2.charAt( 0 ) == '*' ) // *#
+			{
+				int v = sub2.charAt( 1 ) - '0';
+				c2 = v > 6 ? 1 : 2;
+			}
+			else if ( sub2.charAt( 1 ) == '*' ) // #*
+			{
+				int v = sub2.charAt( 0 ) - '0';
+				c2 = v == 1 ? 9 : v == 2 ? 6 : 0;
+			}
+			else
+			{
+				int v = Integer.valueOf( sub2 );
+				c2 = v > 9 && v <= 26 ? 1 : 0;
+			}
+			f[i % 3] = ( f[( i - 1 ) % 3] * c1 % 1000000007 + f[( i - 2 ) % 3] * c2 % 1000000007 ) % 1000000007;
+		}
+		return (int) f[s.length() % 3];
 	}
 
 	public List<TreeNode> findDuplicateSubtrees( TreeNode root )
@@ -113,32 +146,6 @@ public class Solution
 			if ( FDScompare( root1.left, root2.left ) && FDScompare( root1.right, root2.right ) )
 				return true;
 		return false;
-	}
-
-	public int numDecodings( String s )
-	{
-		if ( s.length() < 1 )
-			return 0;
-		int[] f = new int[s.length() + 1];
-		f[0] = 1;
-		f[1] = s.charAt( 0 ) == '0' ? 0 : 1;
-		for ( int i = 2, n = s.length(); i <= n; i++ )
-		{
-			int c1 = s.charAt( i - 1 ) == '0' ? 0 : s.charAt( i - 1 ) == '*' ? 9 : 1, c2 = 0;
-			if ( s.charAt( i - 2 ) == '*' ) // 10 - 19, 20 - 26
-				c2 = s.charAt( i - 1 ) < '7' ? 2 : 1;
-			else
-			{
-				if ( s.charAt( i - 1 ) == '*' )
-				{
-					int k = s.charAt( i - 1 ) - '0';
-					c2 = s.charAt( i - 2 );
-				}
-			}
-			c2 = c2 > 9 && c2 <= 26 ? 1 : 0;
-			f[i] = f[i - 1] * c1 + f[i - 2] * c2;
-		}
-		return f[s.length()];
 	}
 
 	int numDecodingsHelper( String s )
