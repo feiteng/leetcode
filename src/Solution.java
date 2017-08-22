@@ -43,14 +43,83 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String[] strings = { "0", "0", "0", "0", "null", "null", "0", "0", "0", "0", "0" };
+		String[] strings = { "1" };
 		TreeNode t = new TreeNode( strings );
 		// for ( TreeNode v : s.findDuplicateSubtrees( t ) )
 		// v.print();
-		System.out.println(
-				s.numDecodings( "**********1111111111" ) );
+		System.out.println( s.findTarget( t, 2 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
 
+	int maxPathMax = Integer.MIN_VALUE;
+
+	public int maxPathSum( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+		maxmPathDown( root );
+		return maxPathMax;
+	}
+
+	int maxmPathDown( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+		int left = Math.max( 0, maxmPathDown( root.left ) );
+		int right = Math.max( 0, maxmPathDown( root.right ) );
+		maxPathMax = Math.max( maxPathMax, left + right + root.val );
+		return root.val + Math.max( left, right );
+	}
+
+	Map<Integer, Integer> findTMap = new HashMap<>();
+
+	public boolean findTarget( TreeNode root, int k )
+	{
+		findTargetElements( root );
+		for ( int m : findTMap.keySet() )
+		{
+			if ( k - m == m )
+			{
+				if ( findTMap.get( m ) > 1 )
+					return true;
+			}
+			else if ( findTMap.containsKey( k - m ) )
+				return true;
+		}
+		return false;
+	}
+
+	void findTargetElements( TreeNode root )
+	{
+		if ( root == null )
+			return;
+		findTMap.put( root.val, findTMap.getOrDefault( root.val, 0 ) + 1 );
+		findTargetElements( root.left );
+		findTargetElements( root.right );
+	}
+
+	Set<Integer> cetSet = new HashSet<>();
+
+	public boolean checkEqualTree( TreeNode root )
+	{
+		int sum = treeSum( root ), target = sum / 2;
+		System.out.println( sum );
+		if ( sum % 2 != 0 )
+			return false;
+		// now find subtree that sums to target
+		System.out.println( cetSet );
+		return cetSet.contains( target );
+	}
+
+	int treeSum( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+		int left = treeSum( root.left ), right = treeSum( root.right ), rval = root.val + left + right;
+		cetSet.add( left );
+		cetSet.add( right );
+		cetSet.add( rval );
+		return rval;
 	}
 
 	public int numDecodings( String s )
@@ -8335,14 +8404,6 @@ public class Solution
 		}
 
 		return -1;
-	}
-
-	public void s8()
-	{
-		char x = 'A';
-		int i = 0;
-		System.out.print( true ? x : 0 );
-		System.out.print( false ? i : x );
 	}
 
 	public int bfsQue( String beginWord, String endWord, Set<String> wordList )
