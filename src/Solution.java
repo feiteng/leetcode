@@ -134,6 +134,34 @@ public class Solution
 		return sum / k;
 	}
 
+	public int splitArray( int[] nums, int m )
+	{
+		int[] sum = new int[nums.length + 1];
+		for ( int i = 0; i < nums.length; i++ )
+			sum[i + 1] = sum[i] + nums[i];
+		int[][] vis = new int[nums.length + 1][nums.length + 1];
+		for ( int[] v : vis )
+			Arrays.fill( v, Integer.MAX_VALUE );
+		return splitARYHelper( sum, m - 1, 1, nums.length, vis );
+	}
+
+	int splitARYHelper( int[] vals, int k, int s, int e, int[][] visited )
+	{
+		if ( visited[s][e] != Integer.MAX_VALUE )
+			return visited[s][e];
+		if ( k == 0 || s == e )
+			return vals[e] - vals[s - 1];
+		int min = Integer.MAX_VALUE;
+		for ( int i = s; i < e; i++ )
+		{
+			if ( e - s <= k - 1 )
+				continue;
+			min = Math.min( min, Math.max( vals[i] - vals[s - 1], splitARYHelper( vals, k - 1, i + 1, e, visited ) ) );
+		}
+		visited[s][e] = Math.min( visited[s][e], min );
+		return visited[s][e];
+	}
+
 	int maxPathMax = Integer.MIN_VALUE;
 
 	public int maxPathSum( TreeNode root )
