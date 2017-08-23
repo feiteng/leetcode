@@ -51,6 +51,44 @@ public class Solution
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
+	class Interval
+	{
+		int start = 0;
+		int end = 0;
+
+		Interval( int s, int e )
+		{
+			start = s;
+			end = e;
+		}
+	}
+
+	public int eraseOverlapIntervals( Interval[] intervals )
+	{
+		int k = 0;
+		Map<Interval, Set<Interval>> map = new HashMap<>();
+		for ( Interval i : intervals )
+			map.put( i, new HashSet<>() );
+		for ( Interval i : intervals )
+		{
+			for ( Interval v : map.keySet() )
+				if ( overlap( i, v ) )
+				{
+					map.get( i ).add( v );
+					map.get( v ).add( i );
+				}
+		}
+
+		return k;
+	}
+
+	boolean overlap( Interval v1, Interval v2 )
+	{
+		if ( v1.end < v2.start || v1.start > v2.end )
+			return false;
+		return true;
+	}
+
 	public int strangePrinter( String s )
 	{
 		Map<Character, Integer> map = new HashMap<>();
