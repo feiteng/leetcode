@@ -51,6 +51,89 @@ public class Solution
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
+	public int strangePrinter( String s )
+	{
+		Map<Character, Integer> map = new HashMap<>();
+		for ( char k : s.toCharArray() )
+		{
+			if ( !map.containsKey( k ) )
+				map.put( k, 0 );
+			map.put( k, map.get( k ) + 1 );
+		}
+		return map.keySet().size();
+	}
+
+	class TNW
+	{
+		TreeNode t;
+		int wid;
+
+		public TNW( TreeNode t, int width )
+		{
+			this.t = t;
+			wid = width;
+		}
+	}
+
+	public int widthOfBinaryTree( TreeNode root )
+	{
+		// level order, counting null root.
+		if ( root == null )
+			return 0;
+		LinkedList<TNW> queue = new LinkedList<>(), tmp;
+		queue.add( new TNW( root, 0 ) );
+		int width = 1;
+		while ( !queue.isEmpty() )
+		{
+			tmp = new LinkedList<>();
+			int min = queue.peek().wid, max = queue.getLast().wid;
+			width = Math.max( width, max - min + 1 );
+			while ( !queue.isEmpty() )
+			{
+				TNW t = queue.poll();
+				if ( t.t.left != null )
+					tmp.add( new TNW( t.t.left, t.wid * 2 ) );
+				if ( t.t.right != null )
+					tmp.add( new TNW( t.t.right, t.wid * 2 + 1 ) );
+			}
+			queue.addAll( tmp );
+		}
+		return width;
+	}
+
+	public int[][] imageSmoother( int[][] M )
+	{
+		int m = M.length, n = M[0].length;
+		int[][] ret = new int[m][n];
+		for ( int i = 0; i < m; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+			{
+				ret[i][j] = imageAvg( M, i, j );
+			}
+		}
+		return ret;
+	}
+
+	int imageAvg( int[][] M, int i, int j )
+	{
+		int[][] dirs = {
+				{ -1, -1 }, { -1, 0 }, { -1, 1 },
+				{ 0, -1 }, { 0, 0 }, { 0, 1 },
+				{ 1, -1 }, { 1, 0 }, { 1, 1 }
+		};
+		int m = M.length, n = M[0].length, k = 0, sum = 0;
+		for ( int[] d : dirs )
+		{
+			int ni = i + d[0], nj = j + d[1];
+			if ( ni < 0 || nj < 0 || ni >= m || nj >= n )
+				continue;
+			sum += M[ni][nj];
+			k++;
+		}
+		return sum / k;
+	}
+
 	int maxPathMax = Integer.MIN_VALUE;
 
 	public int maxPathSum( TreeNode root )
