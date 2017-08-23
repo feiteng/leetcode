@@ -32,6 +32,18 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 
+class Interval
+{
+	int start = 0;
+	int end = 0;
+
+	Interval( int s, int e )
+	{
+		start = s;
+		end = e;
+	}
+}
+
 public class Solution
 {
 
@@ -44,49 +56,59 @@ public class Solution
 		time = System.currentTimeMillis();
 
 		String[] strings = { "1" };
-		TreeNode t = new TreeNode( strings );
-		// for ( TreeNode v : s.findDuplicateSubtrees( t ) )
-		// v.print();
-		System.out.println( s.findTarget( t, 2 ) );
+		int[][] v = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 1, 3 } };
+		Interval[] vi = new Interval[v.length];
+		for ( int i = 0; i < v.length; i++ )
+			vi[i] = new Interval( v[i][0], v[i][1] );
+
+		System.out.println( s.eraseOverlapIntervals( vi ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
-	}
-
-	class Interval
-	{
-		int start = 0;
-		int end = 0;
-
-		Interval( int s, int e )
-		{
-			start = s;
-			end = e;
-		}
 	}
 
 	public int eraseOverlapIntervals( Interval[] intervals )
 	{
-		int k = 0;
 		Map<Interval, Set<Interval>> map = new HashMap<>();
 		for ( Interval i : intervals )
 			map.put( i, new HashSet<>() );
 		for ( Interval i : intervals )
 		{
 			for ( Interval v : map.keySet() )
-				if ( overlap( i, v ) )
+				if ( i != v && overlap( i, v ) )
 				{
 					map.get( i ).add( v );
 					map.get( v ).add( i );
 				}
 		}
+		Set<Interval> set = new HashSet<>();
+		while ( true )
+		{
+			Interval remove = null;
+			int size = 0;
+			for ( Interval v : map.keySet() )
+			{
+				if ( map.get( v ).size() > size )
+					size = map.get( v ).size();
+				remove = v;
+			}
+			if ( size == 0 )
+				break;
+			set.add( remove );
+			map.remove( remove );
+			for ( Interval v : map.keySet() )
+			{
+				if ( map.get( v ).contains( remove ) )
+					map.get( v ).remove( remove );
+			}
+		}
 
-		return k;
+		return set.size();
 	}
 
 	boolean overlap( Interval v1, Interval v2 )
 	{
-		if ( v1.end < v2.start || v1.start > v2.end )
-			return false;
-		return true;
+		if ( v1.end > v2.start || v2.end > v1.start )
+			return true;
+		return false;
 	}
 
 	public int strangePrinter( String s )
