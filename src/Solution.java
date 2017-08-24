@@ -64,7 +64,8 @@ public class Solution
 		System.out.println( s.eraseOverlapIntervals( vi ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
-
+	
+	// updated 8_24
 	public int eraseOverlapIntervals( Interval[] intervals )
 	{
 		Map<Interval, Set<Interval>> map = new HashMap<>();
