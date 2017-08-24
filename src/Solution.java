@@ -56,7 +56,7 @@ public class Solution
 		time = System.currentTimeMillis();
 
 		String[] strings = { "1" };
-		int[][] v = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 1, 3 } };
+		int[][] v = { { 0, 2 }, { 1, 3 }, { 1, 3 }, { 2, 4 }, { 3, 5 }, { 3, 5 }, { 4, 6 } };
 		Interval[] vi = new Interval[v.length];
 		for ( int i = 0; i < v.length; i++ )
 			vi[i] = new Interval( v[i][0], v[i][1] );
@@ -64,7 +64,7 @@ public class Solution
 		System.out.println( s.eraseOverlapIntervals( vi ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
-	
+
 	// updated 8_24
 	public int eraseOverlapIntervals( Interval[] intervals )
 	{
@@ -80,16 +80,28 @@ public class Solution
 					map.get( v ).add( i );
 				}
 		}
+
 		Set<Interval> set = new HashSet<>();
 		while ( true )
 		{
+			System.out.println();
+			for ( Interval v : map.keySet() )
+			{
+				System.out.print( v.start + "_" + v.end );
+				for ( Interval m : map.get( v ) )
+					System.out.print( " " + m.start + "_" + m.end );
+				System.out.println();
+			}
+
 			Interval remove = null;
 			int size = 0;
 			for ( Interval v : map.keySet() )
 			{
 				if ( map.get( v ).size() > size )
+				{
 					size = map.get( v ).size();
-				remove = v;
+					remove = v;
+				}
 			}
 			if ( size == 0 )
 				break;
@@ -100,6 +112,7 @@ public class Solution
 				if ( map.get( v ).contains( remove ) )
 					map.get( v ).remove( remove );
 			}
+			System.out.println( "" + remove.start + "_" + remove.end );
 		}
 
 		return set.size();
@@ -107,9 +120,11 @@ public class Solution
 
 	boolean overlap( Interval v1, Interval v2 )
 	{
-		if ( v1.end > v2.start || v2.end > v1.start )
-			return true;
-		return false;
+		// System.out.println( v1.end <= v2.start );
+		// System.out.println( v2.end <= v1.start );
+		if ( v1.end <= v2.start || v2.end <= v1.start )
+			return false;
+		return true;
 	}
 
 	public int strangePrinter( String s )
