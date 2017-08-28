@@ -55,31 +55,121 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String[] strings = { "1" };
-		int[][] v = { { 0, 2 }, { 1, 3 }, { 1, 3 }, { 2, 4 }, { 3, 5 }, { 3, 5 }, { 4, 6 } };
-		Interval[] vi = new Interval[v.length];
-		for ( int i = 0; i < v.length; i++ )
-			vi[i] = new Interval( v[i][0], v[i][1] );
+		int[] vls = {};
 
-		System.out.println( s.eraseOverlapIntervals( vi ) );
+		System.out.println( s.isPossible( vls ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
 	public boolean checkPossibility( int[] nums )
 	{
-		int k = 0, minval = nums[0];
-		for ( int i = 1; i < nums.length - 1; i++ )
+		if ( nums.length < 3 )
+			return true;
+		int max = nums[1];
+		for ( int i = 0, n = nums.length; i < n; i++ )
 		{
-			if ( minval < nums[i] )
-				continue;
+			max = Math.max( max, nums[i] );
+			if ( checkPossTest( nums, max, i ) )
+				return true;
+		}
+		return false;
+	}
+
+	boolean checkPossTest( int[] nums, int max, int pos )
+	{
+
+	}
+
+	boolean checkPossOrder( int[] nums, int i, int j )
+	{
+		for ( int k = i; k < j - 1; k++ )
+		{
+			if ( nums[k] > nums[k + 1] )
+				return false;
+		}
+		return true;
+	}
+
+	public boolean isPossible( int[] nums )
+	{
+		LinkedList<LinkedList<Integer>> lists = new LinkedList<>();
+		for ( int k : nums )
+		{
+			boolean pad = false;
+			for ( int n = lists.size(), i = n - 1; i >= 0; i-- )
+			{
+				LinkedList<Integer> list = lists.get( i );
+				if ( list.getLast() == k ) // duplicate
+					continue;
+				if ( list.getLast() + 1 < k && list.size() > 2 )
+					lists.remove( i );
+				if ( list.getLast() + 1 == k )
+				{
+					list.add( k );
+					pad = true;
+					break;
+				}
+			}
+			if ( !pad )
+			{
+				LinkedList<Integer> list = new LinkedList<>();
+				list.add( k );
+				lists.add( list );
+			}
+
+		}
+		System.out.println( lists );
+		for ( List<Integer> list : lists )
+		{
+			if ( list.size() < 3 )
+				return false;
+		}
+		return true;
+	}
+
+	public TreeNode deleteNode( TreeNode root, int key )
+	{
+		TreeNode cpy = root, cpyPar = root;
+		while ( cpy != null && cpy.val != key )
+		{
+			cpyPar = cpy;
+			if ( key < cpy.val )
+				cpy = cpy.left;
+			else
+				cpy = cpy.right;
+		}
+		if ( cpy == null )
+			return root; // can't find node
+		if ( cpy.left != null )
+		{
+			TreeNode last = cpy.left, left = cpy.left, right = cpy.right;
+			while ( last.right != null )
+				last = last.right;
+			last.right = right;
+			cpy.val = left.val;
+			cpy.left = left.left;
+			cpy.right = left.right;
+		}
+		else if ( cpy.right != null )
+		{
+			// search in right child
+			cpy.val = cpy.right.val;
+			cpy.left = cpy.right.left;
+			cpy.right = cpy.right.right;
+		}
+		else
+		{
+			if ( cpy == root )
+				root = null;
 			else
 			{
-				k++;
-				minval = nums[i];
+				if ( cpy == cpyPar.left )
+					cpyPar.left = null;
+				else
+					cpyPar.right = null;
 			}
 		}
-		return k < 2;
-
+		return root;
 	}
 
 	// updated 8_24
