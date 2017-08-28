@@ -65,6 +65,23 @@ public class Solution
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
+	public boolean checkPossibility( int[] nums )
+	{
+		int k = 0, minval = nums[0];
+		for ( int i = 1; i < nums.length - 1; i++ )
+		{
+			if ( minval < nums[i] )
+				continue;
+			else
+			{
+				k++;
+				minval = nums[i];
+			}
+		}
+		return k < 2;
+
+	}
+
 	// updated 8_24
 	public int eraseOverlapIntervals( Interval[] intervals )
 	{
