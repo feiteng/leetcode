@@ -57,8 +57,69 @@ public class Solution
 
 		String[] times = { "23:59", "00:00" };
 
-		System.out.println( s.findMinDifference( new ArrayList<>( Arrays.asList( times ) ) ) );
+		System.out.println( s.calculate227( "0-2147483647" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int calculate227( String s )
+	{
+
+		s = s.replace( " ", "" );
+		Stack<Integer> sInt = new Stack<>();
+		Stack<Character> sOps = new Stack<>();
+		for ( int i = 0, n = s.length(); i < n; i++ )
+		{
+			char c = s.charAt( i );
+			if ( c == ' ' )
+				continue;
+			if ( c == '+' || c == '-' )
+				sOps.push( c );
+			else if ( c == '*' || c == '/' )
+			{
+				int a = sInt.pop(), b;
+				int j = calculate227NextInt( s, i + 1 );
+				b = Integer.valueOf( s.substring( i + 1, j ) );
+				if ( c == '*' )
+					sInt.push( a * b );
+				if ( c == '/' )
+					sInt.push( a / b );
+				i = j - 1;
+			}
+			else
+			{
+				int j = calculate227NextInt( s, i );
+				sInt.push( Integer.valueOf( s.substring( i, j ) ) );
+				i = j - 1;
+			}
+		}
+		sInt = reverseStack( sInt );
+		sOps = reverseStack( sOps );
+
+		while ( !sOps.isEmpty() )
+		{
+			char c = sOps.pop();
+			if ( c == '+' )
+				sInt.push( sInt.pop() + sInt.pop() );
+			if ( c == '-' )
+				sInt.push( sInt.pop() - sInt.pop() );
+		}
+		return sInt.peek();
+	}
+
+	<Item> Stack<Item> reverseStack( Stack<Item> stack )
+	{
+		Stack<Item> rev = new Stack<>();
+		while ( !stack.isEmpty() )
+			rev.push( stack.pop() );
+		return rev;
+	}
+
+	int calculate227NextInt( String s, int i )
+	{
+		int n = s.length(), j = i;
+		while ( j < n && s.charAt( j ) >= '0' && s.charAt( j ) <= '9' )
+			j++;
+		return j;
 	}
 
 	public int findMinDifference( List<String> timePoints )
