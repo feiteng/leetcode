@@ -55,29 +55,248 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] vls = {};
+		String[] times = { "23:59", "00:00" };
 
-		System.out.println( s.isPossible( vls ) );
+		System.out.println( s.findMinDifference( new ArrayList<>( Arrays.asList( times ) ) ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
-	public boolean checkPossibility( int[] nums )
+	public int findMinDifference( List<String> timePoints )
 	{
-		if ( nums.length < 3 )
-			return true;
-		int max = nums[1];
-		for ( int i = 0, n = nums.length; i < n; i++ )
+		boolean[] timeSlots = new boolean[1440];
+		for ( String time : timePoints )
 		{
-			max = Math.max( max, nums[i] );
-			if ( checkPossTest( nums, max, i ) )
-				return true;
+			int h = Integer.valueOf( time.substring( 0, 2 ) ), m = Integer.valueOf( time.substring( 3, 5 ) ),
+					timeInt = h * 60 + m;
+			if ( timeSlots[timeInt] )
+				return 0;
+			timeSlots[timeInt] = true;
 		}
-		return false;
+		int j = 0, minDiff = 1440, initial = 0;
+		while ( !timeSlots[j] )
+			j++;
+		initial = j;
+		for ( int i = j + 1; i < 1440; i++ )
+		{
+			if ( !timeSlots[i] )
+				continue;
+			minDiff = Math.min( minDiff, i - j );
+			j = i;
+		}
+		int last = j;
+		minDiff = Math.min( minDiff, initial + 1440 - last );
+		return minDiff;
 	}
 
-	boolean checkPossTest( int[] nums, int max, int pos )
+	int findMinDiffTime( String s1, String s2 )
 	{
+		int h1 = Integer.valueOf( s1.substring( 0, 2 ) ),
+				h2 = Integer.valueOf( s2.substring( 0, 2 ) ),
+				m1 = Integer.valueOf( s1.substring( 3, 5 ) ),
+				m2 = Integer.valueOf( s2.substring( 3, 5 ) );
+		return Math.min( ( h2 - h1 ) * 60 + m2 - m1,
+				( h1 + 24 - h2 ) * 60 + m1 - m2 );
+	}
 
+	public String findContestMatch( int n )
+	{
+		LinkedList<String> list = new LinkedList<>(), tmp;
+		for ( int i = 1; i <= n; i++ )
+			list.add( String.valueOf( i ) );
+		while ( list.size() > 1 )
+		{
+			tmp = new LinkedList<>();
+			while ( list.size() > 0 )
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.append( "(" ).append( list.getFirst() ).append( "," ).append( list.getLast() ).append( ")" );
+				list.remove();
+				list.removeLast();
+				tmp.add( sb.toString() );
+			}
+			list.addAll( tmp );
+		}
+		return list.getFirst();
+	}
+
+	public int characterReplacement( String s, int k )
+	{
+		char[] v = s.toCharArray();
+		int[] count = new int[26];
+		int maxCount = 0;
+		for ( int i = 0, j = 0, n = v.length; i < n; i++ )
+		{
+			while ( j < n )
+			{
+				count[v[j] - 'A']++;
+				if ( !checkCount( count, k ) )
+				{
+					count[v[j] - 'A']--;
+					break;
+				}
+				j++;
+			}
+			maxCount = Math.max( maxCount, j - i );
+			count[v[i] - 'A']--;
+		}
+		return maxCount;
+	}
+
+	boolean checkCount( int[] count, int k )
+	{
+		int max = 0, tot = 0;
+		for ( int m : count )
+		{
+			max = Math.max( max, m );
+			tot += m;
+		}
+		return tot - max <= k;
+	}
+
+	public int pathSum( int[] nums )
+	{
+		Map<Integer, Integer> map = new HashMap<>();
+		for ( int v : nums )
+		{
+			v -= 10;
+			map.put( v / 10, v % 10 );
+		}
+		int sum = 0;
+		Queue<Integer> q = new LinkedList<>();
+		q.add( 10 );
+		while ( !q.isEmpty() )
+		{
+			int k = q.poll(), a = k / 10, b = k % 10,
+					n1 = ( a + 1 ) * 10 + b * 2, n2 = n1 + 1, val = map.get( k );
+			if ( map.containsKey( n1 ) )
+			{
+				map.put( n1, map.get( n1 ) + val );
+				q.add( n1 );
+			}
+			if ( map.containsKey( n2 ) )
+			{
+				map.put( n2, map.get( n2 ) + val );
+				q.add( n2 );
+			}
+			if ( !map.containsKey( n1 ) && !map.containsKey( n2 ) )
+				// at leaf node
+				sum += val;
+		}
+		return sum;
+
+	}
+
+	// public List<List<Integer>> pathSum( TreeNode root, int sum )
+	// {
+	// List<List<Integer>> ret = new ArrayList<List<Integer>>();
+	// pathSumHelper( ret, new ArrayList<>(), root, sum );
+	// return ret;
+	// }
+	//
+	// void pathSumHelper( List<List<Integer>> ret, List<Integer> list, TreeNode root, int target )
+	// {
+	// if ( root == null )
+	// return;
+	//
+	// list.add( root.val );
+	// if ( target == root.val && root.left == null && root.right == null )
+	// {
+	// ret.add( new ArrayList<>( list ) );
+	// list.remove( list.size() - 1 );
+	// return;
+	// }
+	// else
+	// {
+	// pathSumHelper( ret, list, root.left, target - root.val );
+	// pathSumHelper( ret, list, root.right, target - root.val );
+	// }
+	// list.remove( list.size() - 1 );
+	// }
+
+	int pathSumK = 0;
+
+	public int pathSum( TreeNode root, int sum )
+	{
+		Queue<TreeNode> q = new LinkedList<>();
+		q.add( root );
+		while ( !q.isEmpty() )
+		{
+			TreeNode t = q.poll();
+			if ( t != null )
+			{
+				q.add( t.left );
+				q.add( t.right );
+				findPathSum( t, sum );
+			}
+		}
+		return pathSumK;
+	}
+
+	void findPathSum( TreeNode root, int k )
+	{
+		if ( root == null )
+			return;
+		if ( k == root.val )
+			pathSumK++;
+		findPathSum( root.left, k - root.val );
+		findPathSum( root.right, k - root.val );
+	}
+
+	public int largestBSTSubtree( TreeNode root )
+	{
+		if ( isBST( root, null, null ) )
+			return findNodes( root );
+		return Math.max( largestBSTSubtree( root.left ),
+				largestBSTSubtree( root.right ) );
+	}
+
+	boolean isBST( TreeNode root, Integer min, Integer max )
+	{
+		if ( root == null )
+			return true;
+		if ( min != null && root.val <= min )
+			return false;
+		if ( max != null && root.val >= max )
+			return false;
+		return isBST( root.left, min, root.val ) &&
+				isBST( root.right, root.val, max );
+	}
+
+	void inOrder( TreeNode root, List<Integer> list )
+	{
+		if ( root == null )
+			return;
+		inOrder( root.left, list );
+		list.add( root.val );
+		inOrder( root.right, list );
+	}
+
+	int findNodes( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+		return 1 + findNodes( root.left ) + findNodes( root.right );
+	}
+
+	public TreeNode inorderSuccessor( TreeNode root, TreeNode p )
+	{
+		List<TreeNode> list = new ArrayList<>();
+		inOrderSuccessorTravel( root, list );
+		for ( int i = 0, n = list.size(); i < n; i++ )
+		{
+			if ( list.get( i ) == p )
+				return i == n - 1 ? null : list.get( i + 1 );
+		}
+		return null;
+	}
+
+	void inOrderSuccessorTravel( TreeNode root, List<TreeNode> list )
+	{
+		if ( root == null )
+			return;
+		inOrderSuccessorTravel( root.left, list );
+		list.add( root );
+		inOrderSuccessorTravel( root.right, list );
 	}
 
 	boolean checkPossOrder( int[] nums, int i, int j )
@@ -4854,34 +5073,6 @@ public class Solution
 			s += String.valueOf( c );
 		}
 		return num.equals( s );
-	}
-
-	public List<List<Integer>> pathSum( TreeNode root, int sum )
-	{
-		List<List<Integer>> ret = new ArrayList<List<Integer>>();
-		pathSumHelper( ret, new ArrayList<>(), root, sum );
-		return ret;
-	}
-
-	void pathSumHelper( List<List<Integer>> ret, List<Integer> list, TreeNode root, int target )
-	{
-		if ( root == null )
-			return;
-
-		list.add( root.val );
-		if ( target == root.val && root.left == null && root.right == null )
-		{
-			ret.add( new ArrayList<>( list ) );
-			list.remove( list.size() - 1 );
-			return;
-		}
-		else
-		{
-			pathSumHelper( ret, list, root.left, target - root.val );
-			pathSumHelper( ret, list, root.right, target - root.val );
-		}
-		list.remove( list.size() - 1 );
-
 	}
 
 	public boolean isReflected( int[][] points )
