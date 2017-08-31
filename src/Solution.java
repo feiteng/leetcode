@@ -42,10 +42,20 @@ class Interval
 		start = s;
 		end = e;
 	}
+
 }
 
 public class Solution
 {
+	static Interval[] makeInterval( int[][] vs )
+	{
+		Interval[] m = new Interval[vs.length];
+
+		for ( int i = 0; i < vs.length; i++ )
+			m[i] = new Interval( vs[i][0], vs[i][1] );
+		return m;
+
+	}
 
 	public static void main( String[] args )
 	{
@@ -55,10 +65,126 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String[] times = { "23:59", "00:00" };
+		int[][] k = { { 1, 1 } };
 
-		System.out.println( s.calculate227( "0-2147483647" ) );
+		System.out.println( s.minTotalDistance( k ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int minTotalDistance( int[][] grid )
+	{
+
+		int m = grid.length, n = grid[0].length;
+		List<Integer> row = new ArrayList<>(), col = new ArrayList<>();
+		for ( int i = 0; i < m; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+			{
+				if ( grid[i][j] == 1 )
+				{
+					row.add( i );
+					col.add( j );
+				}
+			}
+		}
+
+		return totDis;
+	}
+
+	public boolean canAttendMeetings( Interval[] intervals )
+	{
+
+		int[] start = new int[intervals.length], end = new int[intervals.length];
+		for ( int i = 0; i < intervals.length; i++ )
+		{
+			start[i] = intervals[i].start;
+			end[i] = intervals[i].end;
+		}
+		Arrays.sort( start );
+		Arrays.sort( end );
+		int k = 0, pos = 0;
+		for ( int i = 0; i < start.length; i++ )
+		{
+			if ( start[i] < end[pos] )
+				k++;
+			else
+				pos++;
+			if ( k > 1 )
+				return false;
+		}
+		return true;
+	}
+
+	public int minMeetingRooms( Interval[] intervals )
+	{
+		int k = 0;
+		int[] start = new int[intervals.length], end = new int[intervals.length];
+		for ( int i = 0; i < intervals.length; i++ )
+		{
+			start[i] = intervals[i].start;
+			end[i] = intervals[i].end;
+		}
+		Arrays.sort( start );
+		Arrays.sort( end );
+		int pos = 0;
+		for ( int i = 0; i < start.length; i++ )
+		{
+			if ( start[i] < end[pos] )
+				k++;
+			else
+			{
+				// k--;
+				pos++;
+			}
+		}
+		return k;
+	}
+
+	public int maximumGap( int[] nums )
+	{
+		Arrays.sort( nums );
+		if ( nums.length < 2 )
+			return 0;
+		int max = Integer.MIN_VALUE;
+		for ( int i = 0, n = nums.length; i < n - 1; i++ )
+		{
+			max = Math.max( max, nums[i] - nums[i - 1] );
+		}
+		return max;
+	}
+
+	public TreeNode str2tree( String s )
+	{
+		if ( s.length() == 0 || s == null )
+			return null;
+
+		TreeNode root;
+		int i = s.indexOf( "(" ), left = i;
+		if ( i < 0 ) // no more bracket
+		{
+			root = new TreeNode( Integer.valueOf( s ) );
+			return root;
+		}
+		int bracket = 1;
+		root = new TreeNode( Integer.valueOf( s.substring( 0, i ) ) );
+		for ( int j = i + 1; j < s.length(); j++ )
+		{
+			if ( s.charAt( j ) == '(' )
+				bracket++;
+			if ( s.charAt( j ) == ')' )
+				bracket--;
+			if ( bracket == 0 && i == left )
+			{
+				root.left = str2tree( s.substring( i + 1, j ) );
+				i = j + 1;
+			}
+			else if ( bracket == 0 )
+			{
+				root.right = str2tree( s.substring( i + 1, j ) );
+			}
+		}
+
+		return root;
 	}
 
 	public int calculate227( String s )
