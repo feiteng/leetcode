@@ -65,16 +65,81 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] k = { { 1, 1 } };
-
-		System.out.println( s.minTotalDistance( k ) );
+		int[][] k = { { 3, 4 }, { 1, 2 }, { 2, 3 } };
+		Interval[] kInterval = makeInterval( k );
+		System.out.println( s.findRightInterval( kInterval ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int[] findRightInterval( Interval[] intervals )
+	{
+		Map<Interval, Integer> map = new HashMap<>();
+		for ( int i = 0; i < intervals.length; i++ )
+			map.put( intervals[i], i );
+		Arrays.sort( intervals, new Comparator<Interval>()
+		{
+			public int compare( Interval i1, Interval i2 )
+			{
+				return i1.start - i2.start;
+			}
+		} );
+		int[] re = new int[intervals.length];
+		Arrays.fill( re, -1 );
+		for ( int i = 0; i < intervals.length; i++ )
+		{
+			for ( int j = i + 1; j < intervals.length; j++ )
+			{
+				if ( intervals[j].start >= intervals[i].end )
+				{
+					re[i] = map.get( intervals[j] );
+					break;
+				}
+			}
+		}
+		System.out.println( map );
+		return re;
+	}
+
+	public List<String> removeInvalidParentheses( String s )
+	{
+
+		List<String> list = new ArrayList<>();
+		removeInvalidParenthHelper( s, list, 0, 0, new char[] { '(', ')' } );
+		return list;
+	}
+
+	void removeInvalidParenthHelper( String s, List<String> ans, int start_i, int start_j, char[] pars )
+	{
+
+		for ( int count = 0, i = start_i; i < s.length(); i++ )
+		{
+			if ( s.charAt( i ) == pars[0] )
+				count++;
+			if ( s.charAt( i ) == pars[1] )
+				count--;
+			if ( count >= 0 )
+				continue;
+			// count < 0, imbalance state
+			for ( int j = start_j; j <= i; j++ )
+			{
+				if ( s.charAt( j ) == pars[1] && ( j == start_j || s.charAt( j - 1 ) != pars[1] ) )
+					removeInvalidParenthHelper( s.substring( 0, j ) + s.substring( j + 1 ), ans, i, j, pars );
+			}
+			return;
+		}
+
+		String reversed = new StringBuilder( s ).reverse().toString();
+		if ( pars[0] == '(' )
+			removeInvalidParenthHelper( reversed, ans, 0, 0, new char[] { ')', '(' } );
+		else
+			ans.add( reversed );
 	}
 
 	public int minTotalDistance( int[][] grid )
 	{
-
 		int m = grid.length, n = grid[0].length;
+		if ( m == 0 || n == 0 )
+			return 0;
 		List<Integer> row = new ArrayList<>(), col = new ArrayList<>();
 		for ( int i = 0; i < m; i++ )
 		{
@@ -87,8 +152,16 @@ public class Solution
 				}
 			}
 		}
+		return MTDDistance( row ) + MTDDistance( col );
+	}
 
-		return totDis;
+	int MTDDistance( List<Integer> list )
+	{
+		Collections.sort( list );
+		int i = 0, j = list.size() - 1, re = 0;
+		while ( i < j )
+			re += list.get( j-- ) - list.get( i++ );
+		return re;
 	}
 
 	public boolean canAttendMeetings( Interval[] intervals )
