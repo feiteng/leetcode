@@ -47,7 +47,7 @@ class Interval
 
 public class Solution
 {
-	static Interval[] makeInterval( int[][] vs )
+	Interval[] makeInterval( int[][] vs )
 	{
 		Interval[] m = new Interval[vs.length];
 
@@ -65,38 +65,124 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[][] k = { { 3, 4 }, { 1, 2 }, { 2, 3 } };
-		Interval[] kInterval = makeInterval( k );
-		System.out.println( s.findRightInterval( kInterval ) );
+		int[] vals = { 1, 0, 2 };
+		TreeNode t = new TreeNode( vals );
+		s.trimBST( t, 1, 2 ).print();
+		System.out.println();
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public void wiggleSort( int[] nums )
+	{
+		int[] cpy = Arrays.copyOf( nums, nums.length );
+		Arrays.sort( cpy );
+		int median = cpy[cpy.length / 2];
+		int i = cpy.length - 1, j = cpy.length, k = 0;
+		while ( i > 0 && j < cpy.length )
+		{
+			nums[k++] = cpy[i--];
+			nums[k++] = cpy[j++];
+		}
+	}
+
+	public TreeNode trimBST( TreeNode root, int L, int R )
+	{
+		if ( root == null )
+			return null;
+		if ( root.val < L )
+			return trimBST( root.right, L, R );
+		if ( root.val > R )
+			return trimBST( root.left, L, R );
+		if ( root.left == null && root.right == null )
+			return root;
+		root.left = trimBST( root.left, L, R );
+		root.right = trimBST( root.right, L, R );
+		root.print();
+		return root;
+	}
+
+	public int maximumSwap( int num )
+	{
+		char[] oric = String.valueOf( num ).toCharArray();
+		int pos = 0;
+		boolean flag = false;
+		for ( int i = 0; i < oric.length; i++ )
+		{
+			for ( int j = i + 1; !flag && j < oric.length; j++ )
+			{
+				if ( oric[j] > oric[i] )
+				{
+					flag = true;
+					pos = i; // where pos is first to be replaced
+
+				}
+			}
+		}
+		if ( !flag )
+			return num;
+		int numVal = num;
+		for ( int i = pos + 1; i < oric.length; i++ )
+		{
+			char[] cpy = Arrays.copyOfRange( oric, 0, oric.length );
+			char tmp = cpy[i];
+			cpy[i] = cpy[pos];
+			cpy[pos] = tmp;
+			numVal = Math.max( numVal, Integer.valueOf( String.valueOf( cpy ) ) );
+		}
+
+		return numVal;
+
+	}
+
+	public int findSecondMinimumValue( TreeNode root )
+	{
+		Set<Integer> vals = new HashSet<>();
+		LinkedList<TreeNode> que = new LinkedList<>();
+		que.add( root );
+		while ( !que.isEmpty() )
+		{
+			TreeNode t = que.poll();
+			if ( t != null )
+			{
+				vals.add( t.val );
+				que.add( t.left );
+				que.add( t.right );
+			}
+		}
+		if ( vals.size() < 2 )
+			return -1;
+		List<Integer> list = new ArrayList<>( vals );
+		Collections.sort( list );
+		return list.get( 1 );
 	}
 
 	public int[] findRightInterval( Interval[] intervals )
 	{
-		Map<Interval, Integer> map = new HashMap<>();
-		for ( int i = 0; i < intervals.length; i++ )
-			map.put( intervals[i], i );
-		Arrays.sort( intervals, new Comparator<Interval>()
-		{
-			public int compare( Interval i1, Interval i2 )
-			{
-				return i1.start - i2.start;
-			}
-		} );
-		int[] re = new int[intervals.length];
+		int[] re = new int[intervals.length], sPos = new int[intervals.length];
 		Arrays.fill( re, -1 );
+
+		Map<Integer, Integer> map = new HashMap<>();
 		for ( int i = 0; i < intervals.length; i++ )
 		{
-			for ( int j = i + 1; j < intervals.length; j++ )
-			{
-				if ( intervals[j].start >= intervals[i].end )
-				{
-					re[i] = map.get( intervals[j] );
-					break;
-				}
-			}
+			map.put( intervals[i].start, i );
+			sPos[i] = intervals[i].start;
 		}
-		System.out.println( map );
+		Arrays.sort( sPos );
+
+		for ( int i = 0; i < intervals.length; i++ )
+		{
+			int end = intervals[i].end;
+			int j = Arrays.binarySearch( sPos, end );
+			if ( j < 0 )
+			{
+				j = -j - 1;
+				re[map.get( intervals[i].start )] = j == intervals.length ? -1 : map.get( sPos[j] );
+			}
+			else
+				re[map.get( intervals[i].start )] = map.get( end );
+		}
+
+		System.out.println( Arrays.toString( re ) );
 		return re;
 	}
 
@@ -654,54 +740,27 @@ public class Solution
 	// updated 8_24
 	public int eraseOverlapIntervals( Interval[] intervals )
 	{
-		Map<Interval, Set<Interval>> map = new HashMap<>();
-		for ( Interval i : intervals )
-			map.put( i, new HashSet<>() );
-		for ( Interval i : intervals )
+		int re = 0, last = 0, n = intervals.length;
+		Arrays.sort( intervals, new Comparator<Interval>()
 		{
-			for ( Interval v : map.keySet() )
-				if ( i != v && overlap( i, v ) )
-				{
-					map.get( i ).add( v );
-					map.get( v ).add( i );
-				}
-		}
-
-		Set<Interval> set = new HashSet<>();
-		while ( true )
+			@Override
+			public int compare( Interval v1, Interval v2 )
+			{
+				return v1.start - v2.start;
+			}
+		} );
+		for ( int i = 1; i < n; i++ )
 		{
-			System.out.println();
-			for ( Interval v : map.keySet() )
+			if ( intervals[i].start < intervals[last].end )
 			{
-				System.out.print( v.start + "_" + v.end );
-				for ( Interval m : map.get( v ) )
-					System.out.print( " " + m.start + "_" + m.end );
-				System.out.println();
+				re++;
+				if ( intervals[i].end < intervals[last].end )
+					last = i;
 			}
-
-			Interval remove = null;
-			int size = 0;
-			for ( Interval v : map.keySet() )
-			{
-				if ( map.get( v ).size() > size )
-				{
-					size = map.get( v ).size();
-					remove = v;
-				}
-			}
-			if ( size == 0 )
-				break;
-			set.add( remove );
-			map.remove( remove );
-			for ( Interval v : map.keySet() )
-			{
-				if ( map.get( v ).contains( remove ) )
-					map.get( v ).remove( remove );
-			}
-			System.out.println( "" + remove.start + "_" + remove.end );
+			else
+				last = i;
 		}
-
-		return set.size();
+		return re;
 	}
 
 	boolean overlap( Interval v1, Interval v2 )
@@ -3305,30 +3364,6 @@ public class Solution
 	int lcm( int a, int b )
 	{
 		return Math.abs( a * b ) / gcd( a, b );
-	}
-
-	public void wiggleSort( int[] nums )
-	{
-		int[] copy = new int[nums.length];
-		System.arraycopy( nums, 0, copy, 0, nums.length );
-		Arrays.sort( copy );
-		int i = 0, j = copy.length - 1, flip = 1, k = 0;
-		while ( k < nums.length )
-		{
-			if ( flip > 0 )
-			{
-				nums[k] = copy[i];
-				i++;
-				flip = 1 - flip;
-			}
-			else
-			{
-				nums[k] = copy[j];
-				j--;
-				flip = 1 - flip;
-			}
-			k++;
-		}
 	}
 
 	public int findTilt( TreeNode root )
