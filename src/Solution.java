@@ -65,25 +65,244 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] vals = { 1, 0, 2 };
-		TreeNode t = new TreeNode( vals );
-		s.trimBST( t, 1, 2 ).print();
-		System.out.println();
+		int[] vals = { 0 };
+		int[][] upd = { { 1, 3, 2 }, { 2, 4, 3 }, { 0, 2, -2 } };
+
+		System.out.println( s.largestRectangleArea( vals ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
-	// 9*6
+
+	public int largestRectangleArea( int[] heights )
+	{
+		if ( heights.length < 1 )
+			return 0;
+		Stack<Integer> sVal = new Stack<>(), sPos = new Stack<>();
+		sVal.add( -1 );
+		sPos.add( -1 );
+		int[] left = new int[heights.length], right = new int[heights.length];
+		for ( int i = 0; i < heights.length; i++ )
+		{
+			if ( heights[i] > sVal.peek() )
+			{
+
+				left[i] = sPos.peek();
+				sVal.push( heights[i] );
+				sPos.push( i );
+			}
+			else
+			{
+				while ( sVal.peek() >= heights[i] )
+				{
+					sVal.pop();
+					sPos.pop();
+				}
+				left[i] = sPos.peek();
+				sVal.push( heights[i] );
+				sPos.push( i );
+			}
+		}
+		sVal.add( -1 );
+		sPos.add( heights.length );
+		for ( int i = heights.length - 1; i >= 0; i-- )
+		{
+			if ( heights[i] > sVal.peek() )
+			{
+				right[i] = sPos.peek();
+				sVal.push( heights[i] );
+				sPos.push( i );
+			}
+			else
+			{
+				while ( sVal.peek() >= heights[i] )
+				{
+					sVal.pop();
+					sPos.pop();
+				}
+				right[i] = sPos.peek();
+				sVal.push( heights[i] );
+				sPos.push( i );
+			}
+		}
+		System.out.println( Arrays.toString( left ) );
+		System.out.println( Arrays.toString( right ) );
+		int area = 0;
+		for ( int i = 0; i < heights.length; i++ )
+			area = Math.max( area, heights[i] * ( right[i] - left[i] - 1 ) );
+		return area;
+	}
+
+	public List<Integer> findDuplicates( int[] nums )
+	{
+		List<Integer> list = new ArrayList<>();
+		for ( int i = 0; i < nums.length; i++ )
+		{
+			int p = nums[i] - 1;
+			if ( p < 0 )
+				continue;
+			while ( nums[p] > 0 )
+			{
+				nums[p] = -nums[p];
+				p = -nums[p] - 1;
+			}
+
+		}
+		for ( int k : nums )
+			if ( k > 0 )
+				list.add( k );
+		return list;
+	}
+
+	boolean knows( int a, int b )
+	{
+		return false;
+	}
+
+	public int findCelebrity( int n )
+	{
+		int celb = 0;
+		for ( int i = 1; i < n; i++ )
+		{
+			if ( knows( celb, i ) )
+				celb = i;
+		}
+		for ( int i = 0; i < n; i++ )
+		{
+			if ( i == celb )
+				continue;
+			if ( knows( celb, i ) || !knows( i, celb ) )
+				return -1;
+		}
+		return celb;
+	}
+
+	public int[] getModifiedArray( int length, int[][] updates )
+	{
+		int[] sums = new int[length + 1], re = new int[length];
+		for ( int[] p : updates )
+		{
+			sums[p[0]] += p[2];
+			sums[p[1] + 1] += -p[2];
+		}
+		re[0] = sums[0];
+		for ( int i = 1; i < re.length; i++ )
+			re[i] = re[i - 1] + sums[i];
+		return re;
+	}
+
+	public List<Interval> insert( List<Interval> intervals, Interval newInterval )
+	{
+		Interval insertInt = new Interval( newInterval.start, newInterval.end );
+		List<Interval> list = new ArrayList<>();
+		for ( Interval v : intervals )
+		{
+			if ( !insertIntersect( v, newInterval ) )
+				list.add( v );
+			else
+			{
+				insertInt.start = Math.min( insertInt.start, v.start );
+				insertInt.end = Math.max( insertInt.end, v.end );
+			}
+		}
+		int i = 0;
+		while ( i < list.size() && list.get( i ).start < insertInt.start )
+			i++;
+		list.add( i, insertInt );
+		return list;
+	}
+
+	boolean insertIntersect( Interval v1, Interval v2 )
+	{
+		return !( v1.end < v2.start || v2.end < v1.start );
+	}
+
+	public String findLongestWord( String s, List<String> d )
+	{
+		// check if s contains any subsequences in d
+		List<String> subs = new ArrayList<>();
+		for ( String sub : d )
+		{
+			if ( FLWisSubSequencey( s, sub ) )
+				subs.add( sub );
+		}
+		Collections.sort( subs, new Comparator<String>()
+		{
+			public int compare( String s1, String s2 )
+			{
+				return s2.length() != s1.length() ? s2.length() - s1.length() : s1.compareTo( s2 );
+			}
+		} );
+		return subs.size() > 0 ? subs.get( 0 ) : "";
+	}
+
+	boolean FLWisSubSequencey( String s, String sub )
+	{
+		if ( s.length() < sub.length() )
+			return false;
+		int m = 0;
+		for ( char k : s.toCharArray() )
+		{
+			if ( k == sub.charAt( m ) )
+				m++;
+			if ( m == sub.length() )
+				return true;
+		}
+		return false;
+	}
 
 	public void wiggleSort( int[] nums )
 	{
 		int[] cpy = Arrays.copyOf( nums, nums.length );
 		Arrays.sort( cpy );
-		int median = cpy[cpy.length / 2];
-		int i = cpy.length - 1, j = cpy.length, k = 0;
-		while ( i > 0 && j < cpy.length )
+		int median = cpy.length % 2 == 0 ? cpy.length / 2 - 1 : cpy.length / 2, index = 0;
+		for ( int i = 0; i <= median; i++ )
 		{
-			nums[k++] = cpy[i--];
-			nums[k++] = cpy[j++];
+			nums[index] = cpy[median - i];
+			if ( index + 1 < nums.length )
+				nums[index + 1] = cpy[nums.length - i - 1];
+			index += 2;
 		}
+	}
+
+	public int poorPigs( int buckets, int minutesToDie, int minutesToTest )
+	{
+		int multip = minutesToTest / minutesToDie;
+		multip++;
+		int tot = multip, count = 1;
+		while ( tot < buckets )
+		{
+			tot *= multip;
+			count++;
+		}
+		return count;
+	}
+
+	// 9*6
+	public int wiggleMaxLength( int[] nums )
+	{
+		if ( nums.length < 2 )
+			return nums.length;
+		int[] p = new int[nums.length], n = new int[nums.length];
+		p[0] = n[0] = 1;
+		for ( int i = 1; i < nums.length; i++ )
+		{
+			if ( nums[i] == nums[i - 1] )
+			{
+				p[i] = p[i - 1];
+				n[i] = n[i - 1];
+			}
+			if ( nums[i] > nums[i - 1] )
+			{
+				p[i] = n[i - 1] + 1;
+				n[i] = n[i - 1];
+			}
+			if ( nums[i] < nums[i - 1] )
+			{
+				p[i] = p[i - 1];
+				n[i] = p[i - 1] + 1;
+			}
+		}
+		return Math.max( p[nums.length - 1], n[nums.length - 1] );
+
 	}
 
 	public TreeNode trimBST( TreeNode root, int L, int R )
@@ -13133,7 +13352,7 @@ public class Solution
 	{
 		if ( root == null )
 			return true;
-		if ( Math.abs( height( root.left ) - height( root.right ) ) > 1 )
+		if ( Math.abs( treeHeight( root.left ) - treeHeight( root.right ) ) > 1 )
 			return false;
 		boolean l = isBalanced( root.left );
 		boolean r = isBalanced( root.right );
@@ -13141,13 +13360,13 @@ public class Solution
 
 	}
 
-	public int height( TreeNode root )
+	public int treeHeight( TreeNode root )
 	{
 		if ( root == null )
 			return 0;
 		if ( root.left == null && root.right == null )
 			return 1;
-		return 1 + Math.max( height( root.left ), height( root.right ) );
+		return 1 + Math.max( treeHeight( root.left ), treeHeight( root.right ) );
 	}
 
 	public String longestCommonPrefix( String[] strs )
