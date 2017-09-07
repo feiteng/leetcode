@@ -65,70 +65,32 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] vals = { 0 };
+		int[] vals = { 4, 3, 2, 7, 8, 2, 3, 1 };
 		int[][] upd = { { 1, 3, 2 }, { 2, 4, 3 }, { 0, 2, -2 } };
 
-		System.out.println( s.largestRectangleArea( vals ) );
+		System.out.println( s.removeDuplicateLetters( "bacbde" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
-	public int largestRectangleArea( int[] heights )
+	public String removeDuplicateLetters( String s )
 	{
-		if ( heights.length < 1 )
-			return 0;
-		Stack<Integer> sVal = new Stack<>(), sPos = new Stack<>();
-		sVal.add( -1 );
-		sPos.add( -1 );
-		int[] left = new int[heights.length], right = new int[heights.length];
-		for ( int i = 0; i < heights.length; i++ )
+		if ( s.length() < 2 )
+			return s;
+		int[] count = new int[26];
+		for ( char c : s.toCharArray() )
+			count[c - 'a']++;
+		int pos = 0;
+		for ( int i = 0; i < s.length(); i++ )
 		{
-			if ( heights[i] > sVal.peek() )
-			{
-
-				left[i] = sPos.peek();
-				sVal.push( heights[i] );
-				sPos.push( i );
-			}
-			else
-			{
-				while ( sVal.peek() >= heights[i] )
-				{
-					sVal.pop();
-					sPos.pop();
-				}
-				left[i] = sPos.peek();
-				sVal.push( heights[i] );
-				sPos.push( i );
-			}
+			if ( s.charAt( pos ) > s.charAt( i ) )
+				pos = i;
+			count[s.charAt( i ) - 'a']--;
+			if ( count[s.charAt( i ) - 'a'] == 0 )
+				break;
 		}
-		sVal.add( -1 );
-		sPos.add( heights.length );
-		for ( int i = heights.length - 1; i >= 0; i-- )
-		{
-			if ( heights[i] > sVal.peek() )
-			{
-				right[i] = sPos.peek();
-				sVal.push( heights[i] );
-				sPos.push( i );
-			}
-			else
-			{
-				while ( sVal.peek() >= heights[i] )
-				{
-					sVal.pop();
-					sPos.pop();
-				}
-				right[i] = sPos.peek();
-				sVal.push( heights[i] );
-				sPos.push( i );
-			}
-		}
-		System.out.println( Arrays.toString( left ) );
-		System.out.println( Arrays.toString( right ) );
-		int area = 0;
-		for ( int i = 0; i < heights.length; i++ )
-			area = Math.max( area, heights[i] * ( right[i] - left[i] - 1 ) );
-		return area;
+		String p = String.valueOf( s.charAt( pos ) ), sub = s.substring( pos + 1 );
+		sub = sub.replace( p, "" );
+		return p + removeDuplicateLetters( sub );
 	}
 
 	public List<Integer> findDuplicates( int[] nums )
@@ -136,20 +98,41 @@ public class Solution
 		List<Integer> list = new ArrayList<>();
 		for ( int i = 0; i < nums.length; i++ )
 		{
-			int p = nums[i] - 1;
-			if ( p < 0 )
-				continue;
-			while ( nums[p] > 0 )
-			{
-				nums[p] = -nums[p];
-				p = -nums[p] - 1;
-			}
-
+			int p = Math.abs( nums[i] ) - 1;
+			if ( nums[p] < 0 )
+				list.add( p + 1 );
+			nums[p] = -nums[p];
 		}
-		for ( int k : nums )
-			if ( k > 0 )
-				list.add( k );
 		return list;
+	}
+
+	public int largestRectangleArea( int[] heights )
+	{
+		if ( heights.length < 1 )
+			return 0;
+		int[] left = new int[heights.length], right = new int[heights.length];
+		left[0] = -1;
+		for ( int i = 1; i < heights.length; i++ )
+		{
+			int p = i - 1;
+			while ( p >= 0 && heights[i] <= heights[p] )
+				p = left[p];
+			left[i] = p;
+		}
+		right[heights.length - 1] = heights.length;
+		for ( int i = heights.length - 2; i >= 0; i-- )
+		{
+			int p = i + 1;
+			while ( p < heights.length && heights[i] <= heights[p] )
+				p = right[p];
+			right[i] = p;
+		}
+		System.out.println( Arrays.toString( left ) );
+		System.out.println( Arrays.toString( right ) );
+		int area = 0;
+		for ( int i = 0; i < heights.length; i++ )
+			area = Math.max( area, heights[i] * ( right[i] - left[i] - 1 ) );
+		return area;
 	}
 
 	boolean knows( int a, int b )
