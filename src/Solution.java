@@ -65,11 +65,86 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] vals = { 36, 33, 18, 55, 98, 14, 77, 43, 6, 97, 49, 72, 62, 48, 68, 65, 22, 18, 63, 44, 14, 4, 99, 52, 52, 23, 47 };
+		int[] vals = { 1, 2, 31, 33 };
 		int[][] upd = { { 1, 3, 2 }, { 2, 4, 3 }, { 0, 2, -2 } };
 
-		System.out.println( s.cheapestJump( vals, 65 ) );
+		System.out.println( s.minPatches( vals, 2147483647 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int minPatches( int[] nums, int n )
+	{
+		long m = 1;
+		int add = 0, i = 0;
+		while ( m <= n )
+		{
+			if ( i < nums.length && nums[i] <= m )
+				m += nums[i++];
+			else
+			{
+				m *= 2;
+				add++;
+			}
+		}
+		return add;
+	}
+
+	void minPatchUpdate( List<Integer> list, boolean[] checks, int newNum )
+	{
+		list.add( 0, newNum );
+		for ( int i = 0, n = list.size(); i < n; i++ )
+		{
+			int tot = list.get( 0 );
+			checks[tot] = true;
+			for ( int j = i + 1; j < n; j++ )
+			{
+				tot += list.get( j );
+				if ( tot >= checks.length )
+					break;
+				checks[tot] = true;
+			}
+		}
+	}
+
+	public boolean canIWin( int maxChoosableInteger, int desiredTotal )
+	{
+		if ( ( 1 + maxChoosableInteger ) * maxChoosableInteger / 2 < desiredTotal )
+			return false;
+		int[] visits = new int[maxChoosableInteger];
+		return CIWhelper( desiredTotal, visits, new HashMap<>() );
+	}
+
+	boolean CIWhelper( int total, int[] visit, Map<Integer, Boolean> map )
+	{
+		if ( total <= 0 )
+			return false;
+		int format = CIWformat( visit );
+		System.out.println( Integer.toBinaryString( format ) );
+		if ( map.containsKey( format ) )
+			return map.get( format );
+		for ( int i = 0; i < visit.length; i++ )
+		{
+			if ( visit[i] > 0 )
+				continue;
+			visit[i] = 1;
+			if ( !CIWhelper( total - ( i + 1 ), visit, map ) ) // other player lose
+			{
+				map.put( format, true );
+				visit[i] = 0;
+				return true;
+			}
+			map.put( format, false );
+			visit[i] = 0;
+		}
+		return map.get( format );
+	}
+
+	int CIWformat( int[] visit )
+	{
+		int re = 0;
+		for ( int i = 0; i < visit.length; i++ )
+			re = ( re << 1 ) | visit[i];
+		return re;
 	}
 
 	List<Integer> CPJdfs = new ArrayList<>();
@@ -120,14 +195,6 @@ public class Solution
 					return true;
 		}
 		return false;
-	}
-
-	public boolean canIWin( int maxChoosableInteger, int desiredTotal )
-	{
-		int choose = maxChoosableInteger + 1;
-		if ( desiredTotal <= maxChoosableInteger )
-			return true;
-		return !( desiredTotal % choose == 0 );
 	}
 
 	public String removeDuplicateLetters( String s )
@@ -3523,31 +3590,31 @@ public class Solution
 		return maxLen;
 	}
 
-	public int minPatches( int[] nums, int n )
-	{
-		// classic 0 - 1 bag problem
-		// pick each item only once
-
-		int count = 0, nextVal = 1, upto = 0;
-		Arrays.sort( nums );
-		for ( int i = 0; i < nums.length; i++ )
-		{
-			if ( nums[i] == nextVal )
-			{
-				nextVal++;
-				upto += nums[i];
-			}
-			else if ( nums[i] > nextVal )
-			{
-				upto += nextVal;
-				nextVal++;
-			}
-
-		}
-
-		return count;
-
-	}
+	// public int minPatches( int[] nums, int n )
+	// {
+	// // classic 0 - 1 bag problem
+	// // pick each item only once
+	//
+	// int count = 0, nextVal = 1, upto = 0;
+	// Arrays.sort( nums );
+	// for ( int i = 0; i < nums.length; i++ )
+	// {
+	// if ( nums[i] == nextVal )
+	// {
+	// nextVal++;
+	// upto += nums[i];
+	// }
+	// else if ( nums[i] > nextVal )
+	// {
+	// upto += nextVal;
+	// nextVal++;
+	// }
+	//
+	// }
+	//
+	// return count;
+	//
+	// }
 
 	public boolean checkPerfectNumber( int num )
 	{
