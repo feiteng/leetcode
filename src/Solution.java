@@ -65,11 +65,69 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] vals = { 4, 3, 2, 7, 8, 2, 3, 1 };
+		int[] vals = { 36, 33, 18, 55, 98, 14, 77, 43, 6, 97, 49, 72, 62, 48, 68, 65, 22, 18, 63, 44, 14, 4, 99, 52, 52, 23, 47 };
 		int[][] upd = { { 1, 3, 2 }, { 2, 4, 3 }, { 0, 2, -2 } };
 
-		System.out.println( s.removeDuplicateLetters( "bacbde" ) );
+		System.out.println( s.cheapestJump( vals, 65 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	List<Integer> CPJdfs = new ArrayList<>();
+	int CPJdfsSum = Integer.MAX_VALUE;
+
+	public List<Integer> cheapestJump( int[] A, int B )
+	{
+		CPJdfs.add( 1 );
+		cheapJumpDFS( A, B, CPJdfs, 0, 1 );
+		if ( CPJdfs.get( CPJdfs.size() - 1 ) != A.length )
+			return new ArrayList<>();
+		return CPJdfs;
+	}
+
+	void cheapJumpDFS( int[] A, int B, List<Integer> list, int sum, int pos )
+	{
+		if ( pos == A.length )
+		{
+			if ( smallerList( list, sum ) )
+			{
+				CPJdfs = new ArrayList<>( list );
+				CPJdfsSum = sum;
+			}
+			return;
+		}
+		if ( pos > A.length )
+			return;
+		for ( int i = pos; i < Math.min( pos + B, A.length ); i++ )
+		{
+			if ( A[i] == -1 )
+				continue;
+			sum += A[i];
+			list.add( i + 1 );
+			cheapJumpDFS( A, B, list, sum, i + 1 );
+			sum -= A[i];
+			list.remove( list.size() - 1 );
+		}
+	}
+
+	boolean smallerList( List<Integer> list, int sum )
+	{
+		if ( CPJdfsSum > sum )
+			return true;
+		if ( CPJdfsSum == sum )
+		{
+			for ( int i = 0, m = CPJdfs.size(), n = list.size(); i < Math.min( m, n ); i++ )
+				if ( list.get( i ) < CPJdfs.get( i ) )
+					return true;
+		}
+		return false;
+	}
+
+	public boolean canIWin( int maxChoosableInteger, int desiredTotal )
+	{
+		int choose = maxChoosableInteger + 1;
+		if ( desiredTotal <= maxChoosableInteger )
+			return true;
+		return !( desiredTotal % choose == 0 );
 	}
 
 	public String removeDuplicateLetters( String s )
