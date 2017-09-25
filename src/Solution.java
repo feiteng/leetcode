@@ -65,11 +65,154 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] vals = { 1, 2, 31, 33 };
-		int[][] upd = { { 1, 3, 2 }, { 2, 4, 3 }, { 0, 2, -2 } };
+		String[] vals = { "1", "2", "3", "4", "5", "6", "null", "null", "null", "7", "8", "9", "10" };
 
-		System.out.println( s.minPatches( vals, 2147483647 ) );
+		System.out.println(
+				s.checkValidString( "" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int findLengthOfLCIS( int[] nums )
+	{
+		if ( nums.length < 1 )
+			return 0;
+		int k = 1, max = 1;
+		for ( int i = 1; i < nums.length; i++ )
+		{
+			if ( nums[i] > nums[i - 1] )
+				k++;
+			else
+			{
+				max = Math.max( max, k );
+				k = 1;
+			}
+		}
+		return Math.max( max, k );
+	}
+
+	public boolean checkValidString( String s )
+	{
+		int low = 0, high = 0;
+		for ( int i = 0; i < s.length(); i++ )
+		{
+			if ( s.charAt( i ) == '(' )
+			{
+				low++;
+				high++;
+			}
+			else if ( s.charAt( i ) == ')' )
+			{
+				if ( low > 0 )
+					low--;
+				high--;
+			}
+			else
+			{
+				if ( low > 0 )
+					low--;
+				high++;
+			}
+			if ( high < 0 )
+				return false;
+		}
+		return low == 0;
+	}
+
+	boolean checkValidStringHelper( String s, int p, int k )
+	{
+		for ( int i = p; i < s.length(); i++ )
+		{
+			if ( k < 0 )
+				return false;
+			if ( s.charAt( i ) == '(' )
+				k++;
+			if ( s.charAt( i ) == ')' )
+				k--;
+			if ( s.charAt( i ) == '*' )
+				return checkValidStringHelper( s, i + 1, k + 1 )
+						|| checkValidStringHelper( s, i + 1, k )
+						|| checkValidStringHelper( s, i + 1, k - 1 );
+		}
+		return k == 0;
+	}
+
+	public boolean validPalindrome( String s )
+	{
+		int i = 0, j = s.length();
+		while ( i + 1 < j && s.charAt( i ) == s.charAt( j - 1 ) )
+		{
+			i++;
+			j--;
+		}
+		if ( i == j || i + 1 == j )
+			return true;
+		return validPalindromeFind( s.substring( i, j - 1 ) ) || validPalindromeFind( s.substring( i + 1, j ) );
+	}
+
+	boolean validPalindromeFind( String s )
+	{
+		return new StringBuilder( s ).reverse().toString().equals( s );
+	}
+
+	public List<Integer> boundaryOfBinaryTree( TreeNode root )
+	{
+		List<Integer> list = new ArrayList<>(), list2 = new ArrayList<>();
+		if ( root == null )
+			return list;
+		list.add( root.val );
+		BOBTleftBound( root.left, list );
+		if ( !BOBTisLeaf( root ) )
+			BOBTaddLeafs( root, list );
+		BOBTrightBound( root.right, list2 );
+		Collections.reverse( list2 );
+		list.addAll( list2 );
+		return list;
+	}
+
+	void BOBTaddLeafs( TreeNode root, List<Integer> list )
+	{
+		if ( root == null )
+			return;
+		if ( BOBTisLeaf( root ) )
+			list.add( root.val );
+		BOBTaddLeafs( root.left, list );
+		BOBTaddLeafs( root.right, list );
+	}
+
+	void BOBTleftBound( TreeNode root, List<Integer> list )
+	{
+		if ( root == null ) // shouldn't have any
+			return;
+		if ( BOBTisLeaf( root ) )
+			return;
+		// now root has either left or right
+		list.add( root.val );
+		if ( root.left != null )
+			BOBTleftBound( root.left, list );
+		else
+			BOBTleftBound( root.right, list );
+	}
+
+	void BOBTrightBound( TreeNode root, List<Integer> list )
+	{
+		if ( root == null ) // shouldn't have any
+			return;
+		if ( BOBTisLeaf( root ) )
+			return;
+		list.add( root.val );
+
+		if ( root.right != null )
+			BOBTrightBound( root.right, list );
+		else
+			BOBTrightBound( root.left, list );
+
+	}
+
+	boolean BOBTisLeaf( TreeNode root )
+	{
+		if ( root == null )
+			return true;
+		return root.left == null && root.right == null;
 	}
 
 	public int minPatches( int[] nums, int n )
