@@ -72,6 +72,31 @@ public class Solution
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
+	public int calPoints( String[] ops )
+	{
+		Stack<Integer> stack = new Stack<>();
+		for ( String p : ops )
+		{
+			if ( p.equals( "C" ) )
+				stack.pop();
+			else if ( p.equals( "D" ) )
+				stack.push( stack.peek() * 2 );
+			else if ( p.equals( "+" ) )
+			{
+				int b = stack.pop(), a = stack.peek();
+				stack.push( b );
+				stack.push( a + b );
+			}
+			else
+				stack.push( Integer.valueOf( p ) );
+		}
+		int sum = 0;
+		for ( int k : stack )
+			sum += k;
+		return sum;
+
+	}
+
 	public int findLengthOfLCIS( int[] nums )
 	{
 		if ( nums.length < 1 )
