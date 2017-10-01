@@ -64,12 +64,164 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-
-		String[] vals = { "1", "2", "3", "4", "5", "6", "null", "null", "null", "7", "8", "9", "10" };
-
-		System.out.println(
-				s.checkValidString( "" ) );
+		int[] vals = { 1, 3, 4, 6 };
+		System.out.println( s.judgePoint24( vals ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public boolean judgePoint24( int[] nums )
+	{
+		double[] vals = new double[4];
+		int i = 0;
+		for ( int k : nums )
+			vals[i++] = k;
+		return JP24( vals, null, 0, new boolean[4] );
+	}
+
+	boolean JP24( double[] vals, Double res, int pos, boolean[] visit )
+	{
+		if ( pos == 4 )
+			return Math.abs( res - 24 ) < 1e-6;
+
+		for ( int i = 0; i < vals.length; i++ )
+		{
+			if ( visit[i] )
+				continue;
+			visit[i] = true;
+			if ( res == null ) // no number yet
+			{
+				if ( JP24( vals, vals[i], pos + 1, visit ) || JP24( vals, -vals[i], pos + 1, visit ) )
+					return true;
+			}
+			else
+			{
+				if ( JP24( vals, res + vals[i], pos + 1, visit ) ||
+						JP24( vals, res - vals[i], pos + 1, visit ) ||
+						JP24( vals, res * vals[i], pos + 1, visit ) ||
+						JP24( vals, res / vals[i], pos + 1, visit ) ||
+						JP24( vals, vals[i] / res, pos + 1, visit ) )
+					return true;
+			}
+			visit[i] = false;
+		}
+		return false;
+	}
+
+	public int[] findPermutation( String s )
+	{
+		int[] rev = new int[s.length() + 1];
+		int cur = 1, pos = 0;
+		Stack<Integer> stack = new Stack<>();
+		for ( char k : s.toCharArray() )
+		{
+			if ( k == 'I' )
+			{
+				rev[pos++] = cur++;
+				while ( !stack.isEmpty() )
+					rev[pos++] = stack.pop();
+			}
+			if ( k == 'D' )
+				stack.push( cur++ );
+		}
+		stack.add( cur++ );
+		while ( !stack.empty() )
+			rev[pos++] = stack.pop();
+
+		return rev;
+	}
+
+	public String shortestPalindrome( String s )
+	{
+		int k = s.length();
+		while ( !SPPalindrome( s, k ) )
+			k--;
+		return new StringBuilder( s.substring( k ) ).reverse().append( s ).toString();
+	}
+
+	boolean SPPalindrome( String s, int k )
+	{
+		int i = 0, j = k - 1;
+		while ( i < j )
+			if ( s.charAt( i++ ) != s.charAt( j-- ) )
+				return false;
+		return true;
+	}
+
+	public String nextClosestTime( String time )
+	{
+		char[] cTime = time.toCharArray();
+		int[] visit = { 0, 1, 3, 4 };
+		int[] vals = new int[4], cons = new int[4];
+		int min = 1441, max = 1441, t = 0;
+		String reTime1 = null, reTime2 = null;
+		for ( int i = 0; i < visit.length; i++ )
+			vals[i] = cTime[visit[i]] - '0';
+		t = NCTgetTime( NCTTimetoStr( vals ) );
+		NCTTimes( vals, 0, cons );
+		for ( String s : NCTTlist )
+		{
+
+			int sTime = NCTgetTime( s );
+			if ( sTime > 1440 )
+				continue;
+			if ( sTime < t && max > sTime )
+			{
+				max = sTime;
+				reTime1 = s;
+			}
+			if ( sTime > t && min > sTime )
+			{
+				min = sTime;
+				reTime2 = s;
+			}
+		}
+		if ( reTime1 == null && reTime2 == null )
+			return time;
+		return reTime2 == null ? NCTformatTime( reTime1 ) : NCTformatTime( reTime2 );
+	}
+
+	String NCTformatTime( String s )
+	{
+		return s.substring( 0, 2 ).concat( ":" ).concat( s.substring( 2 ) );
+	}
+
+	String NCTTimetoStr( int[] time )
+	{
+		String ap = "";
+		for ( int i = 0; i < 4; i++ )
+			ap += String.valueOf( time[i] );
+		return ap;
+	}
+
+	Set<String> NCTTlist = new HashSet<>();
+
+	void NCTTimes( int[] vals, int pos, int[] time )
+	{
+		if ( pos == 4 )
+		{
+			NCTTlist.add( NCTTimetoStr( time ) );
+			return;
+		}
+		for ( int i = pos; i < 4; i++ )
+		{
+			for ( int j = 0; j < 4; j++ )
+			{
+				time[i] = vals[j];
+				NCTTimes( vals, i + 1, time );
+			}
+		}
+	}
+
+	int NCTgetTime( String time )
+	{
+		// time in format HHMM
+		int[] vals = new int[4];
+		for ( int i = 0; i < 4; i++ )
+			vals[i] = time.charAt( i ) - '0';
+		int hour = vals[0] * 10 + vals[1], minute = vals[2] * 10 + vals[3];
+		if ( hour > 23 || minute > 59 )
+			return 1441;
+		return ( vals[0] * 10 + vals[1] ) * 60 + vals[2] * 10 + vals[3];
 	}
 
 	public int calPoints( String[] ops )
