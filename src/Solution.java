@@ -69,6 +69,21 @@ public class Solution
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
+	public int repeatedStringMatch( String A, String B )
+	{
+		int[] arrayA = new int[26], arrayB = new int[26];
+		for ( char k : A.toCharArray() )
+			arrayA[k - 'A']++;
+		for ( char k : B.toCharArray() )
+			arrayB[k - 'A']++;
+		for ( int i = 0; i < 26; i++ )
+		{
+			if ( arrayB[i] > 0 && arrayA[i] == 0 )
+				return -1;
+		}
+
+	}
+
 	public boolean judgePoint24( int[] nums )
 	{
 		double[] vals = new double[4];
