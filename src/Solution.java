@@ -64,24 +64,116 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] vals = { 1, 3, 4, 6 };
-		System.out.println( s.judgePoint24( vals ) );
+		int[] vals = { 1, 4, 5, 4, 4, 5 };
+		TreeNode k = new TreeNode( vals );
+		System.out.println( s.longestUnivaluePath( k ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public double knightProbability( int N, int K, int r, int c )
+	{
+		int[] grid = new int[N * N];
+		int[][] dirs = { { 1, -2 }, { 1, 2 }, { 2, 1 }, { 2, -1 },
+				{ -1, -2 }, { -1, 2 }, { -2, 1 }, { -2, -1 } };
+		int row = N - 1, col = N - 1;
+		Map<Integer, Set<Integer>> map = new HashMap<>();
+		for ( int k = 0; k < grid.length; k++ )
+		{
+			map.put( k, new HashSet<>() );
+			int i = k / N, j = k % N;
+			for ( int[] d : dirs )
+			{
+				int ni = i + d[0], nj = j + d[1];
+				if ( ni < 0 || nj < 0 || ni > row || nj > row )
+					continue;
+				map.get( k ).add( ni * N + nj ); // add all neighbors
+			}
+		}
+
+		// now count number of steps still in grid
+
+		double re = 0, quotient = Math.pow( 8.0, (double) K );
+		return re / quotient;
+	}
+
+	public int getImportance( List<Employee> employees, int id )
+	{
+		int re = 0;
+		Map<Integer, Employee> map = new HashMap<>();
+		for ( Employee e : employees )
+			map.put( e.id, e );
+		Queue<Integer> queue = new LinkedList<>();
+		queue.add( id );
+		while ( !queue.isEmpty() )
+		{
+			Employee emp = map.get( queue.poll() );
+			re += emp.importance;
+			for ( Integer k : emp.subordinates )
+				queue.add( k );
+		}
+		return re;
+	}
+
+	public int longestUnivaluePath( TreeNode root )
+	{
+		if ( root == null )
+			return 0;
+		return Math.max( LUPfind( root.left, root.val ) + LUPfind( root.right, root.val ),
+				Math.max( longestUnivaluePath( root.left ),
+						longestUnivaluePath( root.right ) ) );
+	}
+
+	int LUPfind( TreeNode root, Integer val )
+	{
+		if ( root == null )
+			return 0;
+		if ( root.val != val )
+			return 0;
+		return 1 + Math.max( LUPfind( root.left, val ), LUPfind( root.right, val ) );
 	}
 
 	public int repeatedStringMatch( String A, String B )
 	{
-		int[] arrayA = new int[26], arrayB = new int[26];
+		Set<Character> setA = new HashSet<>(), setB = new HashSet<>();
+
 		for ( char k : A.toCharArray() )
-			arrayA[k - 'A']++;
+			setA.add( k );
 		for ( char k : B.toCharArray() )
-			arrayB[k - 'A']++;
-		for ( int i = 0; i < 26; i++ )
+			setB.add( k );
+		setB.removeAll( setA );
+		if ( !setB.isEmpty() )
+			return -1;
+
+		for ( int i = 0; i < A.length(); i++ )
 		{
-			if ( arrayB[i] > 0 && arrayA[i] == 0 )
+			int m = RSMcomp( A.toCharArray(), i, B.toCharArray() );
+			if ( m > 0 )
+				return m;
+		}
+		return -1;
+	}
+
+	int RSMcomp( char[] a, int k, char[] b )
+	{
+		int re = 1, i = k, j = 0;
+		while ( j < b.length )
+		{
+			if ( i == a.length )
+			{
+				i = 0;
+				re++;
+			}
+			if ( a[i] == b[j] )
+			{
+				i++;
+				j++;
+			}
+			else
 				return -1;
 		}
-
+		if ( j == b.length )
+			return re;
+		return -1;
 	}
 
 	public boolean judgePoint24( int[] nums )
