@@ -64,9 +64,47 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-
-		System.out.println( s.hasAlternatingBits( 5 ) );
+		int[][] isl = { { 1, 1, 0 }, { 0, 1, 1 }, { 0, 0, 0 }, { 1, 1, 1 }, { 0, 1, 0 } };
+		System.out.println( s.numDistinctIslands( isl ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int numDistinctIslands( int[][] grid )
+	{
+		Set<String> set = new HashSet<>();
+		int m = grid.length, n = grid[0].length;
+		boolean[][] visit = new boolean[m][n];
+		for ( int i = 0; i < m; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+			{
+				if ( grid[i][j] == 1 && !visit[i][j] )
+				{
+					visit[i][j] = true;
+					set.add( NDIpatternDFS( grid, new int[] { i, j }, visit ) );
+				}
+			}
+		}
+		System.out.println( set );
+		return set.size();
+	}
+
+	String NDIpatternDFS( int[][] grid, int[] pos, boolean[][] visit )
+	{
+		int i = pos[0], j = pos[1], m = grid.length, n = grid[0].length;
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		String[] v = { "u", "d", "l", "r" };
+		StringBuilder sb = new StringBuilder();
+		for ( int k = 0; k < 4; k++ )
+		{
+			int[] d = dirs[k];
+			int ni = i + d[0], nj = j + d[1];
+			if ( ni < 0 || nj < 0 || ni >= m || nj >= n || grid[ni][nj] == 0 || visit[ni][nj] )
+				continue;
+			visit[ni][nj] = true;
+			sb.append( "(" ).append( v[k] ).append( NDIpatternDFS( grid, new int[] { ni, nj }, visit ) ).append( ")" );
+		}
+		return sb.toString();
 	}
 
 	public int maxAreaOfIsland( int[][] grid )
@@ -78,8 +116,26 @@ public class Solution
 			for ( int j = 0; j < n; j++ )
 			{
 				if ( grid[i][j] == 1 && !visit[i][j] )
-					re = Math.max( re, MAOIcount( grid, new int[] { i, j }, visit ) );
+				{
+					visit[i][j] = true;
+					re = Math.max( re, MAOIcountDFS( grid, new int[] { i, j }, visit ) );
+				}
 			}
+		}
+		return re;
+	}
+
+	int MAOIcountDFS( int[][] grid, int[] pos, boolean[][] visit )
+	{
+		int i = pos[0], j = pos[1], m = grid.length, n = grid[0].length, re = 1;
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		for ( int[] d : dirs )
+		{
+			int ni = i + d[0], nj = j + d[1];
+			if ( ni < 0 || nj < 0 || ni >= m || nj >= n || grid[ni][nj] == 0 || visit[ni][nj] )
+				continue;
+			visit[ni][nj] = true;
+			re += MAOIcountDFS( grid, new int[] { ni, nj }, visit );
 		}
 		return re;
 	}
@@ -87,10 +143,25 @@ public class Solution
 	int MAOIcount( int[][] grid, int[] pos, boolean[][] visit )
 	{
 		// bfs visit
-		int[][] dirs = {};
-		int i = pos[0], j = pos[1];
+		int[][] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		int m = grid.length, n = grid[0].length, re = 0;
 		Queue<int[]> queue = new LinkedList<>();
-
+		queue.add( pos );
+		while ( !queue.isEmpty() )
+		{
+			int[] tmp = queue.poll();
+			re++;
+			int i = tmp[0], j = tmp[1];
+			for ( int[] d : dirs )
+			{
+				int ni = i + d[0], nj = j + d[1];
+				if ( ni < 0 || nj < 0 || ni >= m || nj >= n || grid[ni][nj] == 0 || visit[ni][nj] )
+					continue;
+				visit[ni][nj] = true;
+				queue.add( new int[] { ni, nj } );
+			}
+		}
+		return re;
 	}
 
 	public boolean hasAlternatingBits( int n )
