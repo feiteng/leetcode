@@ -64,36 +64,63 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] vals = { 1, 4, 5, 4, 4, 5 };
-		TreeNode k = new TreeNode( vals );
-		System.out.println( s.longestUnivaluePath( k ) );
+		int[][] m = { { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 1, 0 }, { 1, 1, 0, 1, 1 }, { 0, 0, 0, 0, 0 } };
+		int[] start = { 0, 4 }, destination = { 4, 4 };
+
+		System.out.println( s.hasPath( m, start, destination ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
-	public double knightProbability( int N, int K, int r, int c )
+	public boolean hasPath( int[][] maze, int[] start, int[] destination )
 	{
-		int[] grid = new int[N * N];
-		int[][] dirs = { { 1, -2 }, { 1, 2 }, { 2, 1 }, { 2, -1 },
-				{ -1, -2 }, { -1, 2 }, { -2, 1 }, { -2, -1 } };
-		int row = N - 1, col = N - 1;
-		Map<Integer, Set<Integer>> map = new HashMap<>();
-		for ( int k = 0; k < grid.length; k++ )
+		int m = maze.length, n = maze[0].length;
+		boolean[][] visit = new boolean[m][n];
+		visit[start[0]][start[1]] = true;
+		return HPdfs( maze, start, destination, visit );
+	}
+
+	boolean HPdfs( int[][] maze, int[] pos, int[] des, boolean[][] visit )
+	{
+		int i = pos[0], j = pos[1];
+		if ( visit[i][j] )
+			return false;
+		if ( visit[des[0]][des[1]] )
+			return true;
+		for ( int[] p : HPgetEnd( maze, pos ) )
 		{
-			map.put( k, new HashSet<>() );
-			int i = k / N, j = k % N;
-			for ( int[] d : dirs )
-			{
-				int ni = i + d[0], nj = j + d[1];
-				if ( ni < 0 || nj < 0 || ni > row || nj > row )
-					continue;
-				map.get( k ).add( ni * N + nj ); // add all neighbors
-			}
+			for ( boolean[] b : visit )
+				System.out.println( Arrays.toString( b ) );
+			if ( p == null || visit[p[0]][p[1]] )
+				continue;
+			visit[p[0]][p[1]] = true;
+			if ( HPdfs( maze, p, des, visit ) )
+				return true;
+			visit[p[0]][p[1]] = false;
 		}
+		return false;
+	}
 
-		// now count number of steps still in grid
-
-		double re = 0, quotient = Math.pow( 8.0, (double) K );
-		return re / quotient;
+	int[][] HPgetEnd( int[][] m, int[] pos )
+	{
+		int[][] re = new int[4][2], dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+		int row = m.length, col = m[0].length;
+		int i = pos[0], j = pos[1], ni = i, nj = j;
+		for ( int k = 0; k < 4; k++ )
+		{
+			ni = i + dirs[k][0];
+			nj = j + dirs[k][1];
+			while ( ni > 0 && nj > 0 && ni < row && nj < col && m[ni][nj] != 1 )
+			{
+				ni += dirs[k][0];
+				nj += dirs[k][1];
+			}
+			// either ni, nj at border, or at m[ni][nj] = 1
+			if ( ni == i && nj == j )
+				re[k] = null;
+			else
+				re[k] = new int[] { ni, nj };
+		}
+		return re;
 	}
 
 	public int getImportance( List<Employee> employees, int id )
@@ -112,6 +139,46 @@ public class Solution
 				queue.add( k );
 		}
 		return re;
+	}
+
+	public double knightProbability( int N, int K, int r, int c )
+	{
+		double[][] dp0 = new double[N][N], dp1 = new double[N][N];
+		int[][] dirs = { { 1, -2 }, { 1, 2 }, { 2, 1 }, { 2, -1 },
+				{ -1, -2 }, { -1, 2 }, { -2, 1 }, { -2, -1 } };
+		dp0[r][c] = 1;
+		int m = K;
+		while ( m > 0 )
+		{
+			for ( double[] d : dp1 )
+				Arrays.fill( d, 0 );
+			// dp1 = new double[N][N];
+			for ( int i = 0; i < N; i++ )
+			{
+				for ( int j = 0; j < N; j++ )
+				{
+					for ( int[] d : dirs )
+					{
+						int ni = i + d[0], nj = j + d[1];
+						if ( ni < 0 || nj < 0 || ni >= N || nj >= N )
+							continue;
+						dp1[ni][nj] += dp0[i][j] / 8.0;
+					}
+				}
+			}
+			dp0 = dp1;
+			m--;
+		}
+		for ( double[] d : dp0 )
+			System.out.println( Arrays.toString( d ) );
+		double count = 0;
+		for ( double[] d : dp0 )
+			for ( double v : d )
+				count += v;
+
+		return count;
+		// double re = (double) count, quotient = Math.pow( 8.0, (double) K );
+		// return re / quotient;
 	}
 
 	public int longestUnivaluePath( TreeNode root )
