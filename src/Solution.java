@@ -64,11 +64,50 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[][] m = { { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 1, 0 }, { 1, 1, 0, 1, 1 }, { 0, 0, 0, 0, 0 } };
-		int[] start = { 0, 4 }, destination = { 4, 4 };
 
-		System.out.println( s.hasPath( m, start, destination ) );
+		System.out.println( s.hasAlternatingBits( 5 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int maxAreaOfIsland( int[][] grid )
+	{
+		int m = grid.length, n = grid[0].length, re = 0;
+		boolean[][] visit = new boolean[m][n];
+		for ( int i = 0; i < m; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+			{
+				if ( grid[i][j] == 1 && !visit[i][j] )
+					re = Math.max( re, MAOIcount( grid, new int[] { i, j }, visit ) );
+			}
+		}
+		return re;
+	}
+
+	int MAOIcount( int[][] grid, int[] pos, boolean[][] visit )
+	{
+		// bfs visit
+		int[][] dirs = {};
+		int i = pos[0], j = pos[1];
+		Queue<int[]> queue = new LinkedList<>();
+
+	}
+
+	public boolean hasAlternatingBits( int n )
+	{
+		int a = 1, b = 0;
+		for ( int i = 0; i < 16; i++ )
+		{
+			if ( a == n || b == n )
+				return true;
+			a <<= 2;
+			a ^= 1;
+			b = a << 1;
+			System.out.println( Integer.toBinaryString( a ) );
+			System.out.println( Integer.toBinaryString( b ) );
+
+		}
+		return false;
 	}
 
 	public boolean hasPath( int[][] maze, int[] start, int[] destination )
