@@ -64,9 +64,57 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[][] isl = { { 1, 1, 0 }, { 0, 1, 1 }, { 0, 0, 0 }, { 1, 1, 1 }, { 0, 1, 0 } };
-		System.out.println( s.numDistinctIslands( isl ) );
+		int[] v = { 1, 1, 9, 2 };
+		System.out.println( s.judgePoint24( v ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public boolean judgePoint24( int[] nums )
+	{
+		List<Double> list = new ArrayList<>();
+		for ( int k : nums )
+			list.add( (double) k );
+		return JP24( list );
+	}
+
+	boolean JP24( List<Double> list )
+	{
+		// a + b, a - b, a * b, a / b
+		// try out different combinations
+		if ( list.size() == 1 )
+		{
+			System.out.println( list.get( 0 ) );
+			return Math.abs( list.get( 0 ) - 24 ) < 1e-6;
+		}
+		List<Double> list2 = new ArrayList<>();
+
+		for ( int i = 0, n = list.size(); i < n; i++ )
+		{
+			for ( int j = i + 1; j < n; j++ )
+			{
+				double a = list.get( i ), b = list.get( j );
+				list2.clear();
+				for ( int k = 0; k < n; k++ )
+				{
+					if ( k != i && k != j )
+						list2.add( list.get( k ) );
+				}
+				for ( double v : JP24vals( a, b ) )
+				{
+					list2.add( v );
+					if ( JP24( list2 ) )
+						return true;
+					list2.remove( list2.size() - 1 );
+				}
+			}
+		}
+
+		return false;
+	}
+
+	double[] JP24vals( double a, double b )
+	{
+		return new double[] { a + b, a - b, b - a, a * b, a / b, b / a };
 	}
 
 	public int numDistinctIslands( int[][] grid )
@@ -351,44 +399,6 @@ public class Solution
 		if ( j == b.length )
 			return re;
 		return -1;
-	}
-
-	public boolean judgePoint24( int[] nums )
-	{
-		double[] vals = new double[4];
-		int i = 0;
-		for ( int k : nums )
-			vals[i++] = k;
-		return JP24( vals, null, 0, new boolean[4] );
-	}
-
-	boolean JP24( double[] vals, Double res, int pos, boolean[] visit )
-	{
-		if ( pos == 4 )
-			return Math.abs( res - 24 ) < 1e-6;
-
-		for ( int i = 0; i < vals.length; i++ )
-		{
-			if ( visit[i] )
-				continue;
-			visit[i] = true;
-			if ( res == null ) // no number yet
-			{
-				if ( JP24( vals, vals[i], pos + 1, visit ) || JP24( vals, -vals[i], pos + 1, visit ) )
-					return true;
-			}
-			else
-			{
-				if ( JP24( vals, res + vals[i], pos + 1, visit ) ||
-						JP24( vals, res - vals[i], pos + 1, visit ) ||
-						JP24( vals, res * vals[i], pos + 1, visit ) ||
-						JP24( vals, res / vals[i], pos + 1, visit ) ||
-						JP24( vals, vals[i] / res, pos + 1, visit ) )
-					return true;
-			}
-			visit[i] = false;
-		}
-		return false;
 	}
 
 	public int[] findPermutation( String s )
