@@ -65,8 +65,96 @@ public class Solution
 
 		time = System.currentTimeMillis();
 		int[] v = { 1, 1, 9, 2 };
-		System.out.println( s.judgePoint24( v ) );
+		System.out.println( s.strangePrinter( "aab" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int strangePrinter( String s )
+	{
+		char[] cs = s.toCharArray();
+		int n = cs.length;
+		return StPrtHelper( cs, 0, n - 1, 0, new int[n][n][n] );
+	}
+
+	int StPrtHelper( char[] v, int i, int j, int k, int[][][] T )
+	{
+		if ( i > j )
+			return k;
+		if ( i == j )
+			return k + 1;
+		if ( T[i][j][k] > 0 )
+			return T[i][j][k];
+		int re = 0;
+		while ( i + 1 < j && v[i] == v[i + 1] )
+			i++;
+
+		re = StPrtHelper( v, i + 1, j, k, T );
+		for ( int m = i + 1; m <= j; m++ )
+		{
+			re = Math.min( re, StPrtHelper( v, i + 1, m - 1, k + 1, T ) + StPrtHelper( v, m, j, k, T ) );
+		}
+		T[i][j][k] = re;
+		return re;
+	}
+
+	public int maxCoins( int[] nums )
+	{
+		if ( nums.length < 1 )
+			return 0;
+		int[] newNum = new int[nums.length + 2];
+		int k = -1, size = newNum.length;
+		while ( ++k < nums.length )
+			newNum[k + 1] = nums[k];
+		newNum[0] = newNum[size - 1] = 1;
+		return maxCoinHelper( new int[size][size], newNum, 0, size - 1 );
+	}
+
+	int maxCoinHelper( int[][] memo, int[] nums, int left, int right )
+	{
+		int max = 0;
+		if ( memo[left][right] > 0 )
+			return memo[left][right];
+		if ( left + 1 == right )
+			return 0;
+		for ( int i = left + 1; i < right; i++ )
+		{
+			max = Math.max( max, nums[left] * nums[i] * nums[right]
+					+ maxCoinHelper( memo, nums, left, i )
+					+ maxCoinHelper( memo, nums, i, right ) );
+		}
+		memo[left][right] = max;
+		return max;
+	}
+
+	public int removeBoxes( int[] boxes )
+	{
+		int n = boxes.length;
+		int[][][] T = new int[n][n][n];
+		return RBHelper( boxes, 0, n - 1, 0, T );
+	}
+
+	int RBHelper( int[] box, int i, int j, int k, int[][][] T )
+	{
+		if ( i > j )
+			return 0;
+		if ( i == j )
+			return ( k + 1 ) * ( k + 1 );
+		if ( T[i][j][k] != 0 )
+			return T[i][j][k];
+		while ( i + 1 < j && box[i] == box[i + 1] )
+		{
+			i++;
+			k++;
+		}
+		int re = 0;
+		re = ( k + 1 ) * ( k + 1 ) + RBHelper( box, i + 1, j, 0, T );
+		for ( int m = i + 1; m <= j; m++ )
+		{
+			if ( box[i] == box[m] )
+				re = Math.max( re, RBHelper( box, i + 1, m - 1, 0, T ) + RBHelper( box, m, j, k + 1, T ) );
+		}
+		T[i][j][k] = re;
+		return T[i][j][k];
 	}
 
 	public boolean judgePoint24( int[] nums )
@@ -79,7 +167,7 @@ public class Solution
 
 	boolean JP24( List<Double> list )
 	{
-		// a + b, a - b, a * b, a / b
+		// a + b, a - b, a * b, a / b , b - a, b / a
 		// try out different combinations
 		if ( list.size() == 1 )
 		{
@@ -1712,18 +1800,6 @@ public class Solution
 		if ( v1.end <= v2.start || v2.end <= v1.start )
 			return false;
 		return true;
-	}
-
-	public int strangePrinter( String s )
-	{
-		Map<Character, Integer> map = new HashMap<>();
-		for ( char k : s.toCharArray() )
-		{
-			if ( !map.containsKey( k ) )
-				map.put( k, 0 );
-			map.put( k, map.get( k ) + 1 );
-		}
-		return map.keySet().size();
 	}
 
 	class TNW
@@ -6487,35 +6563,6 @@ public class Solution
 
 		return false;
 
-	}
-
-	public int maxCoins( int[] nums )
-	{
-		if ( nums.length < 1 )
-			return 0;
-		int[] newNum = new int[nums.length + 2];
-		int k = -1, size = newNum.length;
-		while ( ++k < nums.length )
-			newNum[k + 1] = nums[k];
-		newNum[0] = newNum[size - 1] = 1;
-		return maxCoinHelper( new int[size][size], newNum, 0, size - 1 );
-	}
-
-	int maxCoinHelper( int[][] memo, int[] nums, int left, int right )
-	{
-		int max = 0;
-		if ( memo[left][right] > 0 )
-			return memo[left][right];
-		if ( left + 1 == right )
-			return 0;// nums[left];
-		for ( int i = left + 1; i < right; i++ )
-		{
-			max = Math.max( max, nums[left] * nums[i] * nums[right]
-					+ maxCoinHelper( memo, nums, left, i )
-					+ maxCoinHelper( memo, nums, i, right ) );
-		}
-		memo[left][right] = max;
-		return max;
 	}
 
 	public void wallsAndGates( int[][] rooms )
