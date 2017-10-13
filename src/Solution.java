@@ -65,13 +65,29 @@ public class Solution
 
 		time = System.currentTimeMillis();
 		int[] v = { 1, 1, 9, 2 };
-		System.out.println( s.strangePrinter( "aab" ) );
+		System.out.println( s.strangePrinter( "" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
 	public int strangePrinter( String s )
 	{
-		char[] cs = s.toCharArray();
+		if ( s.length() < 1 )
+			return 0;
+		StringBuilder sb = new StringBuilder();
+		int i = 0, j = 1;
+		sb.append( s.charAt( 0 ) );
+		while ( j < s.length() )
+		{
+			if ( sb.charAt( i ) != s.charAt( j ) )
+			{
+				sb.append( s.charAt( j ) );
+				i++;
+				j++;
+			}
+			else
+				j++;
+		}
+		char[] cs = s.toCharArray();// sb.toString().toCharArray();
 		int n = cs.length;
 		return StPrtHelper( cs, 0, n - 1, 0, new int[n][n][n] );
 	}
@@ -87,11 +103,11 @@ public class Solution
 		int re = 0;
 		while ( i + 1 < j && v[i] == v[i + 1] )
 			i++;
-
-		re = StPrtHelper( v, i + 1, j, k, T );
+		re = 1 + StPrtHelper( v, i + 1, j, 0, T );
 		for ( int m = i + 1; m <= j; m++ )
 		{
-			re = Math.min( re, StPrtHelper( v, i + 1, m - 1, k + 1, T ) + StPrtHelper( v, m, j, k, T ) );
+			if ( v[i] == v[m] )
+				re = Math.min( re, StPrtHelper( v, i + 1, m - 1, 0, T ) + StPrtHelper( v, m, j, k, T ) );
 		}
 		T[i][j][k] = re;
 		return re;
