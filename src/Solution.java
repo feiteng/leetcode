@@ -64,30 +64,145 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] v = { 1, 1, 9, 2 };
-		System.out.println( s.strangePrinter( "" ) );
+		int[] v = { 3522, 181, 521, 515, 304, 123, 2512, 312, 922, 407, 146, 1932, 4037, 2646, 3871, 269 };
+		System.out.println( s.canPartitionKSubsets( v, 5 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public boolean canPartitionKSubsets( int[] nums, int k )
+	{
+		Map<Integer, Integer> map = new HashMap<>();
+		int sum = 0;
+		for ( int m : nums )
+		{
+			if ( !map.containsKey( m ) )
+				map.put( m, 0 );
+			map.put( m, map.get( m ) + 1 );
+			sum += m;
+		}
+		return CPKShelper( map, k, 0, sum / k );
+	}
+
+	boolean CPKShelper( Map<Integer, Integer> map, int k, int p, int targ )
+	{
+		if ( k == 0 && CPKSMapEmpty( map ) )
+			return true;
+		if ( p > targ || k < 0 )
+			return false;
+		if ( p == targ )
+			return CPKShelper( map, k - 1, 0, targ );
+		for ( int m : map.keySet() )
+		{
+			if ( map.get( m ) == 0 || p + m > targ )
+				continue;
+			int count = map.get( m );
+			map.put( m, count - 1 );
+			if ( CPKShelper( map, k, p + m, targ ) )
+				return true;
+			map.put( m, count );
+		}
+		return false;
+	}
+
+	boolean CPKSMapEmpty( Map<Integer, Integer> map )
+	{
+		for ( int k : map.keySet() )
+			if ( map.get( k ) != 0 )
+				return false;
+		return true;
+	}
+
+	class FSSnum
+	{
+		int _min = 50000, _max = 0, _val = 0;
+	}
+
+	public int findShortestSubArray( int[] nums )
+	{
+		int max = 0, re = nums.length;
+		Map<Integer, FSSnum> map = new HashMap<>();
+		for ( int i = 0; i < nums.length; i++ )
+		{
+			if ( !map.containsKey( nums[i] ) )
+				map.put( nums[i], new FSSnum() );
+			FSSnum t = map.get( nums[i] );
+			t._val++;
+			max = Math.max( t._val, max );
+			t._min = Math.min( t._min, i );
+			t._max = Math.max( t._max, i );
+		}
+
+		for ( int k : map.keySet() )
+		{
+
+			FSSnum t = map.get( k );
+			// System.out.println( t._val );
+			// System.out.println( t._min );
+			// System.out.println( t._max );
+			if ( t._val == max )
+				re = Math.min( t._max - t._min + 1, re );
+		}
+		return re;
+	}
+
+	public int countBinarySubstrings( String s )
+	{
+		char[] bString = s.toCharArray();
+		int i = 0, j = 0, k = 0, n = bString.length, re = 0, c1 = 0, c2 = 0;
+		while ( k < n )
+		{
+			while ( j < n && bString[i] == bString[j] )
+				j++;
+			k = j;
+			while ( k < n && bString[j] == bString[k] )
+				k++;
+			c1 = j - i;
+			c2 = k - j;
+			re += Math.min( c1, c2 );
+			i = j;
+			j = k;
+		}
+		return re;
+	}
+
+	public boolean isMatch( String s, String p )
+	{
+		return false;
+	}
+
+	public boolean splitArray( int[] nums )
+	{
+		if ( nums.length < 7 )
+			return false;
+		int[] s = new int[nums.length + 1];
+		for ( int i = 0; i < nums.length; i++ )
+			s[i + 1] = nums[i] + s[i];
+		int n = s.length;
+		for ( int j = 3; j < n - 3; j++ )
+		{
+			Set<Integer> set = new HashSet<>();
+
+			for ( int i = 1; i < j; i++ )
+			{
+				if ( s[i - 1] == s[j - 1] - s[i] )
+					set.add( s[i - 1] );
+
+			}
+			for ( int k = j + 1; k < n - 1; k++ )
+			{
+				if ( s[k - 1] - s[j] == s[n - 1] - s[k] && set.contains( s[k - 1] - s[j] ) )
+					return true;
+			}
+
+		}
+		return false;
 	}
 
 	public int strangePrinter( String s )
 	{
 		if ( s.length() < 1 )
 			return 0;
-		StringBuilder sb = new StringBuilder();
-		int i = 0, j = 1;
-		sb.append( s.charAt( 0 ) );
-		while ( j < s.length() )
-		{
-			if ( sb.charAt( i ) != s.charAt( j ) )
-			{
-				sb.append( s.charAt( j ) );
-				i++;
-				j++;
-			}
-			else
-				j++;
-		}
-		char[] cs = s.toCharArray();// sb.toString().toCharArray();
+		char[] cs = s.toCharArray();
 		int n = cs.length;
 		return StPrtHelper( cs, 0, n - 1, 0, new int[n][n][n] );
 	}
