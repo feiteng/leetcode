@@ -69,83 +69,103 @@ public class Solution
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
-	public List<Integer> cheapestJump( int[] A, int B )
+	public int numDistinctIslands2( int[][] grid )
 	{
-		int n = A.length;
-		int[] c = new int[n];
-		Stack<Integer> stack = new Stack<>();
-		stack.push( 1 );
-		Arrays.fill( c, Integer.MAX_VALUE );
-		c[0] = A[0];
-		CPJfill( A, c, stack, B );
-		System.out.println( Arrays.toString( c ) );
-		System.out.println( stack );
-		if ( c[n - 1] == Integer.MAX_VALUE )
-			return new ArrayList<>();
-		List<Integer> list = new ArrayList<>( stack );
-		return list;
-
-	}
-
-	List<Integer> CPJdfs = new ArrayList<>();
-	int CPJdfsSum = Integer.MAX_VALUE;
-
-	void CPJfill( int[] A, int[] c, Stack<Integer> list, int B )
-	{
-		int n = A.length;
-		for ( int i = 1; i < n; i++ )
+		Set<Integer> set = new HashSet<>();
+		int m = grid.length, n = grid[0].length;
+		for ( int i = 0; i < m; i++ )
 		{
-			for ( int j = 1; j <= B; j++ )
+			for ( int j = 0; j < n; j++ )
 			{
-				if ( i - j < 0 || A[i] == -1 || A[i - j] == -1 )
-					break;
-				if ( c[i] > c[i - j] + A[i] )
+				if ( grid[i][j] == 1 )
 				{
-					c[i] = c[i - j] + A[i];
-					while ( list.peek() > i - j + 1 )
-						list.pop();
-					list.push( i - j + 1 );
+					List<int[]> tuple = new ArrayList<>();
+					NDIDFSvisit( grid, i, j, tuple );
+					set.add( NDIDFComputeHash( tuple ) );
 				}
 			}
 		}
+		return set.size();
 	}
 
-	void cheapJumpDFS( int[] A, int B, List<Integer> list, int sum, int pos )
+	int NDIDFComputeHash( List<int[]> tuple )
 	{
-		if ( pos == A.length )
+		int n = tuple.size(), hash = 0;
+		Map<Integer, Integer> stats1 = new HashMap<>(), stats2 = new HashMap<>();
+		for ( int i = 0; i < n; i++ )
 		{
-			if ( smallerList( list, sum ) )
+			int[] p1 = tuple.get( i );
+			stats1.put( p1[0], stats1.getOrDefault( p1[0], 0 ) + 1 );
+			stats1.put( p1[1], stats1.getOrDefault( p1[1], 0 ) + 1 );
+			for ( int j = i + 1; j < n; j++ )
 			{
-				CPJdfs = new ArrayList<>( list );
-				CPJdfsSum = sum;
+				int[] p2 = tuple.get( j );
+				int deltaX = p1[0] - p2[0], deltaY = p1[1] - p2[1];
+				if ( deltaX == 0 || deltaY == 0 )
+					hash = 19 * ( deltaX * deltaX + deltaY * deltaY );
+				else
+					hash = 31 * ( deltaX * deltaX + deltaY * deltaY );
 			}
-			return;
 		}
-		if ( pos > A.length )
-			return;
-		for ( int i = pos; i < Math.min( pos + B, A.length ); i++ )
-		{
-			if ( A[i] == -1 )
-				continue;
-			sum += A[i];
-			list.add( i + 1 );
-			cheapJumpDFS( A, B, list, sum, i + 1 );
-			sum -= A[i];
-			list.remove( list.size() - 1 );
-		}
+		for ( int k : stats1.keySet() )
+			hash += 73 * stats1.get( k ) * stats1.get( k );
+		for ( int k : stats2.keySet() )
+			hash += 73 * stats2.get( k ) * stats2.get( k );
+		int size1 = stats1.size(), size2 = stats2.size();
+		hash += 193 * ( size1 * size1 + size2 * size2 ) + 97 * size1 * size2;
+		return hash;
+
 	}
 
-	boolean smallerList( List<Integer> list, int sum )
+	int[][] NDIdirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+
+	void NDIDFSvisit( int[][] grid, int i, int j, List<int[]> tuple )
 	{
-		if ( CPJdfsSum > sum )
-			return true;
-		if ( CPJdfsSum == sum )
+		if ( i < 0 || j < 0 || i >= grid.length || j >= grid[0].length || grid[i][j] == 0 )
+			return;
+		grid[i][j] = 0;
+		tuple.add( new int[] { i, j } );
+		for ( int[] d : NDIdirs )
+			NDIDFSvisit( grid, i + d[0], j + d[1], tuple );
+	}
+
+	public int arrangeCoins( int n )
+	{
+		long l = 1, r = (long) Integer.MAX_VALUE, nl = (long) n;
+		long sum = ( r + 1 ) * r / 2;
+		while ( Long.compare( sum, nl ) > 0 )
 		{
-			for ( int i = 0, m = CPJdfs.size(), n = list.size(); i < Math.min( m, n ); i++ )
-				if ( list.get( i ) < CPJdfs.get( i ) )
-					return true;
+			r = ( r + l ) / 2;
+			sum = ( r + 1 ) * r / 2;
 		}
-		return false;
+		return (int) r;
+	}
+
+	public List<Integer> cheapestJump( int[] A, int B )
+	{
+		int n = A.length;
+		int[] c = new int[n], p = new int[n], l = new int[n];
+		Arrays.fill( c, Integer.MAX_VALUE );
+		c[0] = A[0];
+		for ( int i = 1; i < n; i++ )
+		{
+			for ( int j = B; j > 0; j-- )
+			{
+				if ( i - j < 0 || A[i] == -1 || A[i - j] == -1 )
+					continue;
+				int alt = c[i - j] + A[i];
+				if ( c[i] > c[i - j] + A[i] || c[i] == alt && l[i] < l[i - j] + 1 )
+				{
+					c[i] = c[i - j] + A[i];
+					p[i] = i - j + 1;
+					l[i] = l[i - j] + 1;
+				}
+			}
+		}
+		List<Integer> list = new ArrayList<>();
+		for ( int k = n; k > 0; k = p[k - 1] )
+			list.add( 0, k );
+		return list.get( 0 ) == 1 ? list : Collections.emptyList();
 	}
 
 	public List<TreeNode> findDuplicateSubtrees( TreeNode root )
