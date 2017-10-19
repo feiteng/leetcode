@@ -64,14 +64,128 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] v = { 2, 2, 2, 2, 3, 4, 5 };
-		System.out.println( s.canPartitionKSubsets( v, 4 ) );
+		int[] v = { 1, 2, 4, -1, 2 };
+		System.out.println( s.cheapestJump( v, 2 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public List<Integer> cheapestJump( int[] A, int B )
+	{
+		int n = A.length;
+		int[] c = new int[n];
+		Stack<Integer> stack = new Stack<>();
+		stack.push( 1 );
+		Arrays.fill( c, Integer.MAX_VALUE );
+		c[0] = A[0];
+		CPJfill( A, c, stack, B );
+		System.out.println( Arrays.toString( c ) );
+		System.out.println( stack );
+		if ( c[n - 1] == Integer.MAX_VALUE )
+			return new ArrayList<>();
+		List<Integer> list = new ArrayList<>( stack );
+		return list;
+
+	}
+
+	List<Integer> CPJdfs = new ArrayList<>();
+	int CPJdfsSum = Integer.MAX_VALUE;
+
+	void CPJfill( int[] A, int[] c, Stack<Integer> list, int B )
+	{
+		int n = A.length;
+		for ( int i = 1; i < n; i++ )
+		{
+			for ( int j = 1; j <= B; j++ )
+			{
+				if ( i - j < 0 || A[i] == -1 || A[i - j] == -1 )
+					break;
+				if ( c[i] > c[i - j] + A[i] )
+				{
+					c[i] = c[i - j] + A[i];
+					while ( list.peek() > i - j + 1 )
+						list.pop();
+					list.push( i - j + 1 );
+				}
+			}
+		}
+	}
+
+	void cheapJumpDFS( int[] A, int B, List<Integer> list, int sum, int pos )
+	{
+		if ( pos == A.length )
+		{
+			if ( smallerList( list, sum ) )
+			{
+				CPJdfs = new ArrayList<>( list );
+				CPJdfsSum = sum;
+			}
+			return;
+		}
+		if ( pos > A.length )
+			return;
+		for ( int i = pos; i < Math.min( pos + B, A.length ); i++ )
+		{
+			if ( A[i] == -1 )
+				continue;
+			sum += A[i];
+			list.add( i + 1 );
+			cheapJumpDFS( A, B, list, sum, i + 1 );
+			sum -= A[i];
+			list.remove( list.size() - 1 );
+		}
+	}
+
+	boolean smallerList( List<Integer> list, int sum )
+	{
+		if ( CPJdfsSum > sum )
+			return true;
+		if ( CPJdfsSum == sum )
+		{
+			for ( int i = 0, m = CPJdfs.size(), n = list.size(); i < Math.min( m, n ); i++ )
+				if ( list.get( i ) < CPJdfs.get( i ) )
+					return true;
+		}
+		return false;
+	}
+
+	public List<TreeNode> findDuplicateSubtrees( TreeNode root )
+	{
+		if ( root == null )
+			return new ArrayList<>();
+		Map<String, Set<TreeNode>> map = new HashMap<>();
+		FDCShelper( root, map );
+		List<TreeNode> list = new ArrayList<>();
+		for ( String s : map.keySet() )
+		{
+			if ( map.get( s ).size() > 1 )
+			{
+				for ( TreeNode t : map.get( s ) )
+				{
+					list.add( t );
+					break;
+				}
+			}
+		}
+		return list;
+	}
+
+	String FDCShelper( TreeNode root, Map<String, Set<TreeNode>> map )
+	{
+		if ( root == null )
+			return "";
+
+		String s = String.valueOf( root.val ),
+				left = FDCShelper( root.left, map ),
+				right = FDCShelper( root.right, map );
+		String app = "(" + s + "(" + left + ")" + "(" + right + ")" + ")";
+		if ( !map.containsKey( app ) )
+			map.put( app, new HashSet<>() );
+		map.get( app ).add( root );
+		return app;
 	}
 
 	public boolean canPartitionKSubsets( int[] nums, int k )
 	{
-		Map<Integer, Integer> map = new HashMap<>();
 		int sum = 0;
 		for ( int m : nums )
 			sum += m;
@@ -181,11 +295,6 @@ public class Solution
 			j = k;
 		}
 		return re;
-	}
-
-	public boolean isMatch( String s, String p )
-	{
-		return false;
 	}
 
 	public boolean splitArray( int[] nums )
@@ -996,56 +1105,6 @@ public class Solution
 		for ( int i = 0; i < visit.length; i++ )
 			re = ( re << 1 ) | visit[i];
 		return re;
-	}
-
-	List<Integer> CPJdfs = new ArrayList<>();
-	int CPJdfsSum = Integer.MAX_VALUE;
-
-	public List<Integer> cheapestJump( int[] A, int B )
-	{
-		CPJdfs.add( 1 );
-		cheapJumpDFS( A, B, CPJdfs, 0, 1 );
-		if ( CPJdfs.get( CPJdfs.size() - 1 ) != A.length )
-			return new ArrayList<>();
-		return CPJdfs;
-	}
-
-	void cheapJumpDFS( int[] A, int B, List<Integer> list, int sum, int pos )
-	{
-		if ( pos == A.length )
-		{
-			if ( smallerList( list, sum ) )
-			{
-				CPJdfs = new ArrayList<>( list );
-				CPJdfsSum = sum;
-			}
-			return;
-		}
-		if ( pos > A.length )
-			return;
-		for ( int i = pos; i < Math.min( pos + B, A.length ); i++ )
-		{
-			if ( A[i] == -1 )
-				continue;
-			sum += A[i];
-			list.add( i + 1 );
-			cheapJumpDFS( A, B, list, sum, i + 1 );
-			sum -= A[i];
-			list.remove( list.size() - 1 );
-		}
-	}
-
-	boolean smallerList( List<Integer> list, int sum )
-	{
-		if ( CPJdfsSum > sum )
-			return true;
-		if ( CPJdfsSum == sum )
-		{
-			for ( int i = 0, m = CPJdfs.size(), n = list.size(); i < Math.min( m, n ); i++ )
-				if ( list.get( i ) < CPJdfs.get( i ) )
-					return true;
-		}
-		return false;
 	}
 
 	public String removeDuplicateLetters( String s )
@@ -2152,68 +2211,6 @@ public class Solution
 			f[i % 3] = ( f[( i - 1 ) % 3] * c1 % 1000000007 + f[( i - 2 ) % 3] * c2 % 1000000007 ) % 1000000007;
 		}
 		return (int) f[s.length() % 3];
-	}
-
-	public List<TreeNode> findDuplicateSubtrees( TreeNode root )
-	{
-		// can only compare left & right, cannot stem from one tree
-		if ( root == null )
-			return new ArrayList<>();
-		List<TreeNode> list = new ArrayList<>();
-		FDSHelper( root.left, root.right, list );
-		// now level order root in list
-		return list;
-	}
-
-	void FDSLvlorder( List<TreeNode> list )
-	{
-		Queue<TreeNode> queue = new LinkedList<>();
-		queue.add( list.get( 0 ) );
-		list.remove( 0 );
-		while ( queue.isEmpty() )
-		{
-			TreeNode t = queue.poll();
-			if ( t != null )
-			{
-				queue.add( t.left );
-				queue.add( t.right );
-				list.add( t );
-			}
-		}
-	}
-
-	void FDSHelper( TreeNode r1, TreeNode r2, List<TreeNode> list )
-	{
-		if ( list.size() > 0 )
-			return;
-		if ( FDScompare( r1, r2 ) )
-			if ( r1 != null )
-				list.add( r1 );
-		if ( r1 != null )
-		{
-			FDSHelper( r1.left, r2, list );
-			FDSHelper( r1.right, r2, list );
-			// FDSHelper( r1.left, r1.right, list );
-		}
-		if ( r2 != null )
-		{
-			FDSHelper( r1, r2.left, list );
-			FDSHelper( r1, r2.right, list );
-			// FDSHelper( r2.left, r2.right, list );
-		}
-
-	}
-
-	boolean FDScompare( TreeNode root1, TreeNode root2 )
-	{
-		if ( root1 == null && root2 == null )
-			return true;
-		if ( root1 == null || root2 == null )
-			return false;
-		if ( root1.val == root2.val )
-			if ( FDScompare( root1.left, root2.left ) && FDScompare( root1.right, root2.right ) )
-				return true;
-		return false;
 	}
 
 	int numDecodingsHelper( String s )
