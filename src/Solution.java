@@ -64,8 +64,8 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] v = { 3522, 181, 521, 515, 304, 123, 2512, 312, 922, 407, 146, 1932, 4037, 2646, 3871, 269 };
-		System.out.println( s.canPartitionKSubsets( v, 5 ) );
+		int[] v = { 2, 2, 2, 2, 3, 4, 5 };
+		System.out.println( s.canPartitionKSubsets( v, 4 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
@@ -74,34 +74,52 @@ public class Solution
 		Map<Integer, Integer> map = new HashMap<>();
 		int sum = 0;
 		for ( int m : nums )
-		{
-			if ( !map.containsKey( m ) )
-				map.put( m, 0 );
-			map.put( m, map.get( m ) + 1 );
 			sum += m;
+		if ( sum % k > 0 )
+			return false;
+		Arrays.sort( nums );
+		int m = nums.length - 1, targ = sum / k;
+		if ( nums[m] > targ )
+			return false;
+		while ( m > 0 && nums[m] == targ )
+		{
+			m--;
+			k--;
 		}
-		return CPKShelper( map, k, 0, sum / k );
+		return CPKShelper( nums, new int[k], m, targ );
 	}
 
-	boolean CPKShelper( Map<Integer, Integer> map, int k, int p, int targ )
+	boolean CPKShelper( int[] nums, int[] vals, int pos, int targ )
 	{
-		if ( k == 0 && CPKSMapEmpty( map ) )
-			return true;
-		if ( p > targ || k < 0 )
-			return false;
-		if ( p == targ )
-			return CPKShelper( map, k - 1, 0, targ );
-		for ( int m : map.keySet() )
+		if ( pos < 0 && CPKStest( vals, targ ) )
 		{
-			if ( map.get( m ) == 0 || p + m > targ )
-				continue;
-			int count = map.get( m );
-			map.put( m, count - 1 );
-			if ( CPKShelper( map, k, p + m, targ ) )
-				return true;
-			map.put( m, count );
+			System.out.println( Arrays.toString( vals ) );
+			return true;
+		}
+		if ( pos < 0 )
+			return false;
+		int k = nums[pos--];
+		for ( int i = 0; i < vals.length; i++ )
+		{
+			if ( vals[i] + k <= targ )
+			{
+				vals[i] += k;
+				if ( CPKShelper( nums, vals, pos, targ ) )
+					return true;
+				vals[i] -= k;
+			}
+			if ( vals[i] == 0 )
+				break;
 		}
 		return false;
+	}
+
+	boolean CPKStest( int[] v, int targ )
+	{
+		for ( int k : v )
+			if ( k != targ )
+				return false;
+		return true;
 	}
 
 	boolean CPKSMapEmpty( Map<Integer, Integer> map )
