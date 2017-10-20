@@ -114,7 +114,6 @@ public class Solution
 		int size1 = stats1.size(), size2 = stats2.size();
 		hash += 193 * ( size1 * size1 + size2 * size2 ) + 97 * size1 * size2;
 		return hash;
-
 	}
 
 	int[][] NDIdirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
