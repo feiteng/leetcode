@@ -64,14 +64,59 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] v = { 1, 2, 4, -1, 2 };
-		System.out.println( s.cheapestJump( v, 2 ) );
+		String[] v = { "i", "love", "leetcode", "i", "love", "coding" };
+		System.out.println( s.topKFrequent( v, 2 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
-	public int minimumDeleteSum( String s1, String s2 )
-	{
+	// public int minimumDeleteSum( String s1, String s2 )
+	// {
+	//
+	// }
 
+	class TPKF
+	{
+		String _word;
+		int _val;
+
+		public TPKF( String w, int v )
+		{
+			_word = w;
+			_val = v;
+		}
+
+	}
+
+	public List<String> topKFrequent( String[] words, int k )
+	{
+		Map<String, Integer> map = new HashMap<>();
+		for ( String w : words )
+		{
+			if ( !map.containsKey( w ) )
+				map.put( w, 0 );
+			map.put( w, map.get( w ) + 1 );
+		}
+		Queue<TPKF> pq = new PriorityQueue<>( new Comparator<TPKF>()
+		{
+			@Override
+			public int compare( TPKF p1, TPKF p2 )
+			{
+				return p1._val != p2._val ? p2._val - p1._val : p1._word.compareTo( p2._word );
+			}
+		}
+
+		);
+		for ( String s : map.keySet() )
+			pq.add( new TPKF( s, map.get( s ) ) );
+		for ( TPKF p : pq )
+			System.out.printf( "%d %s\n", p._val, p._word );
+		List<String> re = new ArrayList<>();
+		while ( k > 0 )
+		{
+			re.add( pq.poll()._word );
+			k--;
+		}
+		return re;
 	}
 
 	public int numDistinctIslands2( int[][] grid )
