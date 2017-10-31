@@ -65,7 +65,8 @@ public class Solution
 
 		time = System.currentTimeMillis();
 		String[] v = { "i", "love", "leetcode", "i", "love", "coding" };
-		System.out.println( s.topKFrequent( v, 2 ) );
+		int[] val = { 2, 1, 4, 5, 2, 9, 7 };
+		System.out.println( s.maxProfit_cd( val ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
@@ -73,34 +74,100 @@ public class Solution
 	// {
 	//
 	// }
-	public int maxProfit( int[] prices, int fee )
+
+	public int maxProfit_cd( int[] prices )
 	{
-		int n = prices.length;
-		int[][] profit = new int[n][n];
-		for ( int i = 0; i < n; i++ )
+		if ( prices.length < 1 )
+			return 0;
+		int n = prices.length, max = -Math.min( prices[0], prices[1] );
+		int[] A = new int[n];
+		A[1] = prices[1] > prices[0] ? prices[1] - prices[0] : 0;
+		for ( int i = 2; i < n; i++ )
 		{
-			for ( int j = i + 1; j < n; j++ )
-			{
-				profit[i][j] = MPFill( prices, i, j );
-			}
+			max = Math.max( max, A[i - 2] - prices[i] );
+			A[i] = Math.max( A[i - 1], prices[i] + max );
 		}
-		for ( int i = 0; i < n; i++ )
+		System.out.println( Arrays.toString( A ) );
+		System.out.println( Arrays.toString( prices ) );
+		return A[n - 1];
+	}
+
+	public int maxProfit( int[] p, int fee )
+	{
+		int n = p.length, curmax = -p[0];
+		int[] A = new int[n];
+		for ( int i = 1; i < n; i++ )
 		{
+			A[i] = Math.max( A[i - 1], p[i] + curmax - fee );
+			curmax = Math.max( curmax, A[i] - p[i] );
+			System.out.printf( "%s, %d \n", Arrays.toString( A ), curmax );
+		}
+
+		return A[n - 1];
+	}
+
+	public int maxProfit( int k, int[] prices )
+	{
+		if ( prices.length < 1 )
+			return 0;
+		int n = prices.length, max = -prices[0], min = prices[0];
+		if ( k > n / 2 )
+			return MPUnlimited( prices );
+		int[] A = new int[n], B = new int[n];
+		for ( int i = 1; i < n; i++ )
+		{
+			min = Math.min( min, prices[i] );
+			A[i] = Math.max( A[i - 1], prices[i] - min );
+		}
+		if ( k == 1 )
+			return A[n - 1];
+		for ( int j = 1; j < k; j++ )
+		{
+			B = new int[n];
+			max = -prices[0];
+			for ( int i = 1; i < n; i++ )
+			{
+				B[i] = Math.max( B[i - 1], prices[i] + max );
+				max = Math.max( max, A[i] - prices[i] );
+			}
+			if ( B[n - 1] == A[n - 1] )
+				return B[n - 1];
+			A = B;
 
 		}
+		return B[n - 1];
+	}
+
+	int MPUnlimited( int[] prices )
+	{
+		if ( prices.length < 1 )
+			return 0;
+		int n = prices.length, max = -prices[0], min = prices[0];
+		int[] A = new int[n];
+		for ( int i = 1; i < n; i++ )
+		{
+			A[i] = Math.max( A[i - 1], prices[i] + max );
+			max = Math.max( max, A[i] - prices[i] );
+		}
+		return A[n - 1];
 	}
 
 	int MPgetProfit( int[][] profit, int k, int a, int b )
 	{
 		if ( k == 1 )
 			return profit[a][b];
-
+		int max = 0;
+		for ( int i = a + 1; i < b; i++ )
+		{
+			max = Math.max( max, profit[a][i] + MPgetProfit( profit, k - 1, i + 1, b ) );
+		}
+		return max;
 	}
 
 	int MPFill( int[] price, int a, int b )
 	{
 		int min = price[a], re = 0;
-		for ( int i = a; i < b; i++ )
+		for ( int i = a; i <= b; i++ )
 		{
 			min = Math.min( min, price[i] );
 			re = Math.max( re, price[i] - min );
@@ -9101,7 +9168,7 @@ public class Solution
 		return f[prices.length - 1];
 	}
 
-	public int maxProfit( int k, int[] prices )
+	public int maxProfit_( int k, int[] prices )
 	{
 		int[][] f = new int[k + 1][prices.length];
 		int maxj = 0;
