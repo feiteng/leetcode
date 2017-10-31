@@ -75,7 +75,37 @@ public class Solution
 	// }
 	public int maxProfit( int[] prices, int fee )
 	{
+		int n = prices.length;
+		int[][] profit = new int[n][n];
+		for ( int i = 0; i < n; i++ )
+		{
+			for ( int j = i + 1; j < n; j++ )
+			{
+				profit[i][j] = MPFill( prices, i, j );
+			}
+		}
+		for ( int i = 0; i < n; i++ )
+		{
 
+		}
+	}
+
+	int MPgetProfit( int[][] profit, int k, int a, int b )
+	{
+		if ( k == 1 )
+			return profit[a][b];
+
+	}
+
+	int MPFill( int[] price, int a, int b )
+	{
+		int min = price[a], re = 0;
+		for ( int i = a; i < b; i++ )
+		{
+			min = Math.min( min, price[i] );
+			re = Math.max( re, price[i] - min );
+		}
+		return re;
 	}
 
 	public int smallestDistancePair( int[] nums, int k )
