@@ -73,6 +73,101 @@ public class Solution
 	// {
 	//
 	// }
+	public int maxProfit( int[] prices, int fee )
+	{
+
+	}
+
+	public int smallestDistancePair( int[] nums, int k )
+	{
+		int low = 0, high = 0;
+
+		Arrays.sort( nums );
+		high = nums[nums.length - 1] - nums[0];
+		low = nums[1] - nums[0];
+		for ( int i = 1; i < nums.length; i++ )
+			low = Math.min( low, nums[i] - nums[i - 1] );
+		while ( low < high )
+		{
+			int mid = ( low + high ) / 2;
+			if ( SDPcount( nums, mid ) < k )
+				low = mid + 1;
+			else
+				high = mid;
+		}
+
+		return low;
+	}
+
+	int SDPcount( int[] nums, int mid )
+	{
+		int re = 0;
+		for ( int i = 0; i < nums.length; i++ )
+		{
+			int j = i;
+			while ( nums[j] - nums[i] <= mid )
+				j++;
+			re += j - i + 1;
+		}
+		return re;
+	}
+
+	public int compress( char[] chars )
+	{
+		int i = 0, j = 0, re = 0;
+		while ( j < chars.length )
+		{
+			while ( j < chars.length && chars[j] == chars[i] )
+				j++;
+			// now chars[i] != chars[j]
+			// thus count = j - i;
+			chars[re++] = chars[i];
+			if ( j - i > 1 )
+			{
+				char[] val = String.valueOf( j - i ).toCharArray();
+				for ( int k = 0; k < val.length; k++ )
+					chars[re++] = val[k];
+			}
+			i = j;
+		}
+		return re;
+	}
+
+	public int findLength( int[] A, int[] B )
+	{
+		int[] len = new int[B.length + 1];
+		int re = 0, t0 = 0, t1 = 0;
+		for ( int i = 0; i < A.length; i++ )
+		{
+			t0 = 0;
+			for ( int j = 0; j < B.length; j++ )
+			{
+				t1 = len[j + 1];
+				if ( A[i] != B[j] )
+					len[j + 1] = 0;
+				if ( A[i] == B[j] )
+					len[j + 1] = 1 + t0;
+				t0 = t1;
+				re = Math.max( re, len[j + 1] );
+			}
+		}
+		return re;
+	}
+
+	public boolean isOneBitCharacter( int[] bits )
+	{
+		boolean re = true;
+		for ( int i = 0; i < bits.length; )
+		{
+			if ( i == bits.length - 1 && bits[i] == 0 )
+				return true;
+			if ( bits[i] == 1 )
+				i += 2;
+			else if ( bits[i] == 0 )
+				i += 1;
+		}
+		return false;
+	}
 
 	class TPKF
 	{
