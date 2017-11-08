@@ -65,8 +65,8 @@ public class Solution
 
 		time = System.currentTimeMillis();
 		String[] v = { "i", "love", "leetcode", "i", "love", "coding" };
-		int[] val = { 2, 1, 4, 5, 2, 9, 7 };
-		System.out.println( s.maxProfit_cd( val ) );
+		String aString = "", bString = "?";
+		System.out.println( s.isMatch( aString, bString ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
@@ -74,6 +74,139 @@ public class Solution
 	// {
 	//
 	// }
+	public void solveSudoku( char[][] board )
+	{
+		boolean[][] row = new boolean[9][9];
+		boolean[][] col = new boolean[9][9];
+		boolean[][] sqr = new boolean[9][9];
+		for ( int i = 0; i < 9; i++ )
+		{
+			for ( int j = 0; j < 9; j++ )
+			{
+				if ( board[i][j] != '.' )
+				{
+					int num = board[i][j] - '1';
+					row[i][num] = true;
+					col[j][num] = true;
+					sqr[( i / 3 ) * 3 + j / 3][num] = true;
+				}
+			}
+		}
+		// travel through board, find which nums are already occupied
+
+	}
+
+	void SSDKDFS( char[][] board, boolean[][] row, boolean[][] col, boolean[][] sqr )
+	{
+
+	}
+
+	public boolean isValidSudoku( char[][] board )
+	{
+		boolean[][] row = new boolean[9][9];
+		boolean[][] col = new boolean[9][9];
+		boolean[][] sqr = new boolean[9][9];
+		for ( int i = 0; i < 9; i++ )
+		{
+			for ( int j = 0; j < 9; j++ )
+			{
+				if ( board[i][j] != '.' )
+				{
+					int num = board[i][j] - '1';
+					if ( row[i][num] == true || col[j][num] == true || sqr[( i / 3 ) * 3 + j / 3][num] == true )
+						return false;
+					row[i][num] = true;
+					col[j][num] = true;
+					sqr[( i / 3 ) * 3 + j / 3][num] = true;
+				}
+			}
+		}
+		return true;
+	}
+
+	public boolean isMatch( String s, String p ) // 44
+	{
+		int i = 0, j = 0, match = 0, index = -1;
+		while ( i < s.length() )
+		{
+			// both forward
+			if ( j < p.length() && ( p.charAt( j ) == '?' || s.charAt( i ) == p.charAt( j ) ) )
+			{
+				i++;
+				j++;
+			}
+			// pattern only
+			else if ( j < p.length() && p.charAt( j ) == '*' )
+			{
+				index = j;
+				match = i;
+				j++;
+			}
+			// string only
+			else if ( index != -1 )
+			// there is a * but chars don't match
+			// e.g. s = aabc, p = *c
+			{
+				j = index + 1;
+				match++;
+				i = match;
+			}
+			else
+				return false;
+
+		}
+		while ( j < p.length() && p.charAt( j ) == '*' )
+			j++;
+		return j == p.length();
+	}
+
+	public boolean isMatch_( String s, String p ) // 10
+	{
+		Boolean[][] match = new Boolean[s.length() + 1][p.length() + 1];
+		return IMatchHelper( s, p, 0, 0, match );
+	}
+
+	boolean IMatchHelper( String s, String p, int i, int j, Boolean[][] match )
+	{
+		if ( match[i][j] != null )
+			return match[i][j];
+
+		boolean ans = false;
+		if ( j == p.length() )
+			ans = i == s.length();
+		else
+		{
+			boolean firstCharMatch = i < s.length() && ( s.charAt( i ) == p.charAt( j ) || p.charAt( j ) == '.' );
+			if ( j + 1 < p.length() && p.charAt( j + 1 ) == '*' )
+				ans = IMatchHelper( s, p, i, j + 2, match ) || firstCharMatch && IMatchHelper( s, p, i + 1, j, match );
+			else
+				ans = firstCharMatch && IMatchHelper( s, p, i + 1, j + 1, match );
+		}
+		match[i][j] = ans;
+		return match[i][j];
+	}
+
+	public List<Integer> lexicalOrder( int n )
+	{
+		List<Integer> list = new ArrayList<>();
+		for ( int i = 1; i < 10; i++ )
+			LODFS( list, i, n );
+		return list;
+	}
+
+	void LODFS( List<Integer> list, int k, int n )
+	{
+		if ( k > n )
+			return;
+		list.add( k );
+		for ( int i = 0; i < 10; i++ )
+		{
+			int nextInt = k * 10 + i;
+			if ( nextInt > n )
+				break;
+			LODFS( list, nextInt, n );
+		}
+	}
 
 	public int maxProfit_cd( int[] prices )
 	{
@@ -8600,37 +8733,6 @@ public class Solution
 		return ret;
 	}
 
-	public List<Integer> lexicalOrder( int n )
-	{
-		List<Integer> list = new ArrayList<>( n );
-		for ( int i = 1; i <= n; i++ )
-			list.add( i );
-		Collections.sort( list, new Comparator<Integer>()
-		{
-
-			public int compare( Integer o1, Integer o2 )
-			{
-				String s1 = o1.toString(), s2 = o2.toString();
-				int i = 0, j = 0;
-				while ( i < s1.length() && j < s2.length() )
-				{
-
-					if ( s1.charAt( i ) != s2.charAt( j ) )
-						return s1.charAt( i ) < s2.charAt( j ) ? -1 : 1;
-					i++;
-					j++;
-				}
-				if ( i == s1.length() )
-					return -1;
-				return 1;
-
-			}
-		} );
-
-		System.out.println( list );
-		return list;
-	}
-
 	public List<List<Integer>> permuteUnique_( int[] nums )
 	{
 		if ( nums.length == 0 )
@@ -11895,29 +11997,6 @@ public class Solution
 		System.out.println( num );
 		if ( num != 1 )
 			return false;
-		return true;
-	}
-
-	public boolean isValidSudoku( char[][] board )
-	{
-		boolean[][] row = new boolean[9][9];
-		boolean[][] col = new boolean[9][9];
-		boolean[][] sqr = new boolean[9][9];
-		for ( int i = 0; i < 9; i++ )
-		{
-			for ( int j = 0; j < 9; j++ )
-			{
-				if ( board[i][j] != '.' )
-				{
-					int num = board[i][j] - '0';
-					if ( row[i][num] == true || col[j][num] == true || sqr[( i / 3 ) * 3 + j / 3][num] == true )
-						return false;
-					row[i][num] = true;
-					col[j][num] = true;
-					sqr[( i / 3 ) * 3 + j / 3][num] = true;
-				}
-			}
-		}
 		return true;
 	}
 
