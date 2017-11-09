@@ -1,19 +1,15 @@
 
-
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class TwoSum
 {
 
-	Map<Integer, Integer> _map;
+	Map<Integer, Integer> _map = new HashMap();
 
 	/** Initialize your data structure here. */
 	public TwoSum()
 	{
-		_map = new HashMap();
-
 	}
 
 	/** Add the number to an internal data structure.. */
@@ -31,10 +27,13 @@ public class TwoSum
 	{
 		for ( int k : _map.keySet() )
 		{
-			if ( k == value - k && _map.get( k ) > 1 )
-				return true;
 			if ( _map.containsKey( value - k ) )
-				return true;
+			{
+				if ( k * 2 == value && _map.get( k ) > 1 )
+					return true;
+				else if ( k * 2 != value )
+					return true;
+			}
 		}
 		return false;
 	}

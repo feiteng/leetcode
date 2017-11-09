@@ -64,9 +64,12 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		String[] v = { "i", "love", "leetcode", "i", "love", "coding" };
-		String aString = "", bString = "?";
-		System.out.println( s.isMatch( aString, bString ) );
+		String[][] v = { { "John", "johnsmith@mail.com", "john_newyork@mail.com" }, { "John", "johnsmith@mail.com", "john00@mail.com" },
+				{ "Mary", "mary@mail.com" }, { "John", "johnnybravo@mail.com" } };
+		List<List<String>> list = new ArrayList<>();
+		for ( String[] st : v )
+			list.add( new ArrayList<>( Arrays.asList( st ) ) );
+		System.out.println( s.accountsMerge( list ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
@@ -74,6 +77,72 @@ public class Solution
 	// {
 	//
 	// }
+	class ACMclass
+	{
+		String _name;
+		Set<String> _emails = new HashSet<>();
+	}
+
+	public List<List<String>> accountsMerge( List<List<String>> accounts )
+	{
+		// p is the parent for ith accounts
+		int[] p = new int[accounts.size()];
+		String[] names = new String[p.length];
+
+		for ( int i = 0; i < p.length; i++ )
+		{
+			p[i] = i;
+			names[i] = accounts.get( i ).get( 0 );
+		}
+
+		Map<String, Integer> map = new HashMap<>();
+
+		for ( int k = 0, m = accounts.size(); k < m; k++ )
+		{
+			List<String> account = accounts.get( k );
+
+			// all unions points to current index
+			for ( int i = 1, n = account.size(); i < n; i++ )
+			{
+				String emailAdd = account.get( i );
+				if ( map.containsKey( emailAdd ) )
+				{
+					int index = map.get( emailAdd );
+					while ( p[index] != index )
+						index = p[index];
+					p[index] = k;
+				}
+			}
+			// point current email to self
+			for ( int i = 1, n = account.size(); i < n; i++ )
+			{
+				String emailAdd = account.get( i );
+				map.put( emailAdd, k );
+			}
+		}
+		List<List<String>> re = new ArrayList<>();
+		Map<Integer, Queue<String>> nMap = new HashMap<>();
+		for ( String emails : map.keySet() )
+		{
+			int index = map.get( emails );
+			while ( p[index] != index )
+				index = p[index];
+			if ( !nMap.containsKey( index ) )
+				nMap.put( index, new PriorityQueue<>() );
+			nMap.get( index ).add( emails );
+		}
+		for ( int k : nMap.keySet() )
+		{
+			List<String> list = new ArrayList<>();
+			list.add( names[k] );
+			Queue<String> pq = nMap.get( k );
+			while ( !pq.isEmpty() )
+				list.add( pq.poll() );
+			re.add( list );
+		}
+		return re;
+	}
+
 	public void solveSudoku( char[][] board )
 	{
 		boolean[][] row = new boolean[9][9];
