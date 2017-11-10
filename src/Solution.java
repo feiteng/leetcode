@@ -79,6 +79,18 @@ public class Solution
 	// }
 	public List<String> removeComments( String[] source )
 	{
+		List<String> re = new ArrayList<>();
+		boolean block = false;
+		for ( int i = 0, n = source.length; i < n; i++ )
+		{
+			if ( block && source[i].indexOf( "*/" ) > 0 )
+			{
+				int index = source[i].indexOf( "*/" );
+			}
+
+		}
+
+		return re;
 
 	}
 
