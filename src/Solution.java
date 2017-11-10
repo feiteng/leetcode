@@ -77,10 +77,9 @@ public class Solution
 	// {
 	//
 	// }
-	class ACMclass
+	public List<String> removeComments( String[] source )
 	{
-		String _name;
-		Set<String> _emails = new HashSet<>();
+
 	}
 
 	public List<List<String>> accountsMerge( List<List<String>> accounts )
