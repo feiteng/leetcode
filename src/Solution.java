@@ -57,26 +57,148 @@ public class Solution
 
 	}
 
-	public static void main( String[] args )
+	public static void main( String[] args ) throws IOException
 	{
 		Solution s = new Solution();
 
 		long time;
 
 		time = System.currentTimeMillis();
-		String[][] v = { { "John", "johnsmith@mail.com", "john_newyork@mail.com" }, { "John", "johnsmith@mail.com", "john00@mail.com" },
-				{ "Mary", "mary@mail.com" }, { "John", "johnnybravo@mail.com" } };
-		List<List<String>> list = new ArrayList<>();
-		for ( String[] st : v )
-			list.add( new ArrayList<>( Arrays.asList( st ) ) );
-		System.out.println( s.accountsMerge( list ) );
+		int[] nums = { 9 };
+		ListNode t = new ListNode( nums );
+		s.plusOne( t ).print();
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public ListNode plusOne( ListNode head )
+	{
+		ListNode t, re, t2 = null;
+		re = reverse( head );
+		t = re;
+		int carry = 1;
+		while ( t != null )
+		{
+			int tmp = t.val;
+			t.val = ( t.val + carry ) % 10;
+			carry = ( carry + tmp ) / 10;
+			t2 = t;
+			t = t.next;
+
+		}
+		if ( carry > 0 )
+			t2.next = new ListNode( 1 );
+		return reverse( re );
+	}
+
+	ListNode POReverse( ListNode head )
+	{
+		ListNode t = head, re = new ListNode( 0 ), next;
+		while ( t != null )
+		{
+			next = re.next;
+			re.next = new ListNode( t.val );
+			re.next.next = next;
+			t = t.next;
+		}
+		return re.next;
+	}
+
+	public ListNode[] splitListToParts( ListNode root, int k )
+	{
+		ListNode t = root;
+		int total = 0;
+		while ( t != null )
+		{
+			t = t.next;
+			total++;
+		}
+		int[] vals = new int[k];
+		Arrays.fill( vals, total / k );
+		for ( int i = 0; i < total % k; i++ )
+			vals[i] += 1;
+		ListNode[] re = new ListNode[k];
+		for ( int i = 0; i < k; i++ )
+		{
+			re[i] = SLTPP( root, vals[i] );
+			for ( int j = 0; j < vals[i]; j++ )
+				root = root.next;
+		}
+		return re;
+	}
+
+	ListNode SLTPP( ListNode root, int k )
+	{
+		ListNode re = new ListNode( 0 ), t = re;
+		for ( int i = 0; i < k; i++ )
+		{
+			t.next = new ListNode( root.val );
+			t = t.next;
+			root = root.next;
+		}
+		return re.next;
+	}
+
+	public int pivotIndex( int[] nums )
+	{
+		int n = nums.length;
+
+		int[] sums = new int[n + 1];
+
+		for ( int i = 0; i < n; i++ )
+			sums[i + 1] = sums[i] + nums[i];
+		for ( int i = 1; i < n + 1; i++ )
+		{
+			if ( sums[n] - sums[i] == sums[i - 1] )
+				return i + 1;
+		}
+		return -1;
+	}
+
+	int[] readFile1() throws IOException
+	{
+		String file = "C:/Users/Rutter/Desktop/java/leetcode/q713.txt";
+		BufferedReader reader = new BufferedReader( new FileReader( file ) );
+
+		String p = reader.readLine();
+		int[] re = new int[p.length() / 2 + 1];
+
+		for ( int i = 0, k = 0; i < p.length(); i += 2 )
+		{
+			re[k] = p.charAt( i ) - '0';
+			k++;
+		}
+		return re;
+
 	}
 
 	// public int minimumDeleteSum( String s1, String s2 )
 	// {
 	//
 	// }
+	public int numSubarrayProductLessThanK( int[] nums, int k )
+	{
+
+		// use moving window to find max length at each position in nums array
+		int n = nums.length, pos = 0, j = 0, re = 0;
+		long prod = 1;
+		for ( int i = 0; i < n; i++ )
+		{
+			if ( nums[i] >= k )
+				continue;
+			for ( j = pos; j < n; j++ )
+			{
+				if ( prod * nums[j] < k )
+					prod *= nums[j];
+				else
+					break;
+			}
+			pos = j;
+			re += j - i;
+			prod /= nums[i];
+		}
+		return re;
+	}
+
 	public List<String> removeComments( String[] source )
 	{
 		List<String> re = new ArrayList<>();
