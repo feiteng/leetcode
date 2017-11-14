@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -64,10 +63,284 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] nums = { 9 };
-		ListNode t = new ListNode( nums );
-		s.plusOne( t ).print();
+		String s1 = "abcdebdde",
+				s2 = "bde";
+		System.out.println( s.minWindow( s1, s2 ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public String minWindow( String S, String T )
+	{
+		int[][] dp = new int[T.length() + 1][S.length() + 1];
+		int startPos = Integer.MAX_VALUE, endPos = 0;
+		for ( int i = 0; i < T.length(); i++ )
+		{
+			for ( int j = 0; j < S.length(); j++ )
+			{
+				if ( T.charAt( i ) == S.charAt( j ) )
+					dp[i + 1][j + 1] = dp[i][j] + 1;
+				else
+					dp[i + 1][j + 1] = Math.max( dp[i][j + 1], dp[i + 1][j] );
+				if ( dp[i + 1][j + 1] == T.length() && T.charAt( i ) == S.charAt( j ) )
+				{
+					int[] pos = MWRetriveString( S, T, dp, j, i );
+					if ( startPos > pos[0] + 1 || endPos - startPos > pos[1] - pos[0] )
+					{
+						startPos = pos[0] + 1;
+						endPos = pos[1] + 1;
+					}
+				}
+				for ( int[] v : dp )
+					System.out.println( Arrays.toString( v ) );
+				System.out.println();
+			}
+		}
+
+		return startPos == Integer.MAX_VALUE ? "" : S.substring( startPos, endPos );
+	}
+
+	int[] MWRetriveString( String S, String T, int[][] dp, int j, int i )
+	{
+		StringBuilder sBuilder = new StringBuilder();
+		int endPos = j;
+		while ( dp[i + 1][j + 1] > 0 )
+		{
+			sBuilder.append( S.charAt( j ) ); // last index
+			if ( S.charAt( j ) == T.charAt( i ) )
+			{
+				i--;
+				j--;
+			}
+			else if ( dp[i + 1][j] > dp[i][j + 1] )
+				j--;
+			else
+				i--;
+		}
+		return new int[] { j, endPos };
+	}
+
+	int MWSubSequence( String S, String T, int pos )
+	{
+		// sub sequence matching
+
+		int re = Integer.MAX_VALUE, i = pos, j = 0;
+
+		while ( i < S.length() && j < T.length() )
+		{
+			if ( S.charAt( i ) == T.charAt( j ) )
+			{
+				i++;
+				j++;
+			}
+			else
+				i++;
+		}
+		if ( j == T.length() )
+			return i - pos;
+		return re;
+	}
+
+	public List<String> removeComments( String[] source )
+	{
+		List<String> re = new ArrayList<>();
+		boolean inBlock = false;
+		StringBuilder sBuilder = new StringBuilder();
+		for ( String line : source )
+		{
+			int i = 0;
+			char[] chars = line.toCharArray();
+			if ( !inBlock )
+				sBuilder = new StringBuilder();
+			while ( i < line.length() )
+			{
+				if ( !inBlock && i + 1 < line.length() && chars[i] == '/' && chars[i + 1] == '*' )
+				{
+					inBlock = true;
+					i++;
+				}
+				else if ( inBlock && i + 1 < line.length() && chars[i] == '*' && chars[i + 1] == '/' )
+				{
+					inBlock = false;
+					i++;
+				}
+				else if ( !inBlock && i + 1 < line.length() && chars[i] == '/' && chars[i + 1] == '/' )
+					break;
+				else if ( !inBlock )
+					sBuilder.append( chars[i] );
+				i++;
+			}
+			if ( !inBlock && sBuilder.length() > 0 )
+				re.add( sBuilder.toString() );
+		}
+		return re;
+	}
+
+	public String countOfAtoms( String formula )
+	{
+		Stack<String> s1 = new Stack<>();
+		Stack<Integer> s2 = new Stack<>();
+		int i = 0;
+		while ( i < formula.length() )
+		{
+			if ( formula.charAt( i ) == '(' )
+			{
+				s1.push( "(" );
+				s2.push( 0 );
+				i++;
+			}
+			else if ( formula.charAt( i ) == ')' )
+			{
+				int j = i + 1, multiplyer = 1;
+				while ( j < formula.length() && formula.charAt( j ) >= '0' && formula.charAt( j ) <= '9' )
+					j++;
+				// j now points to next non-number
+				// i points to ')'
+				multiplyer = Integer.valueOf( formula.substring( i + 1, j ) );
+				Map<String, Integer> map = new HashMap<>();
+				while ( !s1.peek().equals( "(" ) )
+				{
+					String s = s1.pop();
+					int val = s2.pop() * multiplyer;
+					if ( !map.containsKey( s ) )
+						map.put( s, 0 );
+					map.put( s, map.get( s ) + val );
+				}
+				s1.pop(); // s1 removes '('
+				s2.pop();
+				for ( String e : map.keySet() )
+				{
+					s1.push( e );
+					s2.push( map.get( e ) );
+				}
+				i = j;
+			}
+			else
+			{
+				// push the element and value on to stacks
+				// now i points to capital letter
+				int j = i + 1;
+				while ( j < formula.length() && formula.charAt( j ) >= 'a' && formula.charAt( j ) <= 'z' )
+					j++;
+				s1.push( formula.substring( i, j ) );
+				i = j;
+				// j now points to next Capital letter or some number
+				while ( j < formula.length() && formula.charAt( j ) >= '0' && formula.charAt( j ) <= '9' )
+					j++;
+				if ( j != i )
+					s2.push( Integer.valueOf( formula.substring( i, j ) ) );
+				else
+					s2.push( 1 ); // now i = j
+				i = j;
+			}
+		}
+		Map<String, Integer> map = new TreeMap<>();
+		while ( !s1.isEmpty() )
+		{
+			String s = s1.pop();
+			int val = s2.pop();
+			if ( !map.containsKey( s ) )
+				map.put( s, 0 );
+			map.put( s, map.get( s ) + val );
+		}
+		StringBuilder sBuilder = new StringBuilder();
+		for ( String e : map.keySet() )
+		{
+			sBuilder.append( e );
+			int val = map.get( e );
+			if ( val != 1 )
+				sBuilder.append( String.valueOf( val ) );
+		}
+		return sBuilder.toString();
+	}
+
+	public String countOfAtoms_( String formula )
+	{
+		// a bracket means multiplying for elements in bracket
+		// use recursive style to return counts?
+		// since string is valid, a left bracket will be matched with a right one
+
+		// use Map to count, then heap to restore return string
+		Stack<Map<String, Integer>> stack = new Stack<>();
+		stack.add( new HashMap<>() );
+		Map<String, Integer> map = COAMap( "(" + formula + ")1", stack );
+		// now update map with formula
+
+		Queue<String> heap = new PriorityQueue<>( map.keySet() );
+		StringBuilder sb = new StringBuilder();
+		while ( !heap.isEmpty() )
+		{
+			String element = heap.poll();
+			sb.append( element );
+			if ( map.get( element ) != 1 )
+				sb.append( String.valueOf( map.get( element ) ) );
+		}
+		return sb.toString();
+
+	}
+
+	Map<String, Integer> COAMap( String formula, Stack<Map<String, Integer>> stack )
+	{
+		int i = 0;
+		while ( i < formula.length() )
+		{
+			// create new stack
+			if ( formula.charAt( i ) == '(' )
+			{
+				stack.push( new HashMap<>() );
+				i++;
+			}
+			// add all maps to previous stack
+			else if ( formula.charAt( i ) == ')' )
+			{
+				Map<String, Integer> tMap = stack.pop(), topMap = stack.peek();
+				int[] re = COAMultiplyer( formula, i + 1 );
+				int multiplyer = re[0], j = re[1];
+				for ( String e : tMap.keySet() )
+				{
+					tMap.put( e, tMap.get( e ) * multiplyer );
+					if ( topMap.containsKey( e ) )
+						topMap.put( e, tMap.get( e ) + topMap.get( e ) );
+					else
+						topMap.put( e, tMap.get( e ) );
+				}
+
+				i = j;
+			}
+			// add new elements
+			else if ( formula.charAt( i ) >= 'A' && formula.charAt( i ) <= 'Z' )
+			{
+				Map<String, Integer> tMap = stack.peek();
+				// new element and count
+				int j = i + 1;
+				while ( formula.charAt( j ) >= 'a' && formula.charAt( j ) <= 'z' )
+					j++;
+				// in case single element, j won't move
+				String element = formula.substring( i, j );
+				i = j;
+				// now i either points to next element, or the number behind it
+				int[] re = COAMultiplyer( formula, i );
+				int multiplyer = re[0];
+				j = re[1];
+				if ( !tMap.containsKey( element ) )
+					tMap.put( element, 0 );
+				tMap.put( element, tMap.get( element ) + multiplyer );
+				i = j;
+			}
+		}
+		return stack.pop();
+
+	}
+
+	int[] COAMultiplyer( String formula, int i )
+	{
+		// i is either ) or end of element
+		int j = i;
+		while ( j < formula.length() && formula.charAt( j ) >= '0' && formula.charAt( j ) <= '9' )
+			j++;
+		int multiplyer = 1;// no multiplyer case
+		if ( i != j )
+			multiplyer = Integer.valueOf( formula.substring( i, j ) );
+		return new int[] { multiplyer, j };
 	}
 
 	public ListNode plusOne( ListNode head )
@@ -197,23 +470,6 @@ public class Solution
 			prod /= nums[i];
 		}
 		return re;
-	}
-
-	public List<String> removeComments( String[] source )
-	{
-		List<String> re = new ArrayList<>();
-		boolean block = false;
-		for ( int i = 0, n = source.length; i < n; i++ )
-		{
-			if ( block && source[i].indexOf( "*/" ) > 0 )
-			{
-				int index = source[i].indexOf( "*/" );
-			}
-
-		}
-
-		return re;
-
 	}
 
 	public List<List<String>> accountsMerge( List<List<String>> accounts )
@@ -3071,7 +3327,7 @@ public class Solution
 		return true;
 	}
 
-	public String minWindow( String s, String t )
+	public String minWindow_( String s, String t )
 	{
 		if ( s.length() < t.length() || s.length() == 0 || t.length() == 0 )
 			return "";
