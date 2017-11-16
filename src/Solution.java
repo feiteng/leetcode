@@ -63,10 +63,50 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		String s1 = "abcdebdde",
-				s2 = "bde";
-		System.out.println( s.minWindow( s1, s2 ) );
+		int[] n = { 0, 1, 2, 2, 2 };
+		System.out.println( s.numberOfArithmeticSlices( n ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int numberOfArithmeticSlices( int[] A )
+	{
+
+		int re = 0;
+		for ( int i = 0; i < A.length - 2; i++ )
+		{
+			for ( int j = i + 1; j < A.length - 1; j++ )
+			{
+				int diff = A[j] - A[i], last = A[j], k = j + 1;
+				if ( diff == 0 ) // A[i] == A[j]
+				{
+					while ( k < A.length && A[j] == A[k] )
+					{
+						k++;
+						re++;
+					}
+				}
+				else // A[i]!=A[j]
+				{
+					// A[k] = A[k+1]
+					while ( k < A.length )
+					{
+						if ( A[k] != A[j] )
+							k++;
+					}
+					while ( k < A.length && A[k] <= last + diff )
+					{
+						while ( k < A.length && A[k] == last + diff )
+						{
+							k++;
+							re++;
+							last += diff;
+						}
+						k++;
+					}
+				}
+			}
+		}
+		return re;
 	}
 
 	public String minWindow( String S, String T )
@@ -78,34 +118,31 @@ public class Solution
 			for ( int j = 0; j < S.length(); j++ )
 			{
 				if ( T.charAt( i ) == S.charAt( j ) )
-					dp[i + 1][j + 1] = dp[i][j] + 1;
-				else
-					dp[i + 1][j + 1] = Math.max( dp[i][j + 1], dp[i + 1][j] );
-				if ( dp[i + 1][j + 1] == T.length() && T.charAt( i ) == S.charAt( j ) )
 				{
-					int[] pos = MWRetriveString( S, T, dp, j, i );
-					if ( startPos > pos[0] + 1 || endPos - startPos > pos[1] - pos[0] )
+					dp[i + 1][j + 1] = dp[i][j] + 1;
+					// first occurrence of full String T
+					if ( dp[i + 1][j + 1] == T.length() )
 					{
-						startPos = pos[0] + 1;
-						endPos = pos[1] + 1;
+						int tmpPos = MWRetriveString( S, T, dp, j, i );
+						if ( startPos > tmpPos + 1 || endPos - startPos > j - tmpPos )
+						{
+							startPos = tmpPos + 1;
+							endPos = j + 1;
+						}
 					}
 				}
-				for ( int[] v : dp )
-					System.out.println( Arrays.toString( v ) );
-				System.out.println();
+				else
+					dp[i + 1][j + 1] = Math.max( dp[i][j + 1], dp[i + 1][j] );
 			}
 		}
 
 		return startPos == Integer.MAX_VALUE ? "" : S.substring( startPos, endPos );
 	}
 
-	int[] MWRetriveString( String S, String T, int[][] dp, int j, int i )
+	int MWRetriveString( String S, String T, int[][] dp, int j, int i )
 	{
-		StringBuilder sBuilder = new StringBuilder();
-		int endPos = j;
 		while ( dp[i + 1][j + 1] > 0 )
 		{
-			sBuilder.append( S.charAt( j ) ); // last index
 			if ( S.charAt( j ) == T.charAt( i ) )
 			{
 				i--;
@@ -116,7 +153,7 @@ public class Solution
 			else
 				i--;
 		}
-		return new int[] { j, endPos };
+		return j;
 	}
 
 	int MWSubSequence( String S, String T, int pos )
