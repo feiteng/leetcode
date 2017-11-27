@@ -63,48 +63,187 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] n = { 0, 1, 2, 2, 2 };
-		System.out.println( s.numberOfArithmeticSlices( n ) );
+		System.out.println( s );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	// public int countPalindromicSubsequences( String S )
+	// {
+	// long v = 1000000007;
+	// return (int) ( CPDSCount( S, new StringBuilder(), -1, new HashSet<>() ) % v );
+	// }
+
+	public int strongPasswordChecker( String s )
+	{
+		// It has at least 6 characters and at most 20 characters.
+		// It must contain at least one lowercase letter,
+		// at least one uppercase letter, and at least one digit.
+		// It must NOT contain three repeating characters in a
+		// row ("...aaa..." is weak, but "...aa...a..." is strong, assuming other conditions are
+		// met).
+		int minChange = 0, lower = 1, upper = 1, digit = 1;
+
+		// check for repeating chars
+		char[] chars = s.toCharArray();
+		int i = 0, n = chars.length;
+
+		// minimum changes
+		if ( n < 6 )
+			// any non-satisfying problems will be padded
+			minChange -= 6 - n; // can be used for other features
+		if ( n > 20 )
+			minChange += n - 20;
+
+		// force repeating does not happen
+		while ( i + 2 < n )
+		{
+			if ( chars[i] == chars[i + 1] && chars[i + 1] == chars[i + 2] )
+			{
+				chars[i + 2] = '!'; // any random character
+				// number of changes needed on the original array making sure no repeating chars
+				minChange++;
+				i += 2;
+			}
+			i++;
+		}
+
+		// each false takes 1 action to update
+		for ( char k : chars )
+		{
+			if ( k >= 'a' && k <= 'z' )
+				lower = 0;
+			if ( k >= 'A' && k <= 'Z' )
+				upper = 0;
+			if ( k >= '0' && k <= '9' )
+				digit = 0;
+		}
+		int update = lower + upper + digit;
+
+		minChange = Math.max( 0, Math.abs( minChange - lower - upper - digit ) );
+		// no more repeating chars problem
+
+		return minChange + lower + upper + digit;
+
+	}
+
+	long CPDSCount( String str, StringBuilder s, int index, Set<String> set )
+	{
+		if ( index == str.length() )
+		{
+			if ( CPDSPalindrome( s.toString() ) && !set.contains( s.toString() ) )
+			{
+				set.add( s.toString() );
+				return 1;
+			}
+			return 0;
+		}
+		long res = 0;
+
+		for ( int i = index + 1; i < str.length(); i++ )
+		{
+			s.append( str.charAt( i ) );
+			if ( CPDSPalindrome( s.toString() ) && !set.contains( s.toString() ) )
+			{
+				set.add( s.toString() );
+				res += 1;
+			}
+			res += CPDSCount( str, s, i, set );
+			s.deleteCharAt( s.length() - 1 );
+		}
+		return res;
+	}
+
+	boolean CPDSPalindrome( String string )
+	{
+		return new StringBuilder( string ).reverse().toString().equals( string );
+	}
+
+	public List<Integer> selfDividingNumbers( int left, int right )
+	{
+		List<Integer> re = new ArrayList<>();
+		for ( int k = left; k < right; k++ )
+			if ( SDNTest( k ) )
+				re.add( k );
+		return re;
+
+	}
+
+	boolean SDNTest( int n )
+	{
+		int m = n;
+		while ( m != 0 )
+		{
+			int d = m % 10;
+			if ( d == 0 )
+				return false;
+			if ( n % d != 0 )
+				return false;
+			m /= 10;
+		}
+		return true;
 	}
 
 	public int numberOfArithmeticSlices( int[] A )
 	{
+		Map<Integer, Integer> map = new HashMap<>();
+		List<Integer> nums = new ArrayList<>();
+		int re = 0, n = nums.size();
 
-		int re = 0;
-		for ( int i = 0; i < A.length - 2; i++ )
+		for ( int k : A )
 		{
-			for ( int j = i + 1; j < A.length - 1; j++ )
+			if ( !map.containsKey( k ) )
 			{
-				int diff = A[j] - A[i], last = A[j], k = j + 1;
-				if ( diff == 0 ) // A[i] == A[j]
+				map.put( k, 0 );
+				nums.add( k );
+			}
+			map.put( k, map.get( k ) + 1 );
+		}
+		// go through distinct numbers
+
+		for ( int i = 0; i < n; i++ )
+		{
+			// for duplicate counts
+			if ( map.get( nums.get( i ) ) > 2 )
+			{
+				int v = map.get( nums.get( i ) ), c = v, full = 1;
+				while ( c-- > 0 )
+					full <<= 1;
+				re += full - 1 - v - ( v - 1 ) * v / 2;
+			}
+			// for distinct number counts
+			for ( int j = i + 1; j < n; j++ )
+			{
+				int ni = nums.get( i ), nj = nums.get( j ),
+						diff = nj - ni, last = nj, pr = map.get( ni ) * map.get( nj );
+				while ( map.containsKey( last + diff ) )
 				{
-					while ( k < A.length && A[j] == A[k] )
-					{
-						k++;
-						re++;
-					}
-				}
-				else // A[i]!=A[j]
-				{
-					// A[k] = A[k+1]
-					while ( k < A.length )
-					{
-						if ( A[k] != A[j] )
-							k++;
-					}
-					while ( k < A.length && A[k] <= last + diff )
-					{
-						while ( k < A.length && A[k] == last + diff )
-						{
-							k++;
-							re++;
-							last += diff;
-						}
-						k++;
-					}
+					last += diff;
+					pr *= map.get( last );
+					re += pr;
 				}
 			}
+		}
+		return re;
+	}
+
+	public List<Integer> findSubstring( String s, String[] words )
+	{
+		List<Integer> re = new ArrayList<>();
+		return re;
+	}
+
+	public int numberOfArithmeticSlices1( int[] A )
+	{
+		int re = 0, i = 0, j;
+		while ( i < A.length - 1 )
+		{
+			j = i + 1;
+			int diff = A[j] - A[i], k = j + 1;
+			while ( k < A.length && A[k] == A[k - 1] + diff )
+				k++;
+			int count = k - i - 2;
+			re += ( 1 + count ) * count / 2;
+			i = k - 1;
 		}
 		return re;
 	}
