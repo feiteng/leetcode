@@ -63,8 +63,152 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		System.out.println( s );
+		String[] w1 =
+
+				{ "great", "acting", "skills" },
+
+				w2 =
+
+						{ "fine", "painting", "talent" };
+		String[][] pStrings =
+
+				{ { "great", "fine" }, { "drama", "acting" }, { "skills", "talent" } };
+		System.out.println( s.areSentencesSimilarTwo( w1, w2, pStrings ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public String nearestPalindromic( String n )
+	{
+
+	}
+
+	public boolean areSentencesSimilarTwo( String[] words1, String[] words2, String[][] pairs )
+	{
+		if ( words1.length != words2.length )
+			return false;
+		Map<String, String> parent = new HashMap<>();
+		for ( String[] p : pairs )
+		{
+			if ( !parent.containsKey( p[0] ) )
+				parent.put( p[0], p[0] );
+			if ( !parent.containsKey( p[1] ) )
+				parent.put( p[1], p[1] );
+			// bfs to search for all neighbors
+			String s1 = ASSTgetParent( p[0], parent ), s2 = ASSTgetParent( p[1], parent );
+
+			parent.put( s1, s2 );
+
+		}
+
+		for ( String k : parent.keySet() )
+			System.out.printf( "[%s %s]\n", k, parent.get( k ) );
+		System.out.println();
+		for ( int i = 0; i < words1.length; i++ )
+		{
+			if ( words1[i].equals( words2[i] ) )
+				continue;
+			String s1 = ASSTgetParent( words1[i], parent ), s2 = ASSTgetParent( words2[i], parent );
+			if ( s1 == null || s2 == null || !s1.equals( s2 ) )
+				return false;
+			// System.out.printf( "%s %s", ASSTgetParent( words1[i], parent ), ASSTgetParent( words1[i], parent ) );
+			// System.out.println();
+		}
+		return true;
+	}
+
+	String ASSTgetParent( String s, Map<String, String> map )
+	{
+		if ( !map.containsKey( s ) )
+			return null;
+		while ( !map.get( s ).equals( s ) )
+			s = map.get( s );
+		return s;
+	}
+
+	public int[] asteroidCollision( int[] asteroids )
+	{
+		LinkedList<Integer> list = new LinkedList<>();
+		for ( int i = 0; i < asteroids.length; i++ )
+		{
+			int elem = asteroids[i], same = 0;
+			if ( elem < 0 )
+			{
+				while ( !list.isEmpty() && list.getLast() > 0 && list.getLast() <= -elem )
+				{
+					if ( list.getLast() == -elem )
+					{
+						same = 1;
+						list.removeLast();
+						break;
+					}
+					else
+						list.removeLast();
+				}
+				if ( same != 1 && ( list.isEmpty() || list.getLast() < 0 ) )
+					list.add( elem );
+			}
+			else
+				list.addLast( elem );
+		}
+
+		int[] re = new int[list.size()];
+		for ( int i = 0; i < re.length; i++ )
+			re[i] = list.removeFirst();
+
+		return re;
+	}
+
+	public boolean areSentencesSimilar( String[] words1, String[] words2, String[][] pairs )
+	{
+		if ( words1.length != words2.length )
+			return false;
+		Map<String, Set<String>> map = new HashMap<>();
+		for ( String[] p : pairs )
+		{
+			if ( !map.containsKey( p[0] ) )
+				map.put( p[0], new HashSet<>() );
+			if ( !map.containsKey( p[1] ) )
+				map.put( p[1], new HashSet<>() );
+			map.get( p[0] ).add( p[1] );
+			map.get( p[1] ).add( p[0] );
+		}
+		for ( int i = 0; i < words1.length; i++ )
+		{
+			if ( words1[i].equals( words2[i] ) )
+				continue;
+			if ( !map.containsKey( words1[i] ) )
+				return false;
+			if ( !map.get( words1[i] ).contains( words2[i] ) )
+				return false;
+		}
+
+		return true;
+	}
+
+	public int[][] floodFill( int[][] image, int sr, int sc, int newColor )
+	{
+		int[][] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		boolean[][] visited = new boolean[image.length][image[0].length];
+		int color = image[sr][sc];
+		visited[sr][sc] = true;
+		Queue<int[]> list = new LinkedList<>();
+
+		list.add( new int[] { sr, sc } );
+		while ( !list.isEmpty() )
+		{
+			int[] cur = list.poll();
+			int i = cur[0], j = cur[1];
+			image[i][j] = newColor;
+			for ( int[] d : dirs )
+			{
+				int ni = i + d[0], nj = j + d[1];
+				if ( ni < 0 || nj < 0 || ni >= image.length || nj >= image[0].length || visited[ni][nj] || image[ni][nj] != color )
+					continue;
+				list.add( new int[] { ni, nj } );
+				visited[ni][nj] = true;
+			}
+		}
+		return image;
 	}
 
 	// public int countPalindromicSubsequences( String S )
@@ -117,7 +261,6 @@ public class Solution
 			if ( k >= '0' && k <= '9' )
 				digit = 0;
 		}
-		int update = lower + upper + digit;
 
 		minChange = Math.max( 0, Math.abs( minChange - lower - upper - digit ) );
 		// no more repeating chars problem
@@ -616,6 +759,7 @@ public class Solution
 			re[k] = p.charAt( i ) - '0';
 			k++;
 		}
+		reader.close();
 		return re;
 
 	}
@@ -909,7 +1053,7 @@ public class Solution
 	{
 		if ( prices.length < 1 )
 			return 0;
-		int n = prices.length, max = -prices[0], min = prices[0];
+		int n = prices.length, max = -prices[0];
 		int[] A = new int[n];
 		for ( int i = 1; i < n; i++ )
 		{
@@ -1020,7 +1164,6 @@ public class Solution
 
 	public boolean isOneBitCharacter( int[] bits )
 	{
-		boolean re = true;
 		for ( int i = 0; i < bits.length; )
 		{
 			if ( i == bits.length - 1 && bits[i] == 0 )
@@ -7627,7 +7770,7 @@ public class Solution
 		return String.valueOf( c );
 	}
 
-	Map<String, List<List<String>>> palindromePartitionMap = new HashMap();
+	Map<String, List<List<String>>> palindromePartitionMap = new HashMap<>();
 
 	public List<List<String>> partition( String s )
 	{
@@ -7755,7 +7898,7 @@ public class Solution
 
 	void bfsRooms( int[][] rooms, int i, int j )
 	{
-		Queue<Integer> row = new LinkedList<>(), column = new LinkedList<>();
+		Queue<Integer> row = new LinkedList<>();
 	}
 
 	public int reverseBits( int n )
@@ -8404,7 +8547,7 @@ public class Solution
 		Set<String> beginSet = new HashSet<>(), endSet = new HashSet<>(), visited = new HashSet<>(), tmp;
 		beginSet.add( beginWord );
 		endSet.add( endWord );
-		int count = 1, index = 26;
+		int count = 1;
 
 		while ( !beginSet.isEmpty() && !endSet.isEmpty() )
 		{
@@ -9373,10 +9516,9 @@ public class Solution
 			return null;
 		Arrays.sort( nums );
 		List<Integer> list = new ArrayList<>();
-		Set<Integer> set = new HashSet<>();
 		for ( int n : nums )
 			list.add( n );
-		// List<List<Integer>> llist = new ArrayList<>( getUniqP( list ) );
+
 		return getUniqP( list );
 	}
 
@@ -9419,7 +9561,7 @@ public class Solution
 
 	List<List<Integer>> getP( List<Integer> list )
 	{
-		List<List<Integer>> r = new ArrayList<>(), tmpr, tmpr2;
+		List<List<Integer>> r = new ArrayList<>(), tmpr;
 		if ( list.size() == 1 )
 		{
 			r.add( list );
@@ -9429,7 +9571,7 @@ public class Solution
 		for ( int i = 0; i < list.size(); i++ )
 		{
 			k = list.remove( i );
-			List<Integer> tmplist = new ArrayList<>( list ), tmpList2;
+			List<Integer> tmplist = new ArrayList<>( list );
 			list.add( i, k );
 			tmpr = getP( tmplist ); // permutation of list with 1 element less
 			for ( int j = 0; j < tmpr.size(); j++ )
@@ -10799,7 +10941,6 @@ public class Solution
 	public void testStr()
 	{
 		String s;
-		Stack<Integer> st = new Stack<>();
 		st = null;
 		for ( int i = 0; i < 10; i++ )
 			s = new String( "newstring" );

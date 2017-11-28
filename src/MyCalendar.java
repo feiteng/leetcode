@@ -1,43 +1,43 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.TreeSet;
 
 class MyCalendar
 {
-	class Interval
-	{
-		int _start, _end;
-
-		public Interval( int start, int end )
-		{
-			_start = start;
-			_end = end;
-		}
-	}
-
-	List<Interval> _list = new ArrayList<>();
 
 	public MyCalendar()
 	{
 
 	}
 
-	boolean intersect( Interval i1, Interval i2 )
-	{
-		if ( i1._start >= i2._end || i1._end <= i2._start )
-			return false;
-		return true;
-	}
+	TreeSet<Integer> _set = new TreeSet<>();
 
 	public boolean book( int start, int end )
 	{
-		Interval n = new Interval( start, end );
-		for ( Interval i : _list )
-			if ( intersect( i, n ) )
-				return false;
-		_list.add( n );
-		return true;
 
+		_set.add( start );
+		_set.add( -end );
+		int k = 0, run = 0;
+		for ( int m : _set )
+		{
+			if ( m > 0 )
+				run++;
+			else
+				run--;
+			if ( run > 1 )
+			{
+				_set.remove( start );
+				_set.remove( -end );
+				return false;
+			}
+		}
+
+		return true;
 	}
+
+	/**
+	 * Your MyCalendar object will be instantiated and called as such:
+	 * MyCalendar obj = new MyCalendar();
+	 * boolean param_1 = obj.book(start,end);
+	 */
 
 	public static void main( String[] args )
 	{
