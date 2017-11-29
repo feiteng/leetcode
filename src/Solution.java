@@ -63,14 +63,31 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		int[] v = { 2, 3 };
-		System.out.println( s.largestRectangleArea( v ) );
+		char[][] v = { { '0', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0' },
+				{ '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
+				{ '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1' },
+				{ '1', '1', '1', '0', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1' },
+				{ '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '0' },
+				{ '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1' },
+				{ '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
+				{ '0', '1', '1', '0', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1' },
+				{ '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '0', '1', '1', '0', '1', '1', '1', '1' },
+				{ '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1' } };
+		System.out.println( s.maximalRectangle( v ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
 	public int maximalRectangle( char[][] matrix )
 	{
-		int m = matrix.length, n = matrix[0].length;
+		int m = matrix.length, n = matrix[0].length, area = 0;
 		int[] h = new int[n];
 		for ( int i = 0; i < m; i++ )
 		{
@@ -81,13 +98,52 @@ public class Solution
 				else
 					h[j] += 1;
 			}
+			// now heights are updated. Find left and right to calculate area
+			// similar to histogram area
+			int[] left = new int[n], right = new int[n];
+			left[0] = -1;
+			right[n - 1] = n;
+
+			for ( int j = 1; j < n; j++ )
+			{
+				int p = j - 1;
+				while ( p > 0 && h[p] >= h[j] )
+					p = left[p];
+				left[j] = p;
+			}
+
+			for ( int j = n - 2; j >= 0; j-- )
+			{
+				int p = j + 1;
+				while ( p < n && h[p] >= h[j] )
+					p = right[p];
+				right[j] = p;
+			}
+			System.out.println( Arrays.toString( left ) );
+			System.out.println( Arrays.toString( right ) );
+			System.out.println( Arrays.toString( h ) );
+			System.out.println();
+			for ( int j = 0; j < n; j++ )
+				area = Math.max( area, h[j] * ( right[j] - left[j] - 1 ) );
 		}
+		return area;
 	}
 
 	// public String nearestPalindromic( String n )
 	// {
 	//
 	// }
+	public int largestRectangleArea_( int[] h )
+	{
+		if ( h.length < 1 )
+			return 0;
+		int area = 0, n = h.length;
+		// key algo -> p = left[p]
+
+		return area;
+
+	}
+
 	public int largestRectangleArea( int[] h )
 	{
 		if ( h.length < 1 )
