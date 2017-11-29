@@ -63,23 +63,78 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		String[] w1 =
-
-				{ "great", "acting", "skills" },
-
-				w2 =
-
-						{ "fine", "painting", "talent" };
-		String[][] pStrings =
-
-				{ { "great", "fine" }, { "drama", "acting" }, { "skills", "talent" } };
-		System.out.println( s.areSentencesSimilarTwo( w1, w2, pStrings ) );
+		int[] v = { 2, 3 };
+		System.out.println( s.largestRectangleArea( v ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
 	}
 
-	public String nearestPalindromic( String n )
+	public int maximalRectangle( char[][] matrix )
 	{
+		int m = matrix.length, n = matrix[0].length;
+		int[] h = new int[n];
+		for ( int i = 0; i < m; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+			{
+				if ( matrix[i][j] == '0' )
+					h[j] = 0;
+				else
+					h[j] += 1;
+			}
+		}
+	}
 
+	// public String nearestPalindromic( String n )
+	// {
+	//
+	// }
+	public int largestRectangleArea( int[] h )
+	{
+		if ( h.length < 1 )
+			return 0;
+		int area = 0, n = h.length;
+
+		// stack based solution
+		// find out left and right boundaries for each i'th index
+		// left e.g.
+		// stacks are indices
+		// if h[i] is greater than h[stack.peek()], meaning left boundary is at
+		// stack.peek()
+		// else stack keep popping until h[i] > h[stack.peek()]
+		// then push i onto stack
+		//
+		Stack<Integer> stack = new Stack<>();
+		stack.push( 0 );
+		int[] left = new int[n], right = new int[n];
+		left[0] = -1;
+		for ( int i = 1; i < n; i++ )
+		{
+			while ( !stack.isEmpty() && h[stack.peek()] >= h[i] )
+				stack.pop();
+			if ( stack.isEmpty() )
+				left[i] = -1;
+			else
+				left[i] = stack.peek();
+			stack.push( i );
+		}
+		right[n - 1] = n;
+		stack.clear();
+		stack.push( n - 1 );
+		for ( int i = n - 2; i >= 0; i-- )
+		{
+			while ( !stack.isEmpty() && h[stack.peek()] >= h[i] )
+				stack.pop();
+			if ( stack.isEmpty() )
+				right[i] = n;
+			else
+				right[i] = stack.peek();
+			stack.push( i );
+		}
+		for ( int i = 0; i < n; i++ )
+			area = Math.max( area, h[i] * ( right[i] - left[i] - 1 ) );
+		System.out.println( Arrays.toString( left ) );
+		System.out.println( Arrays.toString( right ) );
+		return area;
 	}
 
 	public boolean areSentencesSimilarTwo( String[] words1, String[] words2, String[][] pairs )
@@ -2310,35 +2365,6 @@ public class Solution
 			nums[p] = -nums[p];
 		}
 		return list;
-	}
-
-	public int largestRectangleArea( int[] heights )
-	{
-		if ( heights.length < 1 )
-			return 0;
-		int[] left = new int[heights.length], right = new int[heights.length];
-		left[0] = -1;
-		for ( int i = 1; i < heights.length; i++ )
-		{
-			int p = i - 1;
-			while ( p >= 0 && heights[i] <= heights[p] )
-				p = left[p];
-			left[i] = p;
-		}
-		right[heights.length - 1] = heights.length;
-		for ( int i = heights.length - 2; i >= 0; i-- )
-		{
-			int p = i + 1;
-			while ( p < heights.length && heights[i] <= heights[p] )
-				p = right[p];
-			right[i] = p;
-		}
-		System.out.println( Arrays.toString( left ) );
-		System.out.println( Arrays.toString( right ) );
-		int area = 0;
-		for ( int i = 0; i < heights.length; i++ )
-			area = Math.max( area, heights[i] * ( right[i] - left[i] - 1 ) );
-		return area;
 	}
 
 	boolean knows( int a, int b )
@@ -10936,15 +10962,6 @@ public class Solution
 		System.out.println( mid );
 		int step = ( nums[mid] > nums[mid + 1] ) ? 1 : 0;
 		return nums[mid + step];
-	}
-
-	public void testStr()
-	{
-		String s;
-		st = null;
-		for ( int i = 0; i < 10; i++ )
-			s = new String( "newstring" );
-		return;
 	}
 
 	public int[] singleNumbernew( int[] nums )
