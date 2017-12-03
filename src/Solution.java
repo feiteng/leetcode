@@ -30,6 +30,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 class Interval
 {
@@ -63,26 +64,134 @@ public class Solution
 		long time;
 
 		time = System.currentTimeMillis();
-		char[][] v = { { '0', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0' },
-				{ '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
-				{ '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1' },
-				{ '1', '1', '1', '0', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1' },
-				{ '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '0' },
-				{ '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1' },
-				{ '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
-				{ '0', '1', '1', '0', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1' },
-				{ '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '0', '1', '1', '0', '1', '1', '1', '1' },
-				{ '1', '1', '1', '1', '1', '1', '0', '1', '1', '1', '1', '1', '1', '1', '1', '0', '1', '1', '1' } };
-		System.out.println( s.maximalRectangle( v ) );
+
+		System.out.println( s.numDistinct( "bbbbb", "bb" ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int numDistinct( String s, String t )
+	{
+		if ( s.length() < t.length() )
+			return 0;
+		Map<Character, TreeSet<Integer>> map = new HashMap<>();
+		for ( int i = 0; i < s.length(); i++ )
+		{
+			char k = s.charAt( i );
+			if ( !map.containsKey( k ) )
+				map.put( k, new TreeSet<>() );
+			map.get( k ).add( i );
+		}
+		if ( !map.containsKey( t.charAt( 0 ) ) )
+			return 0;
+		return NDSTHelper( map, t, 0, Collections.min( map.get( t.charAt( 0 ) ) ) + 1, 1 );
+	}
+
+	int NDSTHelper( Map<Character, TreeSet<Integer>> map, String t, int index, int val, int prod )
+	{
+
+		if ( index == t.length() - 1 )
+		{
+			char k = t.charAt( index );
+			if ( !map.containsKey( k ) )
+				return 0;
+			Set<Integer> set = map.get( k ).tailSet( val );
+			return map.get( k ).tailSet( val ).size();
+		}
+		if ( !map.containsKey( t.charAt( index ) ) || map.get( t.charAt( index ) ).tailSet( val ).size() == 0 )
+			return 0;
+		int re = 0;
+
+		for ( int k : map.get( t.charAt( index ) ) )
+		{
+			Set<Integer> set = map.get( t.charAt( index ) ).tailSet( val );
+			int p = map.get( t.charAt( index ) ).tailSet( val ).size();
+			if ( p == 0 )
+				break;
+			re += prod * NDSTHelper( map, t, index + 1, k + 1, 1 );
+		}
+
+		return re;
+	}
+
+	public String minWindow_( String s, String t )
+	{
+		if ( s.length() < t.length() || s.length() == 0 || t.length() == 0 )
+			return "";
+		int[] aryS = new int[128], aryT = new int[128];
+		int i = 0, j = 0, n = s.length();
+		for ( char k : t.toCharArray() )
+			aryT[k]++;
+		String minwindow = "";
+		// find first element's sliding window boundary
+		boolean flag = false;
+		while ( j < n && !checkSub( aryS, aryT ) )
+		{
+			aryS[s.charAt( j++ )]++;
+		}
+		String re = s.substring( 0, j );
+		aryS[s.charAt( i++ )]--;
+		while ( i < n )
+		{
+			while ( j < n && !checkSub( aryS, aryT ) )
+			{
+				aryS[s.charAt( j )]++;
+				j++;
+			}
+			if ( j - i < re.length() )
+				re = s.substring( i, j );
+			i++;
+		}
+		return re;
+	}
+
+	boolean checkSub( int[] a, int[] b )
+	{
+		for ( int i = 0, n = a.length; i < n; i++ )
+			if ( a[i] < b[i] )
+				return false;
+		return true;
+	}
+
+	public List<Integer> findSubstring( String s, String[] words )
+	{
+
+		List<Integer> re = new ArrayList<>();
+
+		Map<String, Integer> map = new HashMap<>();
+
+		for ( String w : words )
+			map.put( w, map.getOrDefault( w, 0 ) + 1 );
+
+		int k = words[0].length(), totalLen = k * words.length, n = s.length();
+		for ( int i = 0; i < n - totalLen + 1; i++ )
+		{
+			String sub = s.substring( i, i + k );
+			if ( map.containsKey( sub ) && FSSAll( s, i, k, map, words.length ) )
+				re.add( i );
+
+		}
+
+		return re;
+	}
+
+	boolean FSSAll( String s, int index, int k, Map<String, Integer> map, int n )
+	{
+		Map<String, Integer> sCount = new HashMap<>();
+
+		int count = 0;
+		while ( count < n )
+		{
+			String sub = s.substring( index, index + k );
+
+			if ( !map.containsKey( sub ) )
+				return false;
+			sCount.put( sub, sCount.getOrDefault( sub, 0 ) + 1 );
+			if ( map.get( sub ) < sCount.get( sub ) )
+				return false;
+			index += k;
+			count++;
+		}
+		return true;
 	}
 
 	public int maximalRectangle( char[][] matrix )
@@ -107,7 +216,7 @@ public class Solution
 			for ( int j = 1; j < n; j++ )
 			{
 				int p = j - 1;
-				while ( p > 0 && h[p] >= h[j] )
+				while ( p >= 0 && h[p] >= h[j] )
 					p = left[p];
 				left[j] = p;
 			}
@@ -119,6 +228,7 @@ public class Solution
 					p = right[p];
 				right[j] = p;
 			}
+			System.out.printf( "Row num %d \n", i );
 			System.out.println( Arrays.toString( left ) );
 			System.out.println( Arrays.toString( right ) );
 			System.out.println( Arrays.toString( h ) );
@@ -138,7 +248,25 @@ public class Solution
 		if ( h.length < 1 )
 			return 0;
 		int area = 0, n = h.length;
-		// key algo -> p = left[p]
+		int[] left = new int[n], right = new int[n];
+		left[0] = -1;
+		right[n - 1] = n;
+		for ( int i = 1; i < n; i++ )
+		{
+			int p = i - 1;
+			while ( p >= 0 && h[p] >= h[i] )
+				p = left[p];
+			left[i] = p;
+		}
+		for ( int i = n - 2; i >= 0; i-- )
+		{
+			int p = i + 1;
+			while ( p < n && h[p] >= h[i] )
+				p = right[p];
+			right[i] = p;
+		}
+		for ( int i = 0; i < n; i++ )
+			area = Math.max( area, h[i] * ( right[i] - left[i] - 1 ) );
 
 		return area;
 
@@ -477,12 +605,6 @@ public class Solution
 				}
 			}
 		}
-		return re;
-	}
-
-	public List<Integer> findSubstring( String s, String[] words )
-	{
-		List<Integer> re = new ArrayList<>();
 		return re;
 	}
 
@@ -3725,45 +3847,6 @@ public class Solution
 			if ( a[i] != b[i] )
 				return false;
 		}
-		return true;
-	}
-
-	public String minWindow_( String s, String t )
-	{
-		if ( s.length() < t.length() || s.length() == 0 || t.length() == 0 )
-			return "";
-		int[] aryS = new int[128], aryT = new int[128];
-		int i = 0, j = 0, n = s.length();
-		for ( char k : t.toCharArray() )
-			aryT[k]++;
-		String minwindow = "";
-		while ( i < n )
-		{
-
-			while ( j < n && !checkSub( aryS, aryT ) )
-			{
-				char c = s.charAt( j );
-				aryS[c]++;
-				j++;
-			}
-			if ( checkSub( aryS, aryT ) )
-			{
-				if ( minwindow.length() == 0 || j - i < minwindow.length() )
-					minwindow = s.substring( i, j );
-			}
-			char c = s.charAt( i );
-			aryS[c]--;
-			i++;
-
-		}
-		return minwindow;
-	}
-
-	boolean checkSub( int[] a, int[] b )
-	{
-		for ( int i = 0, n = a.length; i < n; i++ )
-			if ( a[i] < b[i] )
-				return false;
 		return true;
 	}
 
