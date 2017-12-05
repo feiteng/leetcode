@@ -65,8 +65,77 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		System.out.println( s.numDistinct( "bbbbb", "bb" ) );
+		int[] v = { 73, 74, 75, 71, 69, 72, 76, 73 };
+		System.out.println( s.monotoneIncreasingDigits( 3332 ) );// 56999
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int monotoneIncreasingDigits( int N )
+	{
+
+		// abcd
+		// find first digit not in increasing order?
+		// and no prior digits less than current one after changing.?
+		// change number down, then fix last digits into 99 - always 99?
+
+		// 3332
+		// 3329 -> 32.. -> 2999
+		// 654321
+		// find backward.
+		char[] vals = String.valueOf( N ).toCharArray();
+		int pos = -1;
+		for ( int i = vals.length - 1; i > 0; i-- )
+		{
+			if ( vals[i] < vals[i - 1] )
+			{
+				// change vals[i-1]
+				pos = i - 1;
+				vals[pos] = vals[pos] == '0' ? '9' : (char) ( vals[pos] - 1 );
+				vals[pos + 1] = '9';
+				i++;
+			}
+		}
+		if ( pos < 0 )
+			return N;
+		// pos now points to first num not in correct order
+
+		// now decrease pos by 1
+
+		// fill rest with 9
+		pos += 1;
+		while ( pos < vals.length )
+			vals[pos++] = '9';
+		return Integer.valueOf( String.valueOf( vals ) );
+
+		// 668841
+		// 668839
+		// 668799
+		// 667999
+		// update along
+	}
+
+	public int[] dailyTemperatures( int[] temperatures )
+	{
+		// find next bigger num
+		int[] re = new int[temperatures.length];
+		// O n^2 too slow?
+
+		// sliding window
+
+		// 75 , 60, 61, 76
+		// [3, 1, 1, 0]
+
+		// n^2 method
+		int i = 0, j = 0, n = temperatures.length;
+		for ( i = 0; i < n; i++ )
+		{
+			j = i;
+			while ( j < n && temperatures[i] >= temperatures[j] )
+				j++;
+
+			re[i] = j == n ? 0 : j - i;
+		}
+		return re;
 	}
 
 	public int numDistinct( String s, String t )
