@@ -65,9 +65,102 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		int[] v = { 73, 74, 75, 71, 69, 72, 76, 73 };
-		System.out.println( s.monotoneIncreasingDigits( 3332 ) );// 56999
+		String pString = "1s3 PSt";
+		int[][] v = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 0 }, { 1, 0, 0, 0 } };
+
+		System.out.println( s.countCornerRectangles( v ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public int countCornerRectangles( int[][] grid )
+	{
+		// go through (row, col), starting point has to be a 1
+		// if meet another 1 on same row
+		// go down row to check if a rectangle can be formed
+		// might be too slow?
+
+		int m = grid.length, n = grid[0].length, re = 0;
+		if ( m == 1 || n == 1 )
+			return 0;
+		Map<Integer, Set<Integer>> map = new HashMap<>(),
+				colMap = new HashMap<>();
+
+		for ( int i = 0; i < m; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+			{
+				if ( grid[i][j] == 0 )
+					continue;
+				if ( !map.containsKey( i ) )
+					map.put( i, new TreeSet<>() ); // tree set for order
+				map.get( i ).add( j );
+				if ( !colMap.containsKey( j ) )
+					colMap.put( j, new HashSet<>() );
+				colMap.get( j ).add( i );
+			}
+		}
+		List<Integer> list = new ArrayList<>( map.keySet() );
+		for ( int i = 0, size = list.size(); i < size; i++ )
+		{
+			for ( int j = i + 1; j < size; j++ )
+			{
+				int r1 = list.get( i ), r2 = list.get( j );
+				Set<Integer> s1 = new HashSet<>( map.get( r1 ) ), s2 = new HashSet<>( map.get( r2 ) );
+				s1.retainAll( s2 );
+				re += q750fact( s1.size() );
+			}
+		}
+
+		return re / 2;
+	}
+
+	int q750fact( int n )
+	{
+		if ( n < 2 )
+			return 0;
+		int k = 1;
+		while ( n > 1 )
+		{
+			k *= n;
+			n--;
+		}
+		return k;
+	}
+
+	public String shortestCompletingWord( String licensePlate, String[] words )
+	{
+		String re = "1234567890123456";
+		int[] b = conv( licensePlate );
+		// now b array contains min count of chars
+		// go through []words to find out min length that contains all words
+		for ( String s : words )
+		{
+			int[] c = conv( s );
+			if ( comp( b, c ) && s.length() < re.length() )
+				re = s;
+		}
+		return re;
+	}
+
+	int[] conv( String s )
+	{
+		int[] b = new int[26];
+		for ( char k : s.toCharArray() )
+		{
+			if ( k >= 'a' && k <= 'z' )
+				b[k - 'a']++;
+			if ( k >= 'A' && k <= 'Z' )
+				b[k - 'A']++;
+		}
+		return b;
+	}
+
+	boolean comp( int[] a, int[] b )
+	{
+		for ( int i = 0; i < 26; i++ )
+			if ( a[i] > b[i] )
+				return false;
+		return true;
 	}
 
 	public int monotoneIncreasingDigits( int N )
