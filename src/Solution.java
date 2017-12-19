@@ -65,11 +65,404 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String pString = "1s3 PSt";
-		int[][] v = { { 1, 1, 1, 1 }, { 1, 1, 1, 1 }, { 1, 1, 1, 0 }, { 1, 0, 0, 0 } };
+		String string = "wordgoodgoodgoodbestword";
+		String[] wStrings = { "word", "good", "best", "good" };
+		System.out.println( s.findSubstring( string, wStrings ) );
 
-		System.out.println( s.countCornerRectangles( v ) );
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+	}
+
+	public List<Integer> findSubstring( String s, String[] words )
+	{
+		Map<String, Integer> map = new HashMap<>();
+		List<Integer> re = new ArrayList<>();
+		for ( String w : words )
+			map.put( w, map.getOrDefault( w, 0 ) + 1 );
+		int fix = words[0].length(), n = words.length;
+		for ( String word : map.keySet() )
+		{
+			int idx = s.indexOf( word );
+			while ( idx >= 0 ) // still contains current word
+			{
+				// every possible starting position of word
+				// now find if all words are in there
+				if ( s.length() >= idx + fix * n && q30( s, idx, fix, n, new HashMap( map ) ) )
+					re.add( idx );
+				idx = s.indexOf( word, idx + 1 );
+			}
+		}
+		return re;
+	}
+
+	boolean q30( String s, int i, int len, int n, Map<String, Integer> map )
+	{
+		int count = 0, k = i;
+		while ( count < n )
+		{
+			String nextsub = s.substring( k, k + len );
+			if ( !map.containsKey( nextsub ) )
+				return false;
+			map.put( nextsub, map.get( nextsub ) - 1 );
+			count++;
+			k += len;
+		}
+		for ( String w : map.keySet() )
+			if ( map.get( w ) != 0 )
+				return false;
+		return true;
+	}
+
+	public List<Integer> findSubstring_( String s, String[] words )
+	{
+
+		List<Integer> re = new ArrayList<>();
+
+		Map<String, Integer> map = new HashMap<>();
+
+		for ( String w : words )
+			map.put( w, map.getOrDefault( w, 0 ) + 1 );
+
+		int k = words[0].length(), totalLen = k * words.length, n = s.length();
+		for ( int i = 0; i < n - totalLen + 1; i++ )
+		{
+			String sub = s.substring( i, i + k );
+			if ( map.containsKey( sub ) && FSSAll( s, i, k, map, words.length ) )
+				re.add( i );
+
+		}
+
+		return re;
+	}
+
+	boolean FSSAll( String s, int index, int k, Map<String, Integer> map, int n )
+	{
+		Map<String, Integer> sCount = new HashMap<>();
+
+		int count = 0;
+		while ( count < n )
+		{
+			String sub = s.substring( index, index + k );
+
+			if ( !map.containsKey( sub ) )
+				return false;
+			sCount.put( sub, sCount.getOrDefault( sub, 0 ) + 1 );
+			if ( map.get( sub ) < sCount.get( sub ) )
+				return false;
+			index += k;
+			count++;
+		}
+		return true;
+	}
+
+	public ListNode reverseKGroup_( ListNode head, int k )
+	{
+		if ( head == null || head.next == null )
+			return head;
+		ListNode ret = new ListNode( 0 ), t = ret;
+		ret.next = head;
+		while ( t != null )
+		{
+			ListNode t_ = t;
+			// test if at end
+			for ( int i = 0; i < k; i++ )
+			{
+				t_ = t_.next;
+				if ( t_ == null )
+					return ret.next;
+
+			}
+			// now reverse next k
+			t_ = t.next; // tail
+			ListNode _t = t_; // head
+			int k_ = 1;
+			while ( k_ < k )
+			{
+				t.next = t_.next;
+				t_.next = t.next.next;
+				t.next.next = _t;
+				_t = t.next;
+				k_++;
+				ret.print();
+			}
+			k_ = 0;
+			while ( k_ < k )
+			{
+				t = t.next;
+				k_++;
+			}
+		}
+		return ret.next;
+	}
+
+	public boolean isMatch44( String s, String p )
+	{
+		m44 = new Boolean[s.length() + 1][p.length() + 1];
+		return q44( s, 0, p, 0 );
+	}
+
+	Boolean[][] m44;
+
+	boolean q44( String s, int i, String p, int j )
+	{
+		if ( i > s.length() || j > p.length() )
+			return false;
+		if ( j == p.length() )
+			return i == s.length();
+		if ( m44[i][j] != null )
+			return m44[i][j];
+		System.out.printf( "%d %d\n", i, j );
+		if ( i < s.length() && s.charAt( i ) == p.charAt( j ) || p.charAt( j ) == '?' )
+			m44[i][j] = q44( s, i + 1, p, j + 1 );
+		else if ( p.charAt( j ) == '*' )
+			m44[i][j] = q44( s, i + 1, p, j ) || q44( s, i, p, j + 1 );
+		else
+			m44[i][j] = false;
+		return m44[i][j];
+
+	}
+
+	public boolean isMatch10( String s, String p ) // 10
+	{
+		return q10( s, 0, p, 0 );
+	}
+
+	boolean q10( String s, int i, String p, int j )
+	{
+		if ( i > s.length() || j > p.length() )
+			return false; // will not execute
+		if ( j == p.length() )
+			return i == s.length();
+		if ( i < s.length() && s.charAt( i ) == p.charAt( j ) || p.charAt( j ) == '.' )
+		{
+			if ( j + 1 < p.length() && p.charAt( j + 1 ) == '*' )
+				return q10( s, i, p, j + 2 ) || q10( s, i + 1, p, j );
+		}
+		else if ( p.charAt( j + 1 ) == '*' )
+			return q10( s, i, p, j + 2 );
+		return false;
+
+	}
+
+	public boolean isMatch_( String s, String p ) // 10
+	{
+		Boolean[][] match = new Boolean[s.length() + 1][p.length() + 1];
+		return IMADP( s, p, 0, 0, match );
+	}
+
+	boolean IMADP( String s, String p, int i, int j, Boolean[][] match )
+	{
+		if ( match[i][j] != null )
+			return match[i][j];
+
+		boolean ans = false;
+		if ( j == p.length() )
+			ans = i == s.length();
+		else
+		{
+			boolean firstCharMatch = i < s.length() && ( s.charAt( i ) == p.charAt( j ) || p.charAt( j ) == '.' );
+			if ( j + 1 < p.length() && p.charAt( j + 1 ) == '*' )
+				ans = IMADP( s, p, i, j + 2, match ) || firstCharMatch && IMADP( s, p, i + 1, j, match );
+			else
+				ans = firstCharMatch && IMADP( s, p, i + 1, j + 1, match );
+		}
+		match[i][j] = ans;
+		return match[i][j];
+	}
+
+	public boolean isMatch( String s, String p ) // 44
+	{
+		int i = 0, j = 0, match = 0, index = -1;
+		while ( i < s.length() )
+		{
+			// both forward
+			if ( j < p.length() && ( p.charAt( j ) == '?' || s.charAt( i ) == p.charAt( j ) ) )
+			{
+				i++;
+				j++;
+			}
+			// pattern only
+			else if ( j < p.length() && p.charAt( j ) == '*' )
+			{
+				index = j;
+				match = i;
+				j++;
+			}
+			// string only
+			else if ( index != -1 )
+			// there is a * but chars don't match
+			// e.g. s = aabc, p = *c
+			{
+				j = index + 1;
+				match++;
+				i = match;
+			}
+			else
+				return false;
+
+		}
+		while ( j < p.length() && p.charAt( j ) == '*' )
+			j++;
+		return j == p.length();
+	}
+
+	public String convert( String s, int numRows )
+	{
+		List<StringBuilder> list = new ArrayList<>();
+		for ( int i = 0; i < numRows; i++ )
+			list.add( new StringBuilder() );
+		int p = 0, f = 1;
+		for ( int k = 0; k < s.length(); k++ )
+		{
+			list.get( p ).append( s.charAt( k ) );
+			if ( p == 0 || p == numRows - 1 )
+				f = 1 - f;
+			if ( f == 0 )
+				p++;
+			else
+				p--;
+		}
+		StringBuilder re = new StringBuilder();
+		for ( StringBuilder sb : list )
+			re.append( sb.toString() );
+		return re.toString();
+	}
+
+	public String convert_( String s, int nRows )
+	{
+		if ( nRows == 1 )
+			return s;
+		String[] ret = new String[nRows];
+		for ( int i = 0; i < nRows; i++ )
+			ret[i] = "";
+		char[] c = s.toCharArray();
+		int k = 0, n = nRows - 1;
+		;
+		boolean up = false, down = true, tmp;
+		for ( int i = 0; i < c.length; i++ )
+		{
+			if ( i % n == 0 )
+			{
+				tmp = up;
+				up = down;
+				down = tmp;
+			}
+			System.out.println( "K=" + k );
+			ret[k] += String.valueOf( c[i] );
+			if ( up )
+				k++;
+			if ( down )
+				k--;
+		}
+		String str = "";
+		for ( int i = 0; i < nRows; i++ )
+			str += ret[i];
+		return str;
+	}
+
+	public String longestPalindrome( String s )
+	{
+		int n = s.length();
+		if ( n < 1 )
+			return s;
+		String re = String.valueOf( s.charAt( 0 ) );
+		boolean[][] dp = new boolean[n][n];
+		int maxLen = 1;
+		for ( int i = 0; i < n; i++ )
+		{
+			dp[i][i] = true;
+			if ( i + 1 < n && s.charAt( i ) == s.charAt( i + 1 ) )
+			{
+				dp[i][i + 1] = true;
+				maxLen = 1;
+				re = s.substring( i, i + 2 );
+			}
+		}
+
+		for ( int k = 2; k < n; k++ )
+		{
+			for ( int i = 0; i + 1 < n; i++ )
+			{
+				int j = Math.min( n - 1, i + k );
+				if ( s.charAt( i ) == s.charAt( j ) && dp[i + 1][j - 1] )
+				{
+					dp[i][j] = true;
+					if ( maxLen < j - i + 1 )
+					{
+						maxLen = j - i + 1;
+						re = s.substring( i, j + 1 );
+					}
+				}
+			}
+		}
+		return re;
+	}
+
+	public int longestPalindrome_( String s )
+	{
+		int[] upper = new int[26], lower = new int[26];
+
+		for ( int i = 0; i < s.length(); i++ )
+		{
+			char c = s.charAt( i );
+			if ( c >= 'a' )
+				lower[c - 'a']++;
+			else
+				upper[c - 'A']++;
+		}
+		int count = 0;
+		for ( int i = 0; i < upper.length; i++ )
+		{
+			if ( upper[i] >= 2 )
+				count += upper[i] / 2;
+			if ( lower[i] >= 2 )
+				count += lower[i] / 2;
+		}
+		System.out.println( count );
+		count *= 2;
+		if ( count < s.length() )
+			count++;
+		return count;
+	}
+
+	public double findMedianSortedArrays( int[] a, int[] b )
+	{
+		if ( a.length > b.length )
+		{
+			int[] c = b;
+			b = a;
+			a = c;
+		}
+		int m = a.length, n = b.length, l = 0, r = m, i = ( l + r ) / 2, j = ( m + n ) / 2 - i;
+		while ( l <= r ) // binary search
+		{
+			if ( ( i == 0 || j == n || a[i - 1] <= b[j] ) && ( j == 0 || i == m || b[j - 1] <= a[i] ) ) // desired result
+			{
+				int min;
+				if ( i != m && j != n )
+					min = Math.min( a[i], b[j] );
+				else
+					min = i == m ? b[j] : a[i];
+				if ( ( m + n ) % 2 == 0 )
+				{
+					int max;
+					if ( i != 0 && j != 0 )
+						max = Math.max( a[i - 1], b[j - 1] );
+					else
+						max = i == 0 ? b[j - 1] : a[i - 1];
+					return ( max + min ) / 2.0;
+				}
+				else
+					return min;
+			}
+			if ( i > 0 && j < n && a[i - 1] > b[j] )
+				r = i - 1;
+			if ( j > 0 && i < m && b[j - 1] > a[i] )
+				l = i + 1;
+
+			i = ( l + r ) / 2;
+			j = ( m + n ) / 2 - i;
+		}
+		return 0.0;
 	}
 
 	public int countCornerRectangles( int[][] grid )
@@ -311,48 +704,6 @@ public class Solution
 		for ( int i = 0, n = a.length; i < n; i++ )
 			if ( a[i] < b[i] )
 				return false;
-		return true;
-	}
-
-	public List<Integer> findSubstring( String s, String[] words )
-	{
-
-		List<Integer> re = new ArrayList<>();
-
-		Map<String, Integer> map = new HashMap<>();
-
-		for ( String w : words )
-			map.put( w, map.getOrDefault( w, 0 ) + 1 );
-
-		int k = words[0].length(), totalLen = k * words.length, n = s.length();
-		for ( int i = 0; i < n - totalLen + 1; i++ )
-		{
-			String sub = s.substring( i, i + k );
-			if ( map.containsKey( sub ) && FSSAll( s, i, k, map, words.length ) )
-				re.add( i );
-
-		}
-
-		return re;
-	}
-
-	boolean FSSAll( String s, int index, int k, Map<String, Integer> map, int n )
-	{
-		Map<String, Integer> sCount = new HashMap<>();
-
-		int count = 0;
-		while ( count < n )
-		{
-			String sub = s.substring( index, index + k );
-
-			if ( !map.containsKey( sub ) )
-				return false;
-			sCount.put( sub, sCount.getOrDefault( sub, 0 ) + 1 );
-			if ( map.get( sub ) < sCount.get( sub ) )
-				return false;
-			index += k;
-			count++;
-		}
 		return true;
 	}
 
@@ -1295,68 +1646,6 @@ public class Solution
 			}
 		}
 		return true;
-	}
-
-	public boolean isMatch( String s, String p ) // 44
-	{
-		int i = 0, j = 0, match = 0, index = -1;
-		while ( i < s.length() )
-		{
-			// both forward
-			if ( j < p.length() && ( p.charAt( j ) == '?' || s.charAt( i ) == p.charAt( j ) ) )
-			{
-				i++;
-				j++;
-			}
-			// pattern only
-			else if ( j < p.length() && p.charAt( j ) == '*' )
-			{
-				index = j;
-				match = i;
-				j++;
-			}
-			// string only
-			else if ( index != -1 )
-			// there is a * but chars don't match
-			// e.g. s = aabc, p = *c
-			{
-				j = index + 1;
-				match++;
-				i = match;
-			}
-			else
-				return false;
-
-		}
-		while ( j < p.length() && p.charAt( j ) == '*' )
-			j++;
-		return j == p.length();
-	}
-
-	public boolean isMatch_( String s, String p ) // 10
-	{
-		Boolean[][] match = new Boolean[s.length() + 1][p.length() + 1];
-		return IMatchHelper( s, p, 0, 0, match );
-	}
-
-	boolean IMatchHelper( String s, String p, int i, int j, Boolean[][] match )
-	{
-		if ( match[i][j] != null )
-			return match[i][j];
-
-		boolean ans = false;
-		if ( j == p.length() )
-			ans = i == s.length();
-		else
-		{
-			boolean firstCharMatch = i < s.length() && ( s.charAt( i ) == p.charAt( j ) || p.charAt( j ) == '.' );
-			if ( j + 1 < p.length() && p.charAt( j + 1 ) == '*' )
-				ans = IMatchHelper( s, p, i, j + 2, match ) || firstCharMatch && IMatchHelper( s, p, i + 1, j, match );
-			else
-				ans = firstCharMatch && IMatchHelper( s, p, i + 1, j + 1, match );
-		}
-		match[i][j] = ans;
-		return match[i][j];
 	}
 
 	public List<Integer> lexicalOrder( int n )
@@ -4124,7 +4413,7 @@ public class Solution
 		return diff;
 	}
 
-	public double findMedianSortedArrays( int[] nums1, int[] nums2 )
+	public double findMedianSortedArrays_( int[] nums1, int[] nums2 )
 	{
 		int k = 0, n1 = nums1.length, n2 = nums2.length, i = 0, j = 0;
 		int[] vals = new int[n1 + n2];
@@ -9274,33 +9563,6 @@ public class Solution
 		return list.toArray( new int[1][] );
 	}
 
-	public int longestPalindrome( String s )
-	{
-		int[] upper = new int[26], lower = new int[26];
-
-		for ( int i = 0; i < s.length(); i++ )
-		{
-			char c = s.charAt( i );
-			if ( c >= 'a' )
-				lower[c - 'a']++;
-			else
-				upper[c - 'A']++;
-		}
-		int count = 0;
-		for ( int i = 0; i < upper.length; i++ )
-		{
-			if ( upper[i] >= 2 )
-				count += upper[i] / 2;
-			if ( lower[i] >= 2 )
-				count += lower[i] / 2;
-		}
-		System.out.println( count );
-		count *= 2;
-		if ( count < s.length() )
-			count++;
-		return count;
-	}
-
 	public int lastRemaining( int n )
 	{
 		List<Integer> l1 = new ArrayList<>(), l2;
@@ -9653,46 +9915,6 @@ public class Solution
 			i += kmp[j];
 		}
 		return -1;
-	}
-
-	public ListNode reverseKGroup_( ListNode head, int k )
-	{
-		if ( head == null || head.next == null )
-			return head;
-		ListNode ret = new ListNode( 0 ), t = ret;
-		ret.next = head;
-		while ( t != null )
-		{
-			ListNode t_ = t;
-			// test if at end
-			for ( int i = 0; i < k; i++ )
-			{
-				t_ = t_.next;
-				if ( t_ == null )
-					return ret.next;
-
-			}
-			// now reverse next k
-			t_ = t.next; // tail
-			ListNode _t = t_; // head
-			int k_ = 1;
-			while ( k_ < k )
-			{
-				t.next = t_.next;
-				t_.next = t.next.next;
-				t.next.next = _t;
-				_t = t.next;
-				k_++;
-				ret.print();
-			}
-			k_ = 0;
-			while ( k_ < k )
-			{
-				t = t.next;
-				k_++;
-			}
-		}
-		return ret.next;
 	}
 
 	public List<List<Integer>> fourSum( int[] nums, int target )
@@ -15749,38 +15971,6 @@ public class Solution
 			ret += base[i];
 		}
 		return ret;
-	}
-
-	public String convert( String s, int nRows )
-	{
-		if ( nRows == 1 )
-			return s;
-		String[] ret = new String[nRows];
-		for ( int i = 0; i < nRows; i++ )
-			ret[i] = "";
-		char[] c = s.toCharArray();
-		int k = 0, n = nRows - 1;
-		;
-		boolean up = false, down = true, tmp;
-		for ( int i = 0; i < c.length; i++ )
-		{
-			if ( i % n == 0 )
-			{
-				tmp = up;
-				up = down;
-				down = tmp;
-			}
-			System.out.println( "K=" + k );
-			ret[k] += String.valueOf( c[i] );
-			if ( up )
-				k++;
-			if ( down )
-				k--;
-		}
-		String str = "";
-		for ( int i = 0; i < nRows; i++ )
-			str += ret[i];
-		return str;
 	}
 
 	public boolean hasPathSumBFS( TreeNode root, int sum )
