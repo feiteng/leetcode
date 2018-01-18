@@ -65,11 +65,186 @@ public class Solution
 
 		time = System.currentTimeMillis();
 
-		String string = "wordgoodgoodgoodbestword";
-		String[] wStrings = { "word", "good", "best", "good" };
-		System.out.println( s.findSubstring( string, wStrings ) );
+		System.out.println( s.totalNQueens( 5 ) );
 
 		System.out.printf( "Run time... %s ms", System.currentTimeMillis() - time );
+
+	}
+
+	public int totalNQueens( int n )
+	{
+		totalNQueensHelper( -1, new int[n][n] );
+		return totalNQueensCount;
+	}
+
+	int totalNQueensCount = 0;
+
+	void totalNQueensHelper( int r, int[][] b )
+	{
+		if ( r == b.length - 1 )
+		{
+			totalNQueensCount++;
+			return;
+		}
+		for ( int i = 0; i < b.length; i++ )
+		{
+			if ( testTotalNQueens( r + 1, i, b ) )
+			{
+				b[r + 1][i] = 1;
+				totalNQueensHelper( r + 1, b );
+				b[r + 1][i] = 0;
+			}
+		}
+	}
+
+	boolean testTotalNQueens( int r, int c, int[][] b )
+	{
+		int n = b.length;
+		for ( int i = 0; i < n; i++ )
+		{
+			if ( b[r][i] == 1 && c != i )
+				return false;
+			if ( b[i][c] == 1 && r != i )
+				return false;
+			int dr = r - i, d1c = c + i, d2c = c - i;
+			if ( dr < n && dr >= 0 && d1c < n && d1c >= 0 && dr != r && d1c != c )
+				if ( b[dr][d1c] == 1 )
+					return false;
+			if ( dr < n && dr >= 0 && d2c < n && d2c >= 0 && dr != r && d2c != c )
+				if ( b[dr][d2c] == 1 )
+					return false;
+		}
+		return true;
+	}
+
+	public List<List<String>> solveNQueens( int n )
+	{
+
+		checkQ( -1, makeBoard( n ) );
+		return solveNQueensRe;
+	}
+
+	List<List<String>> solveNQueensRe = new ArrayList<>();
+
+	void checkQ( int i, char[][] b )
+	{
+		if ( i == b.length - 1 )
+		{
+			solveNQueensRe.add( conv( b ) );
+			return;
+		}
+
+		for ( int j = 0; j < b.length; j++ )
+		{
+			if ( testQ( i + 1, j, b ) )
+			{
+				b[i + 1][j] = 'Q';
+				checkQ( i + 1, b );
+				b[i + 1][j] = '.';
+			}
+		}
+	}
+
+	boolean testQ( int r, int c, char[][] b )
+	{
+		int n = b.length;
+		for ( int i = 0; i < n; i++ )
+		{
+			if ( b[r][i] == 'Q' && c != i )
+				return false;
+			if ( b[i][c] == 'Q' && r != i )
+				return false;
+			int dr = r - i, d1c = c + i, d2c = c - i;
+			if ( dr < n && dr >= 0 && d1c < n && d1c >= 0 && dr != r && d1c != c )
+				if ( b[dr][d1c] == 'Q' )
+					return false;
+			if ( dr < n && dr >= 0 && d2c < n && d2c >= 0 && dr != r && d2c != c )
+				if ( b[dr][d2c] == 'Q' )
+					return false;
+		}
+		return true;
+	}
+
+	List<String> conv( char[][] b )
+	{
+		List<String> re = new ArrayList<>();
+		for ( char[] row : b )
+			re.add( String.valueOf( row ) );
+		return re;
+	}
+
+	char[][] makeBoard( int n )
+	{
+		char[][] board = new char[n][n];
+		for ( char[] b : board )
+			Arrays.fill( b, '.' );
+		return board;
+	}
+
+	public void solveSudoku( char[][] board )
+	{
+		if ( board == null || board.length == 0 )
+			return;
+		solveSDK( board );
+	}
+
+	boolean solveSDK( char[][] board )
+	{
+		int m = board.length, n = board[0].length;
+		for ( int i = 0; i < m; i++ )
+		{
+			for ( int j = 0; j < n; j++ )
+			{
+				if ( board[i][j] != '.' )
+					continue;
+				for ( char k = '1'; k <= '9'; k++ )
+				{
+					if ( isValid( board, i, j, k ) )
+					{
+						board[i][j] = k;
+						if ( solveSDK( board ) )
+							return true;
+					}
+				}
+				board[i][j] = '.';
+				return false;
+			}
+		}
+		return true;
+	}
+
+	boolean isValid( char[][] board, int i, int j, char c )
+	{
+		for ( int k = 0; k < 9; k++ )
+		{
+			int si = i / 3 * 3, sj = j / 3 * 3;
+			if ( board[i][k] == c || board[k][j] == c || board[si + k / 3][sj + k % 3] == c )
+				return false;
+		}
+		return true;
+	}
+
+	public boolean isValidSudoku( char[][] board )
+	{
+		boolean[][] row = new boolean[9][9];
+		boolean[][] col = new boolean[9][9];
+		boolean[][] sqr = new boolean[9][9];
+		for ( int i = 0; i < 9; i++ )
+		{
+			for ( int j = 0; j < 9; j++ )
+			{
+				if ( board[i][j] != '.' )
+				{
+					int num = board[i][j] - '1';
+					if ( row[i][num] == true || col[j][num] == true || sqr[( i / 3 ) * 3 + j / 3][num] == true )
+						return false;
+					row[i][num] = true;
+					col[j][num] = true;
+					sqr[( i / 3 ) * 3 + j / 3][num] = true;
+				}
+			}
+		}
+		return true;
 	}
 
 	public List<Integer> findSubstring( String s, String[] words )
@@ -1596,56 +1771,6 @@ public class Solution
 			re.add( list );
 		}
 		return re;
-	}
-
-	public void solveSudoku( char[][] board )
-	{
-		boolean[][] row = new boolean[9][9];
-		boolean[][] col = new boolean[9][9];
-		boolean[][] sqr = new boolean[9][9];
-		for ( int i = 0; i < 9; i++ )
-		{
-			for ( int j = 0; j < 9; j++ )
-			{
-				if ( board[i][j] != '.' )
-				{
-					int num = board[i][j] - '1';
-					row[i][num] = true;
-					col[j][num] = true;
-					sqr[( i / 3 ) * 3 + j / 3][num] = true;
-				}
-			}
-		}
-		// travel through board, find which nums are already occupied
-
-	}
-
-	void SSDKDFS( char[][] board, boolean[][] row, boolean[][] col, boolean[][] sqr )
-	{
-
-	}
-
-	public boolean isValidSudoku( char[][] board )
-	{
-		boolean[][] row = new boolean[9][9];
-		boolean[][] col = new boolean[9][9];
-		boolean[][] sqr = new boolean[9][9];
-		for ( int i = 0; i < 9; i++ )
-		{
-			for ( int j = 0; j < 9; j++ )
-			{
-				if ( board[i][j] != '.' )
-				{
-					int num = board[i][j] - '1';
-					if ( row[i][num] == true || col[j][num] == true || sqr[( i / 3 ) * 3 + j / 3][num] == true )
-						return false;
-					row[i][num] = true;
-					col[j][num] = true;
-					sqr[( i / 3 ) * 3 + j / 3][num] = true;
-				}
-			}
-		}
-		return true;
 	}
 
 	public List<Integer> lexicalOrder( int n )
@@ -8766,7 +8891,7 @@ public class Solution
 	}
 
 	// Set<Integer> col = new HashSet<>(), diag = new HashSet<>(), diagr = new HashSet<>();
-	public int totalNQueens( int n )
+	public int totalNQueens_( int n )
 	{
 		return solveNQueensCount( n ).size();
 	}
@@ -8856,7 +8981,7 @@ public class Solution
 		}
 	}
 
-	public List<List<String>> solveNQueens( int n )
+	public List<List<String>> solveNQueens_( int n )
 	{
 		List<List<String>> list = new ArrayList<>();
 		for ( int j = 0; j < n; j++ )
