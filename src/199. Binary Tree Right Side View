@@ -1,0 +1,44 @@
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<Integer> rightSideView(TreeNode root) {
+    // idea - 
+    // in order to have the right side view, needs to know each level, and to know
+    // the most right side element, and this calls for a bfs method. 
+    // to keep track of elements on that level, a level is also tracked
+    // a map is used to update the element on the right hand side
+        Queue<TreeNode> q = new LinkedList<>();
+        q.offer(root);
+        int lvl = 0;
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+        while(!q.isEmpty())
+        {
+            int size = q.size();
+            while(size-- > 0)
+            {
+                TreeNode cur = q.poll();
+                if(cur == null) continue;
+                map.put(lvl, cur.val);
+                q.offer(cur.left);
+                q.offer(cur.right);
+            }
+            lvl++;
+        }
+        List<Integer> list = new ArrayList<>();
+        for(int k : map.keySet()) list.add(map.get(k));
+        return list;
+    }
+}
