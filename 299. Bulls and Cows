@@ -1,0 +1,22 @@
+class Solution {
+    public String getHint(String secret, String guess) {
+        int n = secret.length();
+        int[] f = new int[10], g = new int[10];
+        int same = 0;
+        for(int i = 0; i < n; i++)
+        {
+            int u = secret.charAt(i) - '0',
+                v = guess.charAt(i) - '0';
+            f[u]++;
+            g[v]++;
+            if(u == v) same++;
+        }
+        int total = 0;
+        for(int i = 0; i < 10; i++)
+        {
+            total += Math.min(f[i], g[i]);
+        }
+        total -= same;
+        return "" + same + "A" + total + "B";
+    }
+}
