@@ -1,0 +1,28 @@
+class MyCalendar {
+
+    TreeMap<Integer, Integer> map = new TreeMap<>();
+    public MyCalendar() {
+        
+    }
+    
+    public boolean book(int start, int end) {
+        for(int k : map.keySet())
+        {
+            if(intersect(k, map.get(k), start, end)) return false;
+        }
+        map.put(start, end);
+        return true;
+    }
+    
+    boolean intersect(int s1, int e1, int s2, int e2)
+    {
+        if(e1 <= s2 || e2 <= s1) return false;
+        return true;
+    }
+}
+
+/**
+ * Your MyCalendar object will be instantiated and called as such:
+ * MyCalendar obj = new MyCalendar();
+ * boolean param_1 = obj.book(start,end);
+ */
