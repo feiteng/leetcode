@@ -1,0 +1,48 @@
+class Solution {
+    
+    class Trie
+    {
+        Trie[] child = new Trie[26];
+        Queue<String> q = new PriorityQueue<>();
+        void insert(String s) {
+            Trie root = this;
+            for(char c : s.toCharArray()) {
+                if(root.child[c - 'a'] == null) root.child[c - 'a'] = new Trie();
+                root.q.add(s);
+                root = root.child[c - 'a'];
+            }
+            root.q.add(s);
+        }
+        
+        List<String> search(String s) {
+            Trie root = this;
+            for(char c : s.toCharArray()) {
+                if(root.child[c - 'a'] == null) return new ArrayList<>();
+                root = root.child[c - 'a'];
+            }
+            // System.out.println(s);
+            // System.out.println(root.q);
+            Queue<String> q2 = new PriorityQueue<>(root.q);
+            List<String> list = new ArrayList<>();
+            while(!q2.isEmpty() && list.size() < 3) 
+                list.add(q2.poll());
+            return list;
+        }
+    }
+    
+    Trie trie = new Trie();
+    public List<List<String>> suggestedProducts(String[] products, String searchWord) {
+        
+        List<List<String>> re = new ArrayList<>();
+        
+        int n = searchWord.length();
+        
+        for(String p : products) trie.insert(p);
+        
+        for(int i = 1; i <= n; i++) {
+            String sub = searchWord.substring(0, i);
+            re.add(trie.search(sub));
+        }
+        return re;
+    }
+}
