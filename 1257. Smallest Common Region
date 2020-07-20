@@ -1,0 +1,38 @@
+class Solution {
+    public String findSmallestRegion(List<List<String>> regions, String region1, String region2) {
+        Map<String, String> fatherMap = new HashMap<>();
+        for(List<String> list : regions)
+        {
+            int size = list.size();
+            String father = list.get(0);
+            for(int i = 1; i < size; i++)
+            {
+                String item = list.get(i);
+                fatherMap.put(item, father);
+            }
+        }
+        
+        Stack<String> s1 = new Stack<>(), s2 = new Stack<>();
+        while(fatherMap.containsKey(region1))
+        {
+            s1.push(region1);
+            region1 = fatherMap.get(region1);
+        }
+        s1.push(region1);
+        while(fatherMap.containsKey(region2))
+        {
+            s2.push(region2);
+            region2 = fatherMap.get(region2);
+        }
+        s2.push(region2);
+        // System.out.println(s1);
+        // System.out.println(s2);
+        String last = null;
+        while(!s1.isEmpty() && !s2.isEmpty() && s1.peek().equals(s2.peek()))
+        {
+            last = s1.pop();
+            s2.pop();
+        }
+        return last;
+    }
+}
